@@ -52,7 +52,7 @@ public class Login extends HttpServlet {
         String path;
 
         if(username == null || password == null || username.isEmpty() || password.isEmpty()){
-            path = "/index.html";
+            path = "index.html";
             ctx.setVariable("errorMsg", "Credenziali vuote o mancanti");
             templateEngine.process(path, ctx, response.getWriter());            // In caso di credenziali vuote o mancanti, torna al login
             return;
@@ -68,7 +68,7 @@ public class Login extends HttpServlet {
                 session.setAttribute("utente", utente);      // Associa l'utente alla sessione
                 response.sendRedirect(path);          // Accedi al sito
             } else {
-                path = "/index.html";
+                path = "index.html";
                 ctx.setVariable("errorMsg", "Username o password errati");
                 templateEngine.process(path, ctx, response.getWriter());         // Torna al login in caso di errore
             }
