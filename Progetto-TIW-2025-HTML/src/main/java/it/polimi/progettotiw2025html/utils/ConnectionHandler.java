@@ -1,6 +1,12 @@
-import java.sql.*;
-public class ConnectionTester {
-    public static void main(String[] args) {
+package it.polimi.progettotiw2025html.utils;
+
+import jakarta.servlet.UnavailableException;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.SQLException;
+
+public class ConnectionHandler {
+    public static Connection getConnection() throws UnavailableException {
         final String DATABASE = "Progetto_Web";
         final String USER = "progetto_web";
         final String PASSWORD = "progetto_web";
@@ -10,8 +16,7 @@ public class ConnectionTester {
             Class.forName("com.mysql.cj.jdbc.Driver");
             System.out.println("Driver loaded");
         } catch (ClassNotFoundException e) {
-            System.out.println("Driver not found");
-            e.printStackTrace();
+            throw new UnavailableException("Can't load database driver");
         }
         try {
             connection = DriverManager.getConnection
@@ -19,8 +24,14 @@ public class ConnectionTester {
             System.out.println("Database connected");
             connection.close();
         } catch (Exception e) {
-            System.out.println("Connection failed");
-            e.printStackTrace();
+            throw new UnavailableException("Couldn't get db connection");
+        }
+        return connection;
+    }
+
+    public static void closeConnection(Connection connection) throws SQLException {
+        if (connection != null) {
+            connection.close();
         }
     }
 }
