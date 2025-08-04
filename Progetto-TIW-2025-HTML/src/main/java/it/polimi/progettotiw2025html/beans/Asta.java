@@ -1,19 +1,20 @@
 package it.polimi.progettotiw2025html.beans;
 
-import java.util.Date;
 import java.util.List;
+import java.time.LocalDateTime;
+import java.time.Duration;
 
 public class Asta {
     private final int idAsta;
     private final List<Articolo> articoli;
     private double prezzo;
     private final int rialzoMinimo;
-    private final Date scadenza;
+    private final LocalDateTime scadenza;
     private final String proprietario;
     private boolean chiusa;
-    private String vincitore;
+    private Offerta offertaMassima;
 
-    public Asta(int idAsta, List<Articolo> articoli, double prezzo, int rialzoMinimo, Date scadenza, String proprietario) {
+    public Asta(int idAsta, List<Articolo> articoli, double prezzo, int rialzoMinimo, LocalDateTime scadenza, String proprietario) {
         this.idAsta = idAsta;
         this.articoli = articoli;
         this.prezzo = prezzo;
@@ -41,7 +42,7 @@ public class Asta {
         return rialzoMinimo;
     }
 
-    public Date getScadenza() {
+    public LocalDateTime getScadenza() {
         return scadenza;
     }
 
@@ -49,16 +50,16 @@ public class Asta {
         return proprietario;
     }
 
-    public String getVincitore() {
-        return vincitore;
+    public Offerta getOffertaMassima() {
+        return offertaMassima;
     }
 
     public void setPrezzo(double prezzo) {
         this.prezzo = prezzo;
     }
 
-    public void setVincitore(String vincitore) {
-        this.vincitore = vincitore;
+    public void setOffertaMassima(Offerta offertaMassima) {
+        this.offertaMassima = offertaMassima;
     }
 
     //----------------- Stato Asta -----------------
@@ -69,5 +70,14 @@ public class Asta {
 
     public void chiudiAsta() {
         this.chiusa = true;
+    }
+
+    public String getTempoMancante() {
+        LocalDateTime now = LocalDateTime.now();
+        if (now.isAfter(scadenza)) return "scaduta";
+        Duration dur = Duration.between(now, scadenza);
+        long days = dur.toDays();
+        long hours = dur.minusDays(days).toHours();
+        return days + " giorni e " + hours + " ore";
     }
 }
