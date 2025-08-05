@@ -5,7 +5,7 @@ import java.time.LocalDateTime;
 import java.time.Duration;
 
 public class Asta {
-    private final int idAsta;
+    private final int id;
     private final List<Articolo> articoli;
     private double prezzo;
     private final int rialzoMinimo;
@@ -14,8 +14,8 @@ public class Asta {
     private boolean chiusa;
     private Offerta offertaMassima;
 
-    public Asta(int idAsta, List<Articolo> articoli, double prezzo, int rialzoMinimo, LocalDateTime scadenza, String proprietario) {
-        this.idAsta = idAsta;
+    public Asta(int id, List<Articolo> articoli, double prezzo, int rialzoMinimo, LocalDateTime scadenza, String proprietario) {
+        this.id = id;
         this.articoli = articoli;
         this.prezzo = prezzo;
         this.rialzoMinimo = rialzoMinimo;
@@ -26,8 +26,8 @@ public class Asta {
 
     //----------------- Getter e Setter -----------------
 
-    public int getIdAsta() {
-        return idAsta;
+    public int getId() {
+        return id;
     }
 
     public List<Articolo> getArticoli() {

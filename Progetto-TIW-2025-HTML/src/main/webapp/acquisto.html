@@ -1,20 +1,30 @@
 <!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Acquisto</title>
-</head>
-<body>
-<form id="CampoCerca">
-    <input type="text" placeholder="Parola chiave" required>
-    <button type="submit">Cerca</button>
-    <div id="listaAste">
-        <!-- Qui verranno inseriti gli articoli dinamicamente via JS -->
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>Acquisto</title>
+    </head>
+    <body>
+        <form id="CercaParolaChiave">
+            <input type="text" placeholder="Parola chiave" required>
+            <button type="submit">Cerca</button>
+        </form>
+        <h2>Aste Trovate</h2>
+        <div th:if="${#lists.isEmpty(asteTrovate)}">
+            <p th:text="'Nessuna asta trovata'"></p>
+        </div>
+        <div th:each="a : ${asteTrovate}">
+            <div>
+                <p><a th:href="@{/dettaglioAsta(id=${a.id})}">
+                    <strong>ID Asta: </strong><span th:text="${a.id}"></span></a></p>
+                <p><strong>Rialzo minimo: </strong> <span th:text="${a.rialzoMinimo}"></span>€</p>
+                <p><strong>Offerta massima corrente: </strong> <span th:text="${a.offertaMassima > 0 ? a.offertaMassima + '€' : 'Nessuna offerta'}"></span></p>
+                <p><strong>Tempo rimanente: </strong> <span th:text="${a.tempoMancante}"></span></p>
+            </div>
+        </div>
+    <h3>Offerte aggiudicate</h3>
+    <div id="articoliAggiudicati">
+
     </div>
-</form>
-<h3>Offerte aggiudicate</h3>
-<div id="articoliAggiudicati">
-    <!-- Qui verranno inseriti gli articoli aggiudicati dinamicamente via JS -->
-</div>
-</body>
+    </body>
 </html>

@@ -7,17 +7,16 @@ public class Articolo {
     private final String immagine;
     private final double prezzo;
     private int idAsta;
-    private final String usernameUtente;
+    private final String proprietario;
 
-    public Articolo(int codice, String nome, String descrizione, String immagine, double prezzo, String usernameUtente) {
+    public Articolo(int codice, String nome, String descrizione, String immagine, double prezzo, String proprietario) {
         this.codice = codice;
         this.nome = nome;
         this.descrizione = descrizione;
         this.immagine = immagine;
         this.prezzo = prezzo;
-        this.usernameUtente = usernameUtente;
+        this.proprietario = proprietario;
     }
-
     //----------------- Getter e Setter -----------------
 
     public int getCodice() {
@@ -44,8 +43,8 @@ public class Articolo {
         return idAsta;
     }
 
-    public String getUsernameUtente() {
-        return usernameUtente;
+    public String getProprietario() {
+        return proprietario;
     }
 
     public void setIdAsta(int idAsta) {

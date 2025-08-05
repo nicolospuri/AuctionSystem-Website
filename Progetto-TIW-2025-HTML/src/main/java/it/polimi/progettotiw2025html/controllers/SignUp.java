@@ -31,7 +31,9 @@ public class SignUp extends HttpServlet {
 
     @Override
     public void init() throws UnavailableException {
+        System.out.println("Inizializzando SignUp");
         ServletContext servletContext = getServletContext();
+
         JakartaServletWebApplication webApplication = JakartaServletWebApplication.buildApplication(servletContext);
         WebApplicationTemplateResolver templateResolver = new WebApplicationTemplateResolver(webApplication);
 
@@ -48,6 +50,7 @@ public class SignUp extends HttpServlet {
     }
 
     public void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
+        System.out.println("Post di SignUp");
         String username = request.getParameter("username");
         String password = request.getParameter("password");
         String nome = request.getParameter("nome");
@@ -57,11 +60,11 @@ public class SignUp extends HttpServlet {
         ServletContext servletContext = getServletContext();
         JakartaServletWebApplication webApplication = JakartaServletWebApplication.buildApplication(servletContext);
         WebContext ctx = new WebContext(webApplication.buildExchange(request, response), request.getLocale());
-        String path;
+        String path = null;
 
         if (username == null || password == null || cognome == null || indirizzo == null ||
                 username.isEmpty() || password.isEmpty() || nome.isEmpty() || cognome.isEmpty() || indirizzo.isEmpty()) {
-            path = "/index.html";
+            path = "index";
             ctx.setVariable("errorMsg", "Credenziali vuote o mancanti");
             templateEngine.process(path, ctx, response.getWriter());
             return;
@@ -69,21 +72,35 @@ public class SignUp extends HttpServlet {
         try {
             UtenteDAO utenteDAO = new UtenteDAO(connection);
             Utente utente = new Utente(username, password, nome, cognome, indirizzo);
-            boolean isRegistered = utenteDAO.register(utente);
-
-            if (isRegistered) {
-                HttpSession session = request.getSession();
-                session.setAttribute("utente", utente);
-                path = "/home.html";
-                ctx.setVariable("successMsg", "Registrazione avvenuta con successo!");
+            boolean valido = utenteDAO.checkRegistration(utente.getUsername());
+            if(!valido){
+                boolean isRegistered = utenteDAO.signUp(utente);
+                if (isRegistered) {
+                    HttpSession session = request.getSession();
+                    session.setAttribute("utente", utente);
+                    path = request.getContextPath() + "/home";
+                    response.sendRedirect(path);
+                } else {
+                    path = "index";
+                    ctx.setVariable("errorMsg", "Registrazione fallita: errore durante l'inserimento");
+                    templateEngine.process(path, ctx, response.getWriter());
+                }
             } else {
-                path = "/index.html";
+                path = "index";
                 ctx.setVariable("errorMsg", "Registrazione fallita: utente già esistente");
+                templateEngine.process(path, ctx, response.getWriter());
             }
-
-            templateEngine.process(path, ctx, response.getWriter());
         } catch (SQLException e) {
             response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "SQL error: impossibile registrare l'utente");
+        }
+    }
+
+    @Override
+    public void destroy() {
+        try{
+            ConnectionHandler.closeConnection(connection);
+        }catch(SQLException e){
+            e.printStackTrace();
         }
     }
 }

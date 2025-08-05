@@ -4,6 +4,7 @@ import it.polimi.progettotiw2025html.beans.Utente;
 import it.polimi.progettotiw2025html.dao.UtenteDAO;
 import it.polimi.progettotiw2025html.utils.ConnectionHandler;
 import jakarta.servlet.ServletContext;
+import jakarta.servlet.UnavailableException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
@@ -29,7 +30,7 @@ public class Login extends HttpServlet {
     }
 
     @Override
-    public void init() {
+    public void init() throws UnavailableException {
         ServletContext servletContext = getServletContext();
 
         JakartaServletWebApplication webApplication = JakartaServletWebApplication.buildApplication(servletContext);
@@ -39,6 +40,12 @@ public class Login extends HttpServlet {
         this.templateEngine = new TemplateEngine();
         this.templateEngine.setTemplateResolver(templateResolver);
         templateResolver.setSuffix(".html");
+
+        try {
+            connection = ConnectionHandler.getConnection();
+        } catch (UnavailableException e) {
+            throw new UnavailableException("Database connection unavailable");
+        }
     }
 
     @Override
@@ -52,14 +59,13 @@ public class Login extends HttpServlet {
         String path;
 
         if(username == null || password == null || username.isEmpty() || password.isEmpty()){
-            path = "index.html";
+            path = "index";
             ctx.setVariable("errorMsg", "Credenziali vuote o mancanti");
             templateEngine.process(path, ctx, response.getWriter());            // In caso di credenziali vuote o mancanti, torna al login
             return;
         }
 
         try {
-            connection = ConnectionHandler.getConnection();
             UtenteDAO utenteDAO = new UtenteDAO(connection);
             Utente utente = utenteDAO.login(username, password);
             if (utente != null) {
@@ -68,11 +74,11 @@ public class Login extends HttpServlet {
                 session.setAttribute("utente", utente);      // Associa l'utente alla sessione
                 response.sendRedirect(path);          // Accedi al sito
             } else {
-                path = "index.html";
+                path = "index";
                 ctx.setVariable("errorMsg", "Username o password errati");
                 templateEngine.process(path, ctx, response.getWriter());         // Torna al login in caso di errore
             }
-        } catch (Exception e) {
+        } catch (SQLException e) {
             response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Errore interno");
         }
     }

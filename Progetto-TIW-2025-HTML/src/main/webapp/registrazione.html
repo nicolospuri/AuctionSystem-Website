@@ -1,22 +1,23 @@
 <!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Sign Up</title>
-</head>
-<body>
-<h2>Registrazione</h2>
-<form id="registrazione" action="home.html">
-    <input type="text" name="username" placeholder="Username" required><br><br>
-    <input type="password" name="password" placeholder="Password" required><br><br>
-    <input type="text" name="nome" placeholder="Nome" required><br><br>
-    <input type="text" name="cognome" placeholder="Cognome" required><br><br>
-    <input type="text" name="indirizzo" placeholder="Indirizzo" required><br><br>
-    <button type="submit">Registrati</button>
-</form>
-
-<p id="messaggio"></p>
-<p><a href="index.html">Hai già un account? Vai al login</a></p>
-</body>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>Sign Up</title>
+    </head>
+    <body>
+        <h2>Registrazione</h2>
+        <form th:action="@{/SignUp}" method="POST">
+            <input type="text" name="username" placeholder="Username" required><br><br>
+            <input type="password" name="password" placeholder="Password" required><br><br>
+            <input type="text" name="nome" placeholder="Nome" required><br><br>
+            <input type="text" name="cognome" placeholder="Cognome" required><br><br>
+            <input type="text" name="indirizzo" placeholder="Indirizzo" required><br><br>
+            <button type="submit">Registrati</button>
+        </form>
+        <div th:if="${errorMsg}">
+            <span th:text="${errorMsg}"></span>
+        </div>
+        <p><a th:href="@{/index}">Hai già un account? Vai al login</a></p>
+    </body>
 </html>
 

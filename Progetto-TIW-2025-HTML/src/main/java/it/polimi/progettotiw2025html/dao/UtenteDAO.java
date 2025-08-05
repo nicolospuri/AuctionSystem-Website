@@ -12,7 +12,7 @@ public class UtenteDAO {
     }
 
     public Utente login(String username, String password) throws SQLException {
-        String query = "SELECT * FROM utente WHERE username = ? AND password = ?";
+        String query = "SELECT * FROM Utente WHERE Username = ? AND Password = ?";
         try (PreparedStatement stmt = connection.prepareStatement(query)) {
             stmt.setString(1, username);
             stmt.setString(2, password);
@@ -20,11 +20,11 @@ public class UtenteDAO {
             try (ResultSet rs = stmt.executeQuery()) {
                 if (rs.next()) {     //se l'utente esiste il ResultSet avrà una riga e quindi rs.next()=true
                     return new Utente(
-                            rs.getString("username"),
-                            rs.getString("password"),
-                            rs.getString("nome"),
-                            rs.getString("cognome"),
-                            rs.getString("indirizzo")
+                            rs.getString("Username"),
+                            rs.getString("Password"),
+                            rs.getString("Nome"),
+                            rs.getString("Cognome"),
+                            rs.getString("Indirizzo")
                     );
                 }
             }
@@ -33,7 +33,7 @@ public class UtenteDAO {
     }
 
     public boolean checkRegistration(String username) throws SQLException {
-        String query = "SELECT * FROM utenti WHERE username = ?";
+        String query = "SELECT * FROM Utente WHERE Username = ?";
         PreparedStatement statement = connection.prepareStatement(query);
         statement.setString(1, username);
         ResultSet result = statement.executeQuery(); //Contiene tutte le righe trovate dal DB
@@ -42,7 +42,7 @@ public class UtenteDAO {
     }
 
     public boolean signUp(Utente utente) throws SQLException {
-        String query = "INSERT INTO utente (username, password, nome, cognome, indirizzo) VALUES (?, ?, ?, ?, ?)";
+        String query = "INSERT INTO Utente (Username, Password, Nome, Cognome, Indirizzo) VALUES (?, ?, ?, ?, ?)";
 
         try (PreparedStatement stmt = connection.prepareStatement(query)) {
             stmt.setString(1, utente.getUsername());
@@ -51,9 +51,16 @@ public class UtenteDAO {
             stmt.setString(4, utente.getCognome());
             stmt.setString(5, utente.getIndirizzo());
 
-            stmt.executeUpdate(); //serve per eseguire operazioni SQL che modificano i dati
+            System.out.println("executing query");
+
+            int code = stmt.executeUpdate(); //serve per eseguire operazioni SQL che modificano i dati
+            System.out.println("CODE: " + code);
+
+            if (code == 0) throw new SQLException("Registrazione fallita, nessuna riga modificata");
+
             return true;
-        } catch (SQLIntegrityConstraintViolationException e) {
+        } catch (Exception e) {
+            System.out.println("Errore: username già esistente!");
             return false; // Username già esistente
         }
     }
