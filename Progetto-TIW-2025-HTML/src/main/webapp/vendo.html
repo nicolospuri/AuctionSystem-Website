@@ -5,8 +5,9 @@
     <title>Acquisto</title>
 </head>
 <body>
-<form id="articolo">
+<form id="articolo" action="/AggiungiArticolo" method="POST">
     <h2>Aggiungi un articolo</h2>
+    <input type="int" name="codice" placeholder="Codice Articolo" required><br><br>
     <input type="text" name="nome" placeholder="Nome" required><br><br>
     <textarea name="descrizione" placeholder="Descrizione" required></textarea><br><br>
     <input type="file" name="immagine" placeholder="Immagine" accept="image/*" required><br><br>
