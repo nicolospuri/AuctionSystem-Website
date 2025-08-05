@@ -62,6 +62,9 @@ public class RicercaAste extends HttpServlet {
         HttpSession session = request.getSession();
         Utente utente = (Utente) session.getAttribute("utente");
 
+        boolean hasSearched = (keyword != null && !keyword.isEmpty());
+        ctx.setVariable("hasSearched", hasSearched);
+
         try {
             AstaDAO astaDAO = new AstaDAO(connection);
             List<Asta> asteTrovate = null;
@@ -73,10 +76,19 @@ public class RicercaAste extends HttpServlet {
                 asteVinte = astaDAO.getAsteVinteByUsername(utente.getUsername());
             }
 
-            ctx.setVariable("asteTrovate", asteTrovate);
-            ctx.setVariable("asteVinte", asteVinte);
             ctx.setVariable("keyword", keyword);
             ctx.setVariable("utenteLoggato", utente);
+
+            if (asteTrovate != null && asteTrovate.isEmpty()) {
+                ctx.setVariable("asteTrovateMsg", "Nessuna asta trovata");
+            } else {
+                ctx.setVariable("asteTrovate", asteTrovate);
+            }
+            if (asteVinte != null && asteVinte.isEmpty()) {
+                ctx.setVariable("asteVinteMsg", "Nessuna asta vinta");
+            } else {
+                ctx.setVariable("asteVinte", asteVinte);
+            }
             templateEngine.process("acquisto", ctx, response.getWriter());
         } catch (Exception e) {
             e.printStackTrace();

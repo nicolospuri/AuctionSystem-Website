@@ -5,42 +5,69 @@
         <title>Acquisto</title>
     </head>
     <body>
-        <form th:action="@{/RicercaAste}" method="GET">
+        <a href="home.html">Torna alla home</a>
+        <form action="RicercaAste" method="GET">
             <input type="text" name="keyword" placeholder="Parola chiave" required>
             <button type="submit">Cerca</button>
         </form>
         <h2>Aste Trovate</h2>
-        <div th:if="${#lists.isEmpty(asteTrovate)}">
-            <p th:text="'Nessuna asta trovata'"></p>
+        <div th:if="${asteTrovateMsg}">
+            <span th:text="${asteTrovateMsg}"></span>
         </div>
-        <div th:each="a : ${asteTrovate}">
-            <div>
-                <p><a th:href="@{/dettaglioAsta(id=${a.id})}">
-                    <strong>ID Asta: </strong><span th:text="${a.id}"></span></a></p>
-                <p><strong>Rialzo minimo: </strong> <span th:text="${a.rialzoMinimo}"></span>€</p>
-                <p><strong>Scadenza: </strong> <span th:text="${a.scadenza}"></span></p>
-                <p><strong>Proprietario: </strong> <span th:text="${a.proprietario}"></span></p>
-                <p><strong>Articoli: </strong>
-                    <span th:each="art : ${a.articoli}">
-                        <span th:text="${art.codice}"></span> - <span th:text="${art.nome}"></span>;
-                    </span>
-                </p>
-            </div>
+        <div th:if="${asteTrovate}">
+            <table>
+                <thead>
+                    <tr>
+                        <th>ID Asta</th>
+                        <th>Prezzo Iniziale</th>
+                        <th>Rialzo Minimo</th>
+                        <th>Scadenza</th>
+                        <th>Proprietario</th>
+                        <th>Articoli</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="a : ${asteTrovate}">
+                        <td><a th:href="@{/GetOfferte(id=${a.id})}" th:text="${a.id}"></a></td>
+                        <td th:text="${a.prezzo} + '€'"></td>
+                        <td th:text="${a.rialzoMinimo} + '€'"></td>
+                        <td th:text="${a.scadenza}"></td>
+                        <td th:text="${a.proprietario}"></td>
+                        <td th:each="art : ${a.articoli}">
+                            <span th:text="${art.codice} + ' - ' + ${art.nome}"></span><br/>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
         </div>
-    <h2>Aste vinte</h2>
-        <div th:if="${#lists.isEmpty(asteVinte)}">
-            <p>Non hai ancora vinto aste.</p>
+        <br><br>
+        <h2>Aste vinte</h2>
+        <div th:if="${asteVinteMsg}">
+            <span th:text="${asteVinteMsg}"></span>
         </div>
-        <div th:each="a : ${asteVinte}">
-            <div>
-                <p><strong>ID Asta: </strong> <span th:text="${a.id}"></span></p>
-                <p><strong>Articoli: </strong>
-                    <span th:each="art : ${a.articoli}">
-                    <span th:text="${art.codice}"></span> - <span th:text="${art.nome}"></span>;
-                </span>
-                </p>
-                <p><strong>Prezzo:</strong> <span th:text="${a.prezzoFinale != null ? a.prezzoFinale + '€' : 'N/A'}"></span></p>
-            </div>
+        <div th:if="${asteVinte}">
+            <table>
+                <thead>
+                    <tr>
+                        <th>ID Asta</th>
+                        <th>Prezzo</th>
+                        <th>Articoli</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td th:text="${a.id}"></td>
+                        <td th:text="${a.prezzo != null ? a.prezzo + '€' : 'N/A'}"></td>
+                        <td th:each="art : ${a.articoli}">
+                            <span th:text="${art.codice}"></span>
+                            <span th:text="${art.nome}"></span>
+                            <span th:text="${art.descrizione}"></span>
+                            <span th:text="${art.immagine}"></span>
+                            <span th:text="${art.prezzo}"></span>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
         </div>
     </body>
 </html>

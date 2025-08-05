@@ -3,12 +3,14 @@ package it.polimi.progettotiw2025html.beans;
 import java.util.Date;
 
 public class Offerta {
+    private final int id;
     private final String offerente;
     private final double prezzo;
     private final Date data;
     private final int idAsta;
 
-    public Offerta(String offerente, double prezzo, Date data, int idAsta) {
+    public Offerta(int id, String offerente, double prezzo, Date data, int idAsta) {
+        this.id = id;
         this.offerente = offerente;
         this.prezzo = prezzo;
         this.data = data;
@@ -16,6 +18,10 @@ public class Offerta {
     }
 
     //----------------- Getter e Setter -----------------
+
+    public int getId() {
+        return id;
+    }
 
     public String getOfferente() {
         return offerente;

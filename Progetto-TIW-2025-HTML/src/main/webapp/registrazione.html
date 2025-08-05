@@ -6,7 +6,7 @@
     </head>
     <body>
         <h2>Registrazione</h2>
-        <form th:action="@{/SignUp}" method="POST">
+        <form action="SignUp" method="POST">
             <input type="text" name="username" placeholder="Username" required><br><br>
             <input type="password" name="password" placeholder="Password" required><br><br>
             <input type="text" name="nome" placeholder="Nome" required><br><br>
@@ -17,7 +17,7 @@
         <div th:if="${errorMsg}">
             <span th:text="${errorMsg}"></span>
         </div>
-        <p><a th:href="@{/index}">Hai già un account? Vai al login</a></p>
+        <p><a href="index.html">Hai già un account? Vai al login</a></p>
     </body>
 </html>
 
