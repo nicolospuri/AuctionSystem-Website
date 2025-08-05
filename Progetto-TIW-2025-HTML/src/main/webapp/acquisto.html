@@ -5,26 +5,75 @@
         <title>Acquisto</title>
     </head>
     <body>
-        <form id="CercaParolaChiave">
-            <input type="text" placeholder="Parola chiave" required>
+        <a href="home.html">Torna alla home</a>
+        <br><br>
+        <h2>Ricerca Aste</h2>
+        <form action="RicercaAste" method="GET">
+            <input type="text" name="keyword" placeholder="Parola chiave" required>
             <button type="submit">Cerca</button>
         </form>
+        <br><br>
         <h2>Aste Trovate</h2>
-        <div th:if="${#lists.isEmpty(asteTrovate)}">
-            <p th:text="'Nessuna asta trovata'"></p>
+        <div th:if="${asteTrovateMsg}">
+            <span th:text="${asteTrovateMsg}"></span>
         </div>
-        <div th:each="a : ${asteTrovate}">
-            <div>
-                <p><a th:href="@{/dettaglioAsta(id=${a.id})}">
-                    <strong>ID Asta: </strong><span th:text="${a.id}"></span></a></p>
-                <p><strong>Rialzo minimo: </strong> <span th:text="${a.rialzoMinimo}"></span>€</p>
-                <p><strong>Offerta massima corrente: </strong> <span th:text="${a.offertaMassima > 0 ? a.offertaMassima + '€' : 'Nessuna offerta'}"></span></p>
-                <p><strong>Tempo rimanente: </strong> <span th:text="${a.tempoMancante}"></span></p>
-            </div>
+        <div th:if="${asteTrovate}">
+            <table border="1">
+                <thead>
+                    <tr>
+                        <th>ID Asta</th>
+                        <th>Prezzo Iniziale</th>
+                        <th>Rialzo Minimo</th>
+                        <th>Scadenza</th>
+                        <th>Proprietario</th>
+                        <th>Articoli</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="a : ${asteTrovate}">
+                        <td><a th:href="@{/GetOfferte(idAsta=${a.id})}" th:text="${a.id}"></a></td>
+                        <td th:text="${a.prezzoIniziale} + ' €'"></td>
+                        <td th:text="${a.rialzoMinimo} + '.00 €'"></td>
+                        <td th:text="${a.scadenza}"></td>
+                        <td th:text="${a.proprietario}"></td>
+                        <td th:each="art : ${a.articoli}">
+                            <span th:text="${art.codice}"></span>
+                            <span th:text="${art.nome}"></span>
+                            <span th:text="${art.descrizione}"></span>
+                            <!--<span th:text="${art.immagine}"></span>-->
+                            <span th:text="${art.prezzo} + '€'"></span>
+                    </tr>
+                </tbody>
+            </table>
         </div>
-    <h3>Offerte aggiudicate</h3>
-    <div id="articoliAggiudicati">
-
-    </div>
+        <br><br>
+        <h2>Aste vinte</h2>
+        <div th:if="${asteVinteMsg}">
+            <span th:text="${asteVinteMsg}"></span>
+        </div>
+        <div th:if="${asteVinte}">
+            <table border="1">
+                <thead>
+                    <tr>
+                        <th>ID Asta</th>
+                        <th>Prezzo</th>
+                        <th>Articoli</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td th:text="${a.id}"></td>
+                        <td th:text="${a.offertaMassima.prezzo + '€'}"></td>
+                        <td th:each="art : ${a.articoli}">
+                            <span th:text="${art.codice}"></span>
+                            <span th:text="${art.nome}"></span>
+                            <span th:text="${art.descrizione}"></span>
+                            <span th:text="${art.immagine}"></span>
+                            <span th:text="${art.prezzo}"></span>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
     </body>
 </html>

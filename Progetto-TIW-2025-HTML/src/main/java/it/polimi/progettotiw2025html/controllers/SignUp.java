@@ -49,8 +49,8 @@ public class SignUp extends HttpServlet {
         }
     }
 
+    @Override
     public void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
-        System.out.println("Post di SignUp");
         String username = request.getParameter("username");
         String password = request.getParameter("password");
         String nome = request.getParameter("nome");
@@ -78,7 +78,7 @@ public class SignUp extends HttpServlet {
                 if (isRegistered) {
                     HttpSession session = request.getSession();
                     session.setAttribute("utente", utente);
-                    path = request.getContextPath() + "/home";
+                    path = request.getContextPath() + "/home.html";
                     response.sendRedirect(path);
                 } else {
                     path = "index";

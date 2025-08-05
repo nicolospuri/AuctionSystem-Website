@@ -1,27 +1,37 @@
 package it.polimi.progettotiw2025html.beans;
 
-import java.util.List;
 import java.time.LocalDateTime;
 import java.time.Duration;
+import java.util.List;
 
 public class Asta {
     private final int id;
-    private final List<Articolo> articoli;
-    private double prezzo;
+    private double prezzoIniziale;
     private final int rialzoMinimo;
     private final LocalDateTime scadenza;
     private final String proprietario;
     private boolean chiusa;
     private Offerta offertaMassima;
+    private String aggiudicatario;
+    private List<Articolo> articoli;
 
-    public Asta(int id, List<Articolo> articoli, double prezzo, int rialzoMinimo, LocalDateTime scadenza, String proprietario) {
+    public Asta(int id, double prezzoIniziale, int rialzoMinimo, LocalDateTime scadenza, String proprietario) {
         this.id = id;
-        this.articoli = articoli;
-        this.prezzo = prezzo;
+        this.prezzoIniziale = prezzoIniziale;
         this.rialzoMinimo = rialzoMinimo;
         this.scadenza = scadenza;
         this.proprietario = proprietario;
         this.chiusa = false;
+    }
+
+    public Asta(int id, double prezzoIniziale, int rialzoMinimo, LocalDateTime scadenza, String proprietario, String aggiudicatario) {
+        this.id = id;
+        this.prezzoIniziale = prezzoIniziale;
+        this.rialzoMinimo = rialzoMinimo;
+        this.scadenza = scadenza;
+        this.proprietario = proprietario;
+        this.chiusa = true;
+        this.aggiudicatario = aggiudicatario;
     }
 
     //----------------- Getter e Setter -----------------
@@ -30,12 +40,8 @@ public class Asta {
         return id;
     }
 
-    public List<Articolo> getArticoli() {
-        return articoli;
-    }
-
-    public double getPrezzo() {
-        return prezzo;
+    public double getPrezzoIniziale() {
+        return prezzoIniziale;
     }
 
     public int getRialzoMinimo() {
@@ -54,12 +60,28 @@ public class Asta {
         return offertaMassima;
     }
 
-    public void setPrezzo(double prezzo) {
-        this.prezzo = prezzo;
+    public String getAggiudicatario() {
+        return aggiudicatario;
+    }
+
+    public List<Articolo> getArticoli() {
+        return articoli;
+    }
+
+    public void setPrezzoIniziale(double prezzoIniziale) {
+        this.prezzoIniziale = prezzoIniziale;
     }
 
     public void setOffertaMassima(Offerta offertaMassima) {
         this.offertaMassima = offertaMassima;
+    }
+
+    public void setAggiudicatario(String aggiudicatario) {
+        this.aggiudicatario = aggiudicatario;
+    }
+
+    public void setArticoli(List<Articolo> articoli) {
+        this.articoli = articoli;
     }
 
     //----------------- Stato Asta -----------------

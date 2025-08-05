@@ -22,7 +22,6 @@ public class ConnectionHandler {
             connection = DriverManager.getConnection
                     ("jdbc:mysql://localhost:3306/" + DATABASE, USER, PASSWORD);
             System.out.println("Database connected");
-            connection.close();
         } catch (Exception e) {
             throw new UnavailableException("Couldn't get db connection");
         }

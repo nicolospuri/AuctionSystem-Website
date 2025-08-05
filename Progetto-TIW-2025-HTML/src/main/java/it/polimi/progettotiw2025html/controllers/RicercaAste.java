@@ -1,7 +1,10 @@
 package it.polimi.progettotiw2025html.controllers;
 
+import it.polimi.progettotiw2025html.beans.Articolo;
+import it.polimi.progettotiw2025html.beans.Asta;
 import it.polimi.progettotiw2025html.beans.Utente;
-import it.polimi.progettotiw2025html.dao.UtenteDAO;
+import it.polimi.progettotiw2025html.dao.ArticoloDAO;
+import it.polimi.progettotiw2025html.dao.AstaDAO;
 import it.polimi.progettotiw2025html.utils.ConnectionHandler;
 import jakarta.servlet.ServletContext;
 import jakarta.servlet.UnavailableException;
@@ -15,17 +18,19 @@ import org.thymeleaf.context.WebContext;
 import org.thymeleaf.templatemode.TemplateMode;
 import org.thymeleaf.templateresolver.WebApplicationTemplateResolver;
 import org.thymeleaf.web.servlet.JakartaServletWebApplication;
+
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.List;
 
-@WebServlet("/Login")
-public class Login extends HttpServlet {
+@WebServlet("/RicercaAste")
+public class RicercaAste extends HttpServlet {
     private static final long serialVersionUID = 1L;
     private TemplateEngine templateEngine;
     private Connection connection;
 
-    public Login() {
+    public RicercaAste() {
         super();
     }
 
@@ -49,37 +54,53 @@ public class Login extends HttpServlet {
     }
 
     @Override
-    public void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
-        String username = request.getParameter("username");
-        String password = request.getParameter("password");
-
+    public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
         ServletContext servletContext = getServletContext();
         JakartaServletWebApplication webApplication = JakartaServletWebApplication.buildApplication(servletContext);
         WebContext ctx = new WebContext(webApplication.buildExchange(request, response), request.getLocale());
         String path;
 
-        if(username == null || password == null || username.isEmpty() || password.isEmpty()){
-            path = "index";
-            ctx.setVariable("errorMsg", "Credenziali vuote o mancanti");
-            templateEngine.process(path, ctx, response.getWriter());            // In caso di credenziali vuote o mancanti, torna al login
-            return;
-        }
+        String keyword = request.getParameter("keyword");
+        HttpSession session = request.getSession();
+        Utente utente = (Utente) session.getAttribute("utente");
 
         try {
-            UtenteDAO utenteDAO = new UtenteDAO(connection);
-            Utente utente = utenteDAO.login(username, password);
-            if (utente != null) {
-                path = request.getContextPath() + "/home.html";
-                HttpSession session = request.getSession();
-                session.setAttribute("utente", utente);      // Associa l'utente alla sessione
-                response.sendRedirect(path);          // Accedi al sito
-            } else {
-                path = "index";
-                ctx.setVariable("errorMsg", "Username o password errati");
-                templateEngine.process(path, ctx, response.getWriter());         // Torna al login in caso di errore
+            AstaDAO astaDAO = new AstaDAO(connection);
+            ArticoloDAO articoloDAO = new ArticoloDAO(connection);
+            List<Asta> asteTrovate = null;
+            List<Articolo> articoli = null;
+            if (keyword != null && !keyword.isEmpty()) {
+                asteTrovate = astaDAO.getAsteAperteByKeyword(keyword);
             }
+            List<Asta> asteVinte = null;
+            if (utente != null) {
+                asteVinte = astaDAO.getAsteVinteByUsername(utente.getUsername());
+            }
+
+            ctx.setVariable("keyword", keyword);
+
+            if (asteTrovate != null && asteTrovate.isEmpty()) {
+                ctx.setVariable("asteTrovateMsg", "Nessuna asta trovata");
+            } else {
+                for (Asta a : asteVinte) {
+                    articoli = articoloDAO.getArticoliByIdAsta(a.getId());
+                    a.setArticoli(articoli);
+                }
+                ctx.setVariable("asteTrovate", asteTrovate);
+            }
+            if (asteVinte != null && asteVinte.isEmpty()) {
+                ctx.setVariable("asteVinteMsg", "Nessuna asta vinta");
+            } else {
+                for (Asta a : asteVinte) {
+                    articoli = articoloDAO.getArticoliByIdAsta(a.getId());
+                    a.setArticoli(articoli);
+                }
+                ctx.setVariable("asteVinte", asteVinte);
+            }
+            path = "acquisto";
+            templateEngine.process(path, ctx, response.getWriter());
         } catch (SQLException e) {
-            response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Errore interno");
+            response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Errore interno del server durante la ricerca delle aste");
         }
     }
 

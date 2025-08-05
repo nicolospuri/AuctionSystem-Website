@@ -1,7 +1,11 @@
 package it.polimi.progettotiw2025html.controllers;
 
+import it.polimi.progettotiw2025html.beans.Articolo;
+import it.polimi.progettotiw2025html.beans.Offerta;
 import it.polimi.progettotiw2025html.beans.Utente;
-import it.polimi.progettotiw2025html.dao.UtenteDAO;
+import it.polimi.progettotiw2025html.dao.ArticoloDAO;
+import it.polimi.progettotiw2025html.dao.AstaDAO;
+import it.polimi.progettotiw2025html.dao.OffertaDAO;
 import it.polimi.progettotiw2025html.utils.ConnectionHandler;
 import jakarta.servlet.ServletContext;
 import jakarta.servlet.UnavailableException;
@@ -15,17 +19,19 @@ import org.thymeleaf.context.WebContext;
 import org.thymeleaf.templatemode.TemplateMode;
 import org.thymeleaf.templateresolver.WebApplicationTemplateResolver;
 import org.thymeleaf.web.servlet.JakartaServletWebApplication;
+
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.List;
 
-@WebServlet("/Login")
-public class Login extends HttpServlet {
+@WebServlet("/GetOfferte")
+public class GetOfferte extends HttpServlet {
     private static final long serialVersionUID = 1L;
     private TemplateEngine templateEngine;
     private Connection connection;
 
-    public Login() {
+    public GetOfferte() {
         super();
     }
 
@@ -49,37 +55,41 @@ public class Login extends HttpServlet {
     }
 
     @Override
-    public void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
-        String username = request.getParameter("username");
-        String password = request.getParameter("password");
-
+    public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
         ServletContext servletContext = getServletContext();
         JakartaServletWebApplication webApplication = JakartaServletWebApplication.buildApplication(servletContext);
         WebContext ctx = new WebContext(webApplication.buildExchange(request, response), request.getLocale());
         String path;
 
-        if(username == null || password == null || username.isEmpty() || password.isEmpty()){
-            path = "index";
-            ctx.setVariable("errorMsg", "Credenziali vuote o mancanti");
-            templateEngine.process(path, ctx, response.getWriter());            // In caso di credenziali vuote o mancanti, torna al login
+        HttpSession session = request.getSession();
+        Utente utente = (Utente) session.getAttribute("utente");
+        Integer idAsta = 0;
+        try {
+            idAsta = Integer.parseInt(request.getParameter("idAsta"));
+            session.setAttribute("idAsta", idAsta);
+        } catch (NumberFormatException e) {
+            response.sendError(HttpServletResponse.SC_BAD_REQUEST, "ID Asta non valido");
             return;
         }
 
         try {
-            UtenteDAO utenteDAO = new UtenteDAO(connection);
-            Utente utente = utenteDAO.login(username, password);
-            if (utente != null) {
-                path = request.getContextPath() + "/home.html";
-                HttpSession session = request.getSession();
-                session.setAttribute("utente", utente);      // Associa l'utente alla sessione
-                response.sendRedirect(path);          // Accedi al sito
+            ArticoloDAO articoloDAO = new ArticoloDAO(connection);
+            List<Articolo> articoli = articoloDAO.getArticoliByIdAsta(idAsta);
+            ctx.setVariable("articoli", articoli);
+            AstaDAO astaDAO = new AstaDAO(connection);
+            ctx.setVariable("rialzoMinimo", astaDAO.getAstaById(idAsta).getRialzoMinimo());
+
+            OffertaDAO offertaDAO = new OffertaDAO(connection);
+            List<Offerta> offerte = offertaDAO.getOfferteByIdAsta(idAsta);
+            if (offerte != null && !offerte.isEmpty()) {
+                ctx.setVariable("offerte", offerte);
             } else {
-                path = "index";
-                ctx.setVariable("errorMsg", "Username o password errati");
-                templateEngine.process(path, ctx, response.getWriter());         // Torna al login in caso di errore
+                ctx.setVariable("offerteMsg", "Nessuna offerta trovata");
             }
+            path = "offerta";
+            templateEngine.process(path, ctx, response.getWriter());
         } catch (SQLException e) {
-            response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Errore interno");
+            response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Errore interno del server");
         }
     }
 

@@ -1,6 +1,8 @@
 package it.polimi.progettotiw2025html.controllers;
 
+import it.polimi.progettotiw2025html.beans.Articolo;
 import it.polimi.progettotiw2025html.beans.Utente;
+import it.polimi.progettotiw2025html.dao.ArticoloDAO;
 import it.polimi.progettotiw2025html.dao.UtenteDAO;
 import it.polimi.progettotiw2025html.utils.ConnectionHandler;
 import jakarta.servlet.ServletContext;
@@ -46,6 +48,38 @@ public class AggiungiArticolo extends HttpServlet{
             connection = ConnectionHandler.getConnection();
         } catch (UnavailableException e) {
             throw new UnavailableException("Database connection unavailable");
+        }
+    }
+
+    public void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
+        System.out.println("Post di AggiungiArticolo");
+        String nome = request.getParameter("nome");
+        String descrizione = request.getParameter("descrizione");
+        String immagine = request.getParameter("immagine");
+        double prezzo = Double.parseDouble(request.getParameter("prezzo"));
+        String proprietario = request.getParameter("proprietario");
+
+        Utente utente = (Utente) request.getSession().getAttribute("utente");
+        if (utente == null) {
+            response.sendRedirect(request.getContextPath() + "/Login");
+            return;
+        }
+
+        try {
+            UtenteDAO utenteDAO = new UtenteDAO(connection);
+            if (!utenteDAO.checkRegistration(proprietario)) {
+                response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Utente non registrato");
+                return;
+            }
+
+            Articolo articolo = new Articolo("0", nome, descrizione, immagine, prezzo, proprietario);
+            ArticoloDAO articoloDAO = new ArticoloDAO(connection);
+            articoloDAO.addArticolo(articolo);
+
+            response.sendRedirect(request.getContextPath() + "/ListaArticoli");
+        } catch (SQLException e) {
+            e.printStackTrace();
+            response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Errore durante l'aggiunta dell'articolo: " + e.getMessage());
         }
     }
 }

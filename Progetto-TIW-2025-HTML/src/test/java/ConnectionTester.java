@@ -17,6 +17,13 @@ public class ConnectionTester {
             connection = DriverManager.getConnection
                     ("jdbc:mysql://localhost:3306/" + DATABASE, USER, PASSWORD);
             System.out.println("Database connected");
+
+            // Perform a simple query to test the connection
+            Statement stmt = connection.createStatement();
+            ResultSet rs = stmt.executeQuery("SELECT * FROM Utente");
+            if (rs.next()) {
+                System.out.println("Connessione funzionante: " + rs.getString("username"));
+            }
             connection.close();
         } catch (Exception e) {
             System.out.println("Connection failed");
