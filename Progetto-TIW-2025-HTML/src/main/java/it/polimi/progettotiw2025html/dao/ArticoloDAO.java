@@ -18,7 +18,7 @@ public class ArticoloDAO {
         String query = "INSERT INTO Articolo (Codice, Nome, Descrizione, Immagine, Prezzo) VALUES (?, ?, ?, ?, ?)";
 
         try (PreparedStatement stmt = connection.prepareStatement(query)) {
-            stmt.setInt(1, articolo.getCodice());
+            stmt.setString(1, articolo.getCodice());
             stmt.setString(2, articolo.getNome());
             stmt.setString(3, articolo.getDescrizione());
             stmt.setString(4, articolo.getImmagine());

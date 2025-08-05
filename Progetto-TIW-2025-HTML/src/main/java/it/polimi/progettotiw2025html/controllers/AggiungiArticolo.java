@@ -1,6 +1,8 @@
 package it.polimi.progettotiw2025html.controllers;
 
+import it.polimi.progettotiw2025html.beans.Articolo;
 import it.polimi.progettotiw2025html.beans.Utente;
+import it.polimi.progettotiw2025html.dao.ArticoloDAO;
 import it.polimi.progettotiw2025html.dao.UtenteDAO;
 import it.polimi.progettotiw2025html.utils.ConnectionHandler;
 import jakarta.servlet.ServletContext;
@@ -70,7 +72,7 @@ public class AggiungiArticolo extends HttpServlet{
                 return;
             }
 
-            Articolo articolo = new Articolo(0, nome, descrizione, immagine, prezzo, proprietario);
+            Articolo articolo = new Articolo("0", nome, descrizione, immagine, prezzo, proprietario);
             ArticoloDAO articoloDAO = new ArticoloDAO(connection);
             articoloDAO.addArticolo(articolo);
 
