@@ -12,6 +12,7 @@ public class UtenteDAO {
 
     public Utente login(String username, String password) throws SQLException {
         String query = "SELECT * FROM Utente WHERE Username = ? AND Password = ?";
+        System.out.println("Eseguo query login per utente: " + username);
         try {
             PreparedStatement stmt = connection.prepareStatement(query);
             stmt.setString(1, username);

@@ -1,13 +1,58 @@
 <!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Title</title>
-</head>
-<body>
-<div id="articoliAsta">
-    <!-- articoli dell'asta -->
-</div>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>Offerta</title>
+    </head>
+    <body>
+        <a href="acquisto.html">Torna alle aste</a>
+        <h2>Articoli nell'asta</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Codice</th>
+                    <th>Nome</th>
+                    <th>Descrizione</th>
+                    <!-- <th>Immagine</th> -->
+                    <th>Prezzo</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr th:each="art: ${articoli}">
+                    <td th:text="${art.codice}"></td>
+                    <td th:text="${art.nome}"></td>
+                    <td th:text="${art.descrizione}"></td>
+                    <!-- <td><img th:src="@{${art.immagine}}" alt="Immagine Articolo" width="100"/></td> -->
+                    <td th:text="${art.prezzo} + '€'"></td>
+                </tr>
+            </tbody>
+        </table>
+        <br><br>
+        <h2>Offerte</h2>
+        <div th:if="${offerteMsg}">
+            <span th:text="${offerteMsg}"></span>
+        </div>
+        <div th:if="${offerte}">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Utente</th>
+                        <th>Prezzo Offerto</th>
+                        <th>Data Offerta</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="o : ${offerte}">
+                        <td th:text="${o.utente}"></td>
+                        <td th:text="${o.prezzo} + '€'"></td>
+                        <td th:text="${o.dataOfferta}"></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        <br><br>
+        <h2>Fai un'offerta</h2>
+        <form action="FaiOfferta" method="POST">
 
-</body>
+    </body>
 </html>

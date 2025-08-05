@@ -18,7 +18,7 @@ public class AstaDAO {
 
     public List<Asta> getAsteAperteByKeyword(String keyword) throws SQLException {
         String sql = "SELECT a.* " +
-                "FROM Asta a JOIN Articolo art ON art.id_asta = a.id " +
+                "FROM Asta a JOIN Articolo art ON art.idAsta = a.id " +
                 "WHERE a.chiusa = FALSE AND a.scadenza > NOW() AND (art.nome LIKE ? OR art.descrizione LIKE ?) " +
                 "ORDER BY a.scadenza DESC";
         List<Asta> result = new ArrayList<>();
@@ -40,7 +40,7 @@ public class AstaDAO {
     }
 
     public List<Asta> getAsteVinteByUsername(String username) throws SQLException {
-        String sql = "SELECT * FROM Asta WHERE aggiudicatario = ? AND chiusa = false ORDER BY scadenza DESC";
+        String sql = "SELECT * FROM Asta WHERE aggiudicatario = ? AND chiusa = true ORDER BY scadenza DESC";
         List<Asta> result = new ArrayList<>();
 
         PreparedStatement stmt = connection.prepareStatement(sql);
