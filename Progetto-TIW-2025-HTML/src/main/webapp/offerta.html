@@ -6,8 +6,9 @@
     </head>
     <body>
         <a href="acquisto.html">Torna alle aste</a>
+        <br><br>
         <h2>Articoli nell'asta</h2>
-        <table>
+        <table border="1">
             <thead>
                 <tr>
                     <th>Codice</th>
@@ -18,7 +19,7 @@
                 </tr>
             </thead>
             <tbody>
-                <tr th:each="art: ${articoli}">
+                <tr th:each="art : ${articoli}">
                     <td th:text="${art.codice}"></td>
                     <td th:text="${art.nome}"></td>
                     <td th:text="${art.descrizione}"></td>
@@ -33,17 +34,17 @@
             <span th:text="${offerteMsg}"></span>
         </div>
         <div th:if="${offerte}">
-            <table>
+            <table border="1">
                 <thead>
                     <tr>
-                        <th>Utente</th>
+                        <th>Offerente</th>
                         <th>Prezzo Offerto</th>
                         <th>Data Offerta</th>
                     </tr>
                 </thead>
                 <tbody>
                     <tr th:each="o : ${offerte}">
-                        <td th:text="${o.utente}"></td>
+                        <td th:text="${o.offerente}"></td>
                         <td th:text="${o.prezzo} + '€'"></td>
                         <td th:text="${o.dataOfferta}"></td>
                     </tr>
@@ -52,7 +53,14 @@
         </div>
         <br><br>
         <h2>Fai un'offerta</h2>
+        <h3>Rialzo minimo: </h3>
+        <span th:text="${rialzoMinimo} + '.00 €'"></span>
+        <div th:if="${errorMsg}">
+            <span th:text="${errorMsg}"></span>
+        </div>
         <form action="FaiOfferta" method="POST">
-
+            <input type="double" name="prezzoOfferto" placeholder="Prezzo Offerto" required><br><br>
+            <input type="submit" value="Fai offerta">
+        </form>
     </body>
 </html>
