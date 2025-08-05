@@ -2,11 +2,30 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Acquisto</title>
+    <title>Vendo</title>
 </head>
 <body>
-<form id="articolo">
+
+<a href="Index.html"><button type="button">Logout</button></a><br><br>
+<a href="Home.html"><button type="button">Torna alla home</button></a><br>
+
+
+<h2>Lista aste aperte</h2>
+<div>Non hai ancora liste aperte</div>
+<div>
+    <--tabella con le aste chiuse-->
+</div>
+
+<h2>Lista aste chiuse</h2>
+<div>Non hai ancora liste chiuse</div>
+<div>
+    <--tabella con le aste chiuse-->
+</div>
+
+
+<form id="articolo" action="/AggiungiArticolo" method="POST">
     <h2>Aggiungi un articolo</h2>
+    <input type="int" name="codice" placeholder="Codice Articolo" required><br><br>
     <input type="text" name="nome" placeholder="Nome" required><br><br>
     <textarea name="descrizione" placeholder="Descrizione" required></textarea><br><br>
     <input type="file" name="immagine" placeholder="Immagine" accept="image/*" required><br><br>
@@ -15,7 +34,8 @@
 </form>
 <form id="asta">
     <h2>Seleziona gli articoli per l'asta</h2>
-    <div id="listaArticoli">
+    <div>Nessun articolo disponibile per la creazione di aste</div>
+    <div>
         <!-- Qui verranno inseriti gli articoli dinamicamente via JS -->
     </div>
     <button type="submit">Crea Asta</button>
