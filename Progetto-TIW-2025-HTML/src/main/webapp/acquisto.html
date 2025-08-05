@@ -6,16 +6,19 @@
     </head>
     <body>
         <a href="home.html">Torna alla home</a>
+        <br><br>
+        <h2>Ricerca Aste</h2>
         <form action="RicercaAste" method="GET">
             <input type="text" name="keyword" placeholder="Parola chiave" required>
             <button type="submit">Cerca</button>
         </form>
+        <br><br>
         <h2>Aste Trovate</h2>
         <div th:if="${asteTrovateMsg}">
             <span th:text="${asteTrovateMsg}"></span>
         </div>
         <div th:if="${asteTrovate}">
-            <table>
+            <table border="1">
                 <thead>
                     <tr>
                         <th>ID Asta</th>
@@ -28,14 +31,17 @@
                 </thead>
                 <tbody>
                     <tr th:each="a : ${asteTrovate}">
-                        <td><a th:href="@{/GetOfferte(id=${a.id})}" th:text="${a.id}"></a></td>
-                        <td th:text="${a.prezzo} + '€'"></td>
-                        <td th:text="${a.rialzoMinimo} + '€'"></td>
+                        <td><a th:href="@{/GetOfferte(idAsta=${a.id})}" th:text="${a.id}"></a></td>
+                        <td th:text="${a.prezzoIniziale} + ' €'"></td>
+                        <td th:text="${a.rialzoMinimo} + '.00 €'"></td>
                         <td th:text="${a.scadenza}"></td>
                         <td th:text="${a.proprietario}"></td>
                         <td th:each="art : ${a.articoli}">
-                            <span th:text="${art.codice} + ' - ' + ${art.nome}"></span><br/>
-                        </td>
+                            <span th:text="${art.codice}"></span>
+                            <span th:text="${art.nome}"></span>
+                            <span th:text="${art.descrizione}"></span>
+                            <!--<span th:text="${art.immagine}"></span>-->
+                            <span th:text="${art.prezzo} + '€'"></span>
                     </tr>
                 </tbody>
             </table>
@@ -46,7 +52,7 @@
             <span th:text="${asteVinteMsg}"></span>
         </div>
         <div th:if="${asteVinte}">
-            <table>
+            <table border="1">
                 <thead>
                     <tr>
                         <th>ID Asta</th>
@@ -57,7 +63,7 @@
                 <tbody>
                     <tr>
                         <td th:text="${a.id}"></td>
-                        <td th:text="${a.prezzo != null ? a.prezzo + '€' : 'N/A'}"></td>
+                        <td th:text="${a.offertaMassima.prezzo + '€'}"></td>
                         <td th:each="art : ${a.articoli}">
                             <span th:text="${art.codice}"></span>
                             <span th:text="${art.nome}"></span>

@@ -1,9 +1,8 @@
 package it.polimi.progettotiw2025html.controllers;
 
-import it.polimi.progettotiw2025html.beans.Articolo;
+import it.polimi.progettotiw2025html.beans.Asta;
 import it.polimi.progettotiw2025html.beans.Offerta;
 import it.polimi.progettotiw2025html.beans.Utente;
-import it.polimi.progettotiw2025html.dao.ArticoloDAO;
 import it.polimi.progettotiw2025html.dao.AstaDAO;
 import it.polimi.progettotiw2025html.dao.OffertaDAO;
 import it.polimi.progettotiw2025html.utils.ConnectionHandler;
@@ -23,15 +22,15 @@ import org.thymeleaf.web.servlet.JakartaServletWebApplication;
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.util.List;
+import java.time.LocalDateTime;
 
-@WebServlet("/GetOfferte")
-public class GetOfferte extends HttpServlet {
+@WebServlet("/FaiOfferta")
+public class FaiOfferta extends HttpServlet {
     private static final long serialVersionUID = 1L;
     private TemplateEngine templateEngine;
     private Connection connection;
 
-    public GetOfferte() {
+    public FaiOfferta() {
         super();
     }
 
@@ -55,7 +54,7 @@ public class GetOfferte extends HttpServlet {
     }
 
     @Override
-    public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
+    public void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
         ServletContext servletContext = getServletContext();
         JakartaServletWebApplication webApplication = JakartaServletWebApplication.buildApplication(servletContext);
         WebContext ctx = new WebContext(webApplication.buildExchange(request, response), request.getLocale());
@@ -63,31 +62,53 @@ public class GetOfferte extends HttpServlet {
 
         HttpSession session = request.getSession();
         Utente utente = (Utente) session.getAttribute("utente");
-        Integer idAsta = 0;
-        try {
-            idAsta = Integer.parseInt(request.getParameter("idAsta"));
-            session.setAttribute("idAsta", idAsta);
-        } catch (NumberFormatException e) {
-            response.sendError(HttpServletResponse.SC_BAD_REQUEST, "ID Asta non valido");
+        Integer idAsta = (Integer) session.getAttribute("idAsta");
+        if (idAsta == null) {
+            response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Errore nella richiesta: idAsta non presente nella sessione.");
             return;
         }
 
+        double prezzo = 0.0;
         try {
-            ArticoloDAO articoloDAO = new ArticoloDAO(connection);
-            List<Articolo> articoli = articoloDAO.getArticoliByIdAsta(idAsta);
-            ctx.setVariable("articoli", articoli);
+            prezzo = Double.parseDouble(request.getParameter("prezzo"));
+        } catch (NumberFormatException e) {
+            response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Prezzo non valido.");
+            return;
+        }
+
+        if (prezzo <= 0) {
+            ctx.setVariable("errorMsg", "Il prezzo deve essere maggiore di zero.");
+            path = "offerta?idAsta=" + idAsta;
+            templateEngine.process(path, ctx, response.getWriter());
+            return;
+        }
+        try {
             AstaDAO astaDAO = new AstaDAO(connection);
-            ctx.setVariable("rialzoMinimo", astaDAO.getAstaById(idAsta).getRialzoMinimo());
+            Asta asta = astaDAO.getAstaById(idAsta);
+            if (asta.getScadenza().isBefore(LocalDateTime.now())) {
+                ctx.setVariable("errorMsg", "Asta scaduta, non è possibile fare offerte.");
+                path = "offerta?idAsta=" + idAsta;
+                templateEngine.process(path, ctx, response.getWriter());
+                return;
+            }
+            if (asta.getRialzoMinimo() > prezzo - asta.getPrezzoIniziale()) {
+                ctx.setVariable("errorMsg", "L'offerta deve rialzare il prezzo almeno quanto il rialzo minimo");
+                path = "offerta?idAsta=" + idAsta;
+                templateEngine.process(path, ctx, response.getWriter());
+                return;
+            }
 
             OffertaDAO offertaDAO = new OffertaDAO(connection);
-            List<Offerta> offerte = offertaDAO.getOfferteByIdAsta(idAsta);
-            if (offerte != null && !offerte.isEmpty()) {
-                ctx.setVariable("offerte", offerte);
-            } else {
-                ctx.setVariable("offerteMsg", "Nessuna offerta trovata");
+            Offerta maxOfferta = offertaDAO.getMaxOffertaByIdAsta(idAsta);
+            if (maxOfferta != null && maxOfferta.getPrezzo() > prezzo) {
+                ctx.setVariable("errorMsg", "L'offerta deve essere superiore all'offerta massima attuale di " + maxOfferta.getPrezzo());
+                path = "offerta?idAsta=" + idAsta;
+                templateEngine.process(path, ctx, response.getWriter());
+                return;
             }
-            path = "offerta";
-            templateEngine.process(path, ctx, response.getWriter());
+            offertaDAO.addOfferta(utente.getUsername(), prezzo, idAsta);
+            path = request.getContextPath() + "offerte?idAsta=" + idAsta;
+            response.sendRedirect(path);
         } catch (SQLException e) {
             response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Errore interno del server");
         }

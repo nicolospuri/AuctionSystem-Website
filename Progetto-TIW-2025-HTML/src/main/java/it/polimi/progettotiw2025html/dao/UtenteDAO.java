@@ -55,13 +55,7 @@ public class UtenteDAO {
             stmt.setString(4, utente.getCognome());
             stmt.setString(5, utente.getIndirizzo());
 
-            System.out.println("executing query");
-
-            int code = stmt.executeUpdate(); //serve per eseguire operazioni SQL che modificano i dati
-            System.out.println("CODE: " + code);
-
-            if (code == 0) throw new SQLException("Registrazione fallita, nessuna riga modificata");
-
+            stmt.executeUpdate(); //serve per eseguire operazioni SQL che modificano i dati
             return true;
         } catch (Exception e) {
             System.out.println("Errore: username già esistente!");

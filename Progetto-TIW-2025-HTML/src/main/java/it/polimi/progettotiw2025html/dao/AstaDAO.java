@@ -30,7 +30,7 @@ public class AstaDAO {
 
         ResultSet rs = stmt.executeQuery();
         while (rs.next()) {
-            result.add(new Asta(rs.getInt("id"),
+            result.add(new Asta(rs.getInt("Id"),
                     rs.getDouble("Prezzo"),
                     rs.getInt("RialzoMinimo"),
                     rs.getTimestamp("Scadenza").toLocalDateTime(),
@@ -53,9 +53,26 @@ public class AstaDAO {
                         rs.getDouble("Prezzo"),
                         rs.getInt("RialzoMinimo"),
                         rs.getTimestamp("Scadenza").toLocalDateTime(),
-                        rs.getString("Proprietario")));
+                        rs.getString("Proprietario"),
+                        rs.getString("Aggiudicatario")));
             }
         }
         return result;
+    }
+
+    public Asta getAstaById(int idAsta) throws SQLException {
+        String sql = "SELECT * FROM Asta WHERE Id = ?";
+        PreparedStatement stmt = connection.prepareStatement(sql);
+        stmt.setInt(1, idAsta);
+
+        ResultSet rs = stmt.executeQuery();
+        if (rs.next()) {
+            return new Asta(rs.getInt("Id"),
+                    rs.getDouble("Prezzo"),
+                    rs.getInt("RialzoMinimo"),
+                    rs.getTimestamp("Scadenza").toLocalDateTime(),
+                    rs.getString("Proprietario"));
+        }
+        return null;
     }
 }

@@ -1,7 +1,9 @@
 package it.polimi.progettotiw2025html.controllers;
 
+import it.polimi.progettotiw2025html.beans.Articolo;
 import it.polimi.progettotiw2025html.beans.Asta;
 import it.polimi.progettotiw2025html.beans.Utente;
+import it.polimi.progettotiw2025html.dao.ArticoloDAO;
 import it.polimi.progettotiw2025html.dao.AstaDAO;
 import it.polimi.progettotiw2025html.utils.ConnectionHandler;
 import jakarta.servlet.ServletContext;
@@ -62,12 +64,11 @@ public class RicercaAste extends HttpServlet {
         HttpSession session = request.getSession();
         Utente utente = (Utente) session.getAttribute("utente");
 
-        boolean hasSearched = (keyword != null && !keyword.isEmpty());
-        ctx.setVariable("hasSearched", hasSearched);
-
         try {
             AstaDAO astaDAO = new AstaDAO(connection);
+            ArticoloDAO articoloDAO = new ArticoloDAO(connection);
             List<Asta> asteTrovate = null;
+            List<Articolo> articoli = null;
             if (keyword != null && !keyword.isEmpty()) {
                 asteTrovate = astaDAO.getAsteAperteByKeyword(keyword);
             }
@@ -77,21 +78,28 @@ public class RicercaAste extends HttpServlet {
             }
 
             ctx.setVariable("keyword", keyword);
-            ctx.setVariable("utenteLoggato", utente);
 
             if (asteTrovate != null && asteTrovate.isEmpty()) {
                 ctx.setVariable("asteTrovateMsg", "Nessuna asta trovata");
             } else {
+                for (Asta a : asteVinte) {
+                    articoli = articoloDAO.getArticoliByIdAsta(a.getId());
+                    a.setArticoli(articoli);
+                }
                 ctx.setVariable("asteTrovate", asteTrovate);
             }
             if (asteVinte != null && asteVinte.isEmpty()) {
                 ctx.setVariable("asteVinteMsg", "Nessuna asta vinta");
             } else {
+                for (Asta a : asteVinte) {
+                    articoli = articoloDAO.getArticoliByIdAsta(a.getId());
+                    a.setArticoli(articoli);
+                }
                 ctx.setVariable("asteVinte", asteVinte);
             }
-            templateEngine.process("acquisto", ctx, response.getWriter());
-        } catch (Exception e) {
-            e.printStackTrace();
+            path = "acquisto";
+            templateEngine.process(path, ctx, response.getWriter());
+        } catch (SQLException e) {
             response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Errore interno del server durante la ricerca delle aste");
         }
     }
