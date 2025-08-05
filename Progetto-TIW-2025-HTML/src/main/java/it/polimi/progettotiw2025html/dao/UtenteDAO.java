@@ -1,6 +1,5 @@
 package it.polimi.progettotiw2025html.dao;
 
-import it.polimi.progettotiw2025html.utils.ConnectionHandler;
 import java.sql.*;
 import it.polimi.progettotiw2025html.beans.*;
 
@@ -13,7 +12,8 @@ public class UtenteDAO {
 
     public Utente login(String username, String password) throws SQLException {
         String query = "SELECT * FROM Utente WHERE Username = ? AND Password = ?";
-        try (PreparedStatement stmt = connection.prepareStatement(query)) {
+        try {
+            PreparedStatement stmt = connection.prepareStatement(query);
             stmt.setString(1, username);
             stmt.setString(2, password);
 
@@ -28,6 +28,8 @@ public class UtenteDAO {
                     );
                 }
             }
+        } catch (SQLException e) {
+            e.printStackTrace();
         }
         return null;
     }
@@ -44,7 +46,8 @@ public class UtenteDAO {
     public boolean signUp(Utente utente) throws SQLException {
         String query = "INSERT INTO Utente (Username, Password, Nome, Cognome, Indirizzo) VALUES (?, ?, ?, ?, ?)";
 
-        try (PreparedStatement stmt = connection.prepareStatement(query)) {
+        try {
+            PreparedStatement stmt = connection.prepareStatement(query);
             stmt.setString(1, utente.getUsername());
             stmt.setString(2, utente.getPassword());
             stmt.setString(3, utente.getNome());

@@ -5,8 +5,8 @@
         <title>Acquisto</title>
     </head>
     <body>
-        <form id="CercaParolaChiave">
-            <input type="text" placeholder="Parola chiave" required>
+        <form th:action="@{/RicercaAste}" method="GET">
+            <input type="text" name="keyword" placeholder="Parola chiave" required>
             <button type="submit">Cerca</button>
         </form>
         <h2>Aste Trovate</h2>
@@ -18,13 +18,29 @@
                 <p><a th:href="@{/dettaglioAsta(id=${a.id})}">
                     <strong>ID Asta: </strong><span th:text="${a.id}"></span></a></p>
                 <p><strong>Rialzo minimo: </strong> <span th:text="${a.rialzoMinimo}"></span>€</p>
-                <p><strong>Offerta massima corrente: </strong> <span th:text="${a.offertaMassima > 0 ? a.offertaMassima + '€' : 'Nessuna offerta'}"></span></p>
-                <p><strong>Tempo rimanente: </strong> <span th:text="${a.tempoMancante}"></span></p>
+                <p><strong>Scadenza: </strong> <span th:text="${a.scadenza}"></span></p>
+                <p><strong>Proprietario: </strong> <span th:text="${a.proprietario}"></span></p>
+                <p><strong>Articoli: </strong>
+                    <span th:each="art : ${a.articoli}">
+                        <span th:text="${art.codice}"></span> - <span th:text="${art.nome}"></span>;
+                    </span>
+                </p>
             </div>
         </div>
-    <h3>Offerte aggiudicate</h3>
-    <div id="articoliAggiudicati">
-
-    </div>
+    <h2>Aste vinte</h2>
+        <div th:if="${#lists.isEmpty(asteVinte)}">
+            <p>Non hai ancora vinto aste.</p>
+        </div>
+        <div th:each="a : ${asteVinte}">
+            <div>
+                <p><strong>ID Asta: </strong> <span th:text="${a.id}"></span></p>
+                <p><strong>Articoli: </strong>
+                    <span th:each="art : ${a.articoli}">
+                    <span th:text="${art.codice}"></span> - <span th:text="${art.nome}"></span>;
+                </span>
+                </p>
+                <p><strong>Prezzo:</strong> <span th:text="${a.prezzoFinale != null ? a.prezzoFinale + '€' : 'N/A'}"></span></p>
+            </div>
+        </div>
     </body>
 </html>
