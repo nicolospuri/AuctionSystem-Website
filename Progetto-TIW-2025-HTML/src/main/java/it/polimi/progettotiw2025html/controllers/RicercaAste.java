@@ -71,6 +71,10 @@ public class RicercaAste extends HttpServlet {
             List<Articolo> articoli = null;
             if (keyword != null && !keyword.isEmpty()) {
                 asteTrovate = astaDAO.getAsteAperteByKeyword(keyword);
+                for (Asta a : asteTrovate) {
+                    articoli = articoloDAO.getArticoliByIdAsta(a.getId());
+                    a.setArticoli(articoli);
+                }
             }
             List<Asta> asteVinte = null;
             if (utente != null) {

@@ -24,7 +24,9 @@ public class AstaDAO {
         List<Asta> result = new ArrayList<>();
 
         PreparedStatement stmt = connection.prepareStatement(sql);
-        String pattern = "%" + keyword + "%";
+        String pattern = "%" + keyword + "%";   // Usiamo '%' per cercare qualsiasi parte della stringa,
+                                                // altrimenti cercheremmo solo descrizioni o nomi che
+                                                // corrispondono esattamente alla keyword
         stmt.setString(1, pattern);
         stmt.setString(2, pattern);
 
