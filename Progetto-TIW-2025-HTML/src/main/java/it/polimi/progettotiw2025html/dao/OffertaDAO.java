@@ -34,9 +34,11 @@ public class OffertaDAO {
     }
 
     public Offerta getMaxOffertaByIdAsta(int idAsta) throws SQLException {
-        String sql = "SELECT * FROM Offerta WHERE IdAsta = ?, Prezzo = (SELECT MAX(Prezzo) FROM Offerta WHERE IdAsta = ?)";
+        String sql = "SELECT * FROM Offerta WHERE IdAsta = ? " +
+                "AND Prezzo = (SELECT MAX(Prezzo) FROM Offerta WHERE IdAsta = ?)";
         PreparedStatement stmt = connection.prepareStatement(sql);
         stmt.setInt(1, idAsta);
+        stmt.setInt(2, idAsta);
         ResultSet rs = stmt.executeQuery();
 
         if (rs.next()) {
@@ -46,7 +48,7 @@ public class OffertaDAO {
                     rs.getDate("Data"),
                     rs.getInt("IdAsta"));
         } else {
-            return null; // No offers found
+            return null;
         }
     }
 

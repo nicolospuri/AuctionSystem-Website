@@ -20,7 +20,7 @@
         <div th:if="${asteTrovate}">
             <table border="1">
                 <thead>
-                    <tr>
+                    <tr align="center">
                         <th>ID Asta</th>
                         <th>Prezzo Iniziale</th>
                         <th>Rialzo Minimo</th>
@@ -30,18 +30,20 @@
                     </tr>
                 </thead>
                 <tbody>
-                    <tr th:each="a : ${asteTrovate}">
+                    <tr th:each="a : ${asteTrovate}" align="center">
                         <td><a th:href="@{/GetOfferte(idAsta=${a.id})}" th:text="${a.id}"></a></td>
                         <td th:text="${a.prezzoIniziale} + ' €'"></td>
                         <td th:text="${a.rialzoMinimo} + '.00 €'"></td>
                         <td th:text="${a.scadenza}"></td>
                         <td th:text="${a.proprietario}"></td>
-                        <td th:each="art : ${a.articoli}">
-                            <span th:text="${art.codice}"></span>
-                            <span th:text="${art.nome}"></span>
-                            <span th:text="${art.descrizione}"></span>
-                            <!--<span th:text="${art.immagine}"></span>-->
-                            <span th:text="${art.prezzo} + '€'"></span>
+                        <td>
+                            <ul>
+                                <li th:each="art : ${a.articoli}">
+                                    <span th:text="${art.codice}"></span>
+                                    <span th:text="${art.nome}"></span>
+                                </li>
+                            </ul>
+                        </td>
                     </tr>
                 </tbody>
             </table>
@@ -54,22 +56,26 @@
         <div th:if="${asteVinte}">
             <table border="1">
                 <thead>
-                    <tr>
+                    <tr align="center">
                         <th>ID Asta</th>
                         <th>Prezzo</th>
                         <th>Articoli</th>
                     </tr>
                 </thead>
                 <tbody>
-                    <tr>
+                    <tr align="center">
                         <td th:text="${a.id}"></td>
                         <td th:text="${a.offertaMassima.prezzo + '€'}"></td>
-                        <td th:each="art : ${a.articoli}">
-                            <span th:text="${art.codice}"></span>
-                            <span th:text="${art.nome}"></span>
-                            <span th:text="${art.descrizione}"></span>
-                            <span th:text="${art.immagine}"></span>
-                            <span th:text="${art.prezzo}"></span>
+                        <td>
+                            <ul>
+                                <li th:each="art : ${a.articoli}">
+                                    <span th:text="${art.codice}"></span>
+                                    <span th:text="${art.nome}"></span>
+                                    <span th:text="${art.descrizione}"></span>
+                                    <!-- <td><img th:src="@{${art.immagine}}" alt="Immagine Articolo" width="100"/></td> -->
+                                    <span th:text="${art.prezzo} + '€'"></span>
+                                </li>
+                            </ul>
                         </td>
                     </tr>
                 </tbody>
