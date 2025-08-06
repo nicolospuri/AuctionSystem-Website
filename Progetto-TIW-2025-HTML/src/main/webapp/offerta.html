@@ -10,7 +10,7 @@
         <h2>Articoli nell'asta</h2>
         <table border="1">
             <thead>
-                <tr>
+                <tr align="center">
                     <th>Codice</th>
                     <th>Nome</th>
                     <th>Descrizione</th>
@@ -19,7 +19,7 @@
                 </tr>
             </thead>
             <tbody>
-                <tr th:each="art : ${articoli}">
+                <tr th:each="art : ${articoli}" align="center">
                     <td th:text="${art.codice}"></td>
                     <td th:text="${art.nome}"></td>
                     <td th:text="${art.descrizione}"></td>
@@ -36,31 +36,32 @@
         <div th:if="${offerte}">
             <table border="1">
                 <thead>
-                    <tr>
+                    <tr align="center">
                         <th>Offerente</th>
                         <th>Prezzo Offerto</th>
                         <th>Data Offerta</th>
                     </tr>
                 </thead>
                 <tbody>
-                    <tr th:each="o : ${offerte}">
+                    <tr th:each="o : ${offerte}" align="center">
                         <td th:text="${o.offerente}"></td>
                         <td th:text="${o.prezzo} + '€'"></td>
-                        <td th:text="${o.dataOfferta}"></td>
+                        <td th:text="${o.data}"></td>
                     </tr>
                 </tbody>
             </table>
         </div>
         <br><br>
-        <h2>Fai un'offerta</h2>
-        <h3>Rialzo minimo: </h3>
-        <span th:text="${rialzoMinimo} + '.00 €'"></span>
-        <div th:if="${errorMsg}">
-            <span th:text="${errorMsg}"></span>
+        <div th:if="${canOffer}">
+            <h2>Fai un'offerta</h2>
+            <h3>Rialzo minimo: <span th:text="${rialzoMinimo} + '.00 €'"></span></h3>
+            <div th:if="${errorMsg}">
+                <span th:text="${errorMsg}"></span>
+            </div>
+            <form action="FaiOfferta" method="POST">
+                <input type="double" name="prezzoOfferto" placeholder="Prezzo Offerto" required><br><br>
+                <input type="submit" value="Fai offerta">
+            </form>
         </div>
-        <form action="FaiOfferta" method="POST">
-            <input type="double" name="prezzoOfferto" placeholder="Prezzo Offerto" required><br><br>
-            <input type="submit" value="Fai offerta">
-        </form>
     </body>
 </html>

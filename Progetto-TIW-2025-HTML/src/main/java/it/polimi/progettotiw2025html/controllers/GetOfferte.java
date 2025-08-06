@@ -1,6 +1,7 @@
 package it.polimi.progettotiw2025html.controllers;
 
 import it.polimi.progettotiw2025html.beans.Articolo;
+import it.polimi.progettotiw2025html.beans.Asta;
 import it.polimi.progettotiw2025html.beans.Offerta;
 import it.polimi.progettotiw2025html.beans.Utente;
 import it.polimi.progettotiw2025html.dao.ArticoloDAO;
@@ -77,7 +78,8 @@ public class GetOfferte extends HttpServlet {
             List<Articolo> articoli = articoloDAO.getArticoliByIdAsta(idAsta);
             ctx.setVariable("articoli", articoli);
             AstaDAO astaDAO = new AstaDAO(connection);
-            ctx.setVariable("rialzoMinimo", astaDAO.getAstaById(idAsta).getRialzoMinimo());
+            Asta asta = astaDAO.getAstaById(idAsta);
+            ctx.setVariable("rialzoMinimo", asta.getRialzoMinimo());
 
             OffertaDAO offertaDAO = new OffertaDAO(connection);
             List<Offerta> offerte = offertaDAO.getOfferteByIdAsta(idAsta);
@@ -85,6 +87,10 @@ public class GetOfferte extends HttpServlet {
                 ctx.setVariable("offerte", offerte);
             } else {
                 ctx.setVariable("offerteMsg", "Nessuna offerta trovata");
+            }
+
+            if (utente != null && !utente.getUsername().equals(asta.getProprietario())) {
+                ctx.setVariable("canOffer", true);
             }
             path = "offerta";
             templateEngine.process(path, ctx, response.getWriter());
