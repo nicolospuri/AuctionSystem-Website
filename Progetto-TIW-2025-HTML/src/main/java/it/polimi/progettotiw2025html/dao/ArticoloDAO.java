@@ -33,6 +33,24 @@ public class ArticoloDAO {
         }
     }
 
+    public List<Articolo> getArticoliDisponibili(String proprietario) throws SQLException {
+        String sql = "SELECT * FROM Articolo WHERE idAsta IS NULL AND Proprietario = ?";
+        List<Articolo> articoli = new ArrayList<>();
+
+        PreparedStatement stmt = connection.prepareStatement(sql);
+        stmt.setString(1, proprietario);
+        ResultSet rs = stmt.executeQuery();
+        while (rs.next()) {
+            articoli.add(new Articolo(rs.getString("Codice"),
+                    rs.getString("Nome"),
+                    rs.getString("Descrizione"),
+                    rs.getString("Immagine"),
+                    rs.getInt("Prezzo"),
+                    rs.getString("Proprietario")));
+        }
+        return articoli;
+    }
+
     public List<Articolo> getArticoliByIdAsta(int idAsta) throws SQLException {
         String sql = "SELECT * FROM Articolo WHERE IdAsta = ?";
         List<Articolo> result = new ArrayList<>();

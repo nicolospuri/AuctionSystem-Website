@@ -22,20 +22,19 @@ import org.thymeleaf.web.servlet.JakartaServletWebApplication;
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.List;
 
-@WebServlet("/AggiungiArticolo")
-public class AggiungiArticolo extends HttpServlet{
+@WebServlet("/ArticoliDisponibili")
+public class ArticoliDisponibili extends HttpServlet {
     private static final long serialVersionUID = 1L;
     private TemplateEngine templateEngine;
     private Connection connection;
 
-    public AggiungiArticolo() {
-        super();
-    }
+    public  ArticoliDisponibili() { super(); }
 
     @Override
     public void init() throws UnavailableException {
-        System.out.println("Inizializzando AggiungiArticolo");
+        System.out.println("Inizializzando ArticoliDisponibili");
         ServletContext servletContext = getServletContext();
 
         JakartaServletWebApplication webApplication = JakartaServletWebApplication.buildApplication(servletContext);
@@ -53,42 +52,40 @@ public class AggiungiArticolo extends HttpServlet{
         }
     }
 
-    public void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
-        System.out.println("Post di AggiungiArticolo");
-        String nome = request.getParameter("nome");
-        String descrizione = request.getParameter("descrizione");
-        String immagine = request.getParameter("immagine");
-        double prezzo = Double.parseDouble(request.getParameter("prezzo"));
-        String proprietario = request.getParameter("proprietario");
-
+    @Override
+    public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
         ServletContext servletContext = getServletContext();
         JakartaServletWebApplication webApplication = JakartaServletWebApplication.buildApplication(servletContext);
         WebContext ctx = new WebContext(webApplication.buildExchange(request, response), request.getLocale());
-        String path = null;
 
-        Utente utente = (Utente) request.getSession().getAttribute("utente");
-        if (utente == null) {
-            path = "index";
-            ctx.setVariable("errorMsg", "Utente non trovata");
-            templateEngine.process(path, ctx, response.getWriter());
-            return;
-        }
+        HttpSession session = request.getSession();
+        Utente utente = (Utente) session.getAttribute("utente");
 
-        try {
-            UtenteDAO utenteDAO = new UtenteDAO(connection);
-            if (!utenteDAO.checkRegistration(proprietario)) {
-                response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Utente non registrato");
-                return;
+        try{
+            ArticoloDAO articoliDAO = new ArticoloDAO(connection);
+            List<Articolo> articoli = null;
+            if (utente != null) {
+                articoli = articoliDAO.getArticoliDisponibili(utente.getUsername());
             }
 
-            Articolo articolo = new Articolo("0", nome, descrizione, immagine, prezzo, proprietario);
-            ArticoloDAO articoloDAO = new ArticoloDAO(connection);
-            articoloDAO.addArticolo(articolo);
+            if (articoli == null || articoli.isEmpty()) {
+                ctx.setVariable("articoliMsg", "Non ci sono articoli disponibili al momento.");
+            } else {
+                ctx.setVariable("listaArticoli", articoli); // nuova variabile per la lista
+            }
 
-            response.sendRedirect(request.getContextPath() + "/ListaArticoli");
+            templateEngine.process("articoliDisponibili", ctx, response.getWriter());
         } catch (SQLException e) {
+            response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Database error");
+        }
+    }
+
+    @Override
+    public void destroy() {
+        try{
+            ConnectionHandler.closeConnection(connection);
+        }catch(SQLException e){
             e.printStackTrace();
-            response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Errore durante l'aggiunta dell'articolo: " + e.getMessage());
         }
     }
 }
