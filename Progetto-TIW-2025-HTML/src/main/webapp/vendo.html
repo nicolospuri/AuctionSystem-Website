@@ -1,12 +1,12 @@
 <!DOCTYPE html>
-<html lang="en">
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
 <head>
     <meta charset="UTF-8">
     <title>Vendo</title>
 </head>
 <body>
 
-<a href="index.html"><button type="button">Logout</button></a><br><br>
+<form action="Logout" method="POST"><button type="submit">Logout</button></form><br><br>
 <a href="home.html"><button type="button">Torna alla home</button></a><br>
 
 
@@ -38,14 +38,13 @@
     <span th:text="${articoliMsg}"></span>
 </div>
 
-<form action="#" method="post"> <!-- Metti qui il nome corretto della servlet -->
-
+<form action="ArticoliDisponibili" method="POST">
     <div th:if="${listaArticoli}">
         <h3>Articoli disponibili</h3>
         <table border="1">
             <thead>
             <tr>
-                <th>Seleziona</th>
+                <th></th>
                 <th>Codice</th>
                 <th>Nome</th>
                 <th>Descrizione</th>

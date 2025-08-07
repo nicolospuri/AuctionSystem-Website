@@ -5,7 +5,8 @@
         <title>Offerta</title>
     </head>
     <body>
-        <a href="acquisto.html">Torna alle aste</a>
+        <form action="Logout" method="POST"><button type="submit">Logout</button></form><br><br>
+        <a href="acquisto.html"><button type="button">Torna alle aste</button></a>
         <br><br>
         <h2>Articoli nell'asta</h2>
         <table border="1">
@@ -14,7 +15,7 @@
                     <th>Codice</th>
                     <th>Nome</th>
                     <th>Descrizione</th>
-                    <!-- <th>Immagine</th> -->
+                    <!--<th>Immagine</th>-->
                     <th>Prezzo</th>
                 </tr>
             </thead>
@@ -23,7 +24,7 @@
                     <td th:text="${art.codice}"></td>
                     <td th:text="${art.nome}"></td>
                     <td th:text="${art.descrizione}"></td>
-                    <!-- <td><img th:src="@{${art.immagine}}" alt="Immagine Articolo" width="100"/></td> -->
+                    <!--<td><img th:src="@{${art.immagine}}" alt="Immagine Articolo" width="100"/></td>-->
                     <td th:text="${art.prezzo} + '€'"></td>
                 </tr>
             </tbody>
