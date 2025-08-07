@@ -45,7 +45,7 @@ public class ArticoloDAO {
                     rs.getString("Nome"),
                     rs.getString("Descrizione"),
                     rs.getString("Immagine"),
-                    rs.getInt("Prezzo"),
+                    rs.getDouble("Prezzo"),
                     rs.getString("Proprietario")));
         }
         return articoli;
@@ -62,7 +62,8 @@ public class ArticoloDAO {
             result.add(new Articolo(rs.getString("Codice"),
                     rs.getString("Nome"),
                     rs.getString("Descrizione"),
-                    rs.getInt("Prezzo"),
+                    rs.getString("Immagine"),
+                    rs.getDouble("Prezzo"),
                     rs.getString("Proprietario")));
         }
         return result;

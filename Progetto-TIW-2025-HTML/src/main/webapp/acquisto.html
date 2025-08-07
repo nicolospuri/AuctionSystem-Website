@@ -5,13 +5,15 @@
         <title>Acquisto</title>
     </head>
     <body>
-        <a href="home.html">Torna alla home</a><br><br>
+        <form action="Logout" method="POST"><button type="submit">Logout</button></form><br><br>
+        <a href="home.html"><button type="button">Torna alla home</button></a>
         <br><br>
         <h2>Ricerca Aste</h2>
         <form action="RicercaAste" method="GET">
             <input type="text" name="keyword" placeholder="Parola chiave" required>
             <button type="submit">Cerca</button>
         </form>
+        <br><br>
         <h2>Aste Trovate</h2>
         <div th:if="${asteTrovateMsg}">
             <span th:text="${asteTrovateMsg}"></span>
@@ -71,7 +73,7 @@
                                     <span th:text="${art.codice}"></span>
                                     <span th:text="${art.nome}"></span>
                                     <span th:text="${art.descrizione}"></span>
-                                    <!-- <td><img th:src="@{${art.immagine}}" alt="Immagine Articolo" width="100"/></td> -->
+                                    <!--<img th:if="${art.immagine}" th:src="@{${art.immagine}}" alt="Immagine Articolo" width="100"/>-->
                                     <span th:text="${art.prezzo} + '€'"></span>
                                 </li>
                             </ul>

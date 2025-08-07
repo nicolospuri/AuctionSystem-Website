@@ -10,6 +10,7 @@ public class ConnectionHandler {
         final String DATABASE = "Progetto_Web";
         final String USER = "progetto_web";
         final String PASSWORD = "progetto_web";
+        final String URL = "jdbc:mysql://localhost:3306/" + DATABASE + "?serverTimezone=UTC";;
         Connection connection = null;
         // Load the JDBC driver
         try {
@@ -20,7 +21,7 @@ public class ConnectionHandler {
         }
         try {
             connection = DriverManager.getConnection
-                    ("jdbc:mysql://localhost:3306/" + DATABASE, USER, PASSWORD);
+                    (URL, USER, PASSWORD);
             System.out.println("Database connected");
         } catch (Exception e) {
             throw new UnavailableException("Couldn't get db connection");

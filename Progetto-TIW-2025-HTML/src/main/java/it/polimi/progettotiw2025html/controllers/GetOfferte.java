@@ -100,6 +100,11 @@ public class GetOfferte extends HttpServlet {
     }
 
     @Override
+    public void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
+        doGet(request, response);
+    }
+
+    @Override
     public void destroy() {
         try{
             ConnectionHandler.closeConnection(connection);

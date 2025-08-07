@@ -69,7 +69,7 @@ public class AggiungiArticolo extends HttpServlet{
         Utente utente = (Utente) request.getSession().getAttribute("utente");
         if (utente == null) {
             path = "index";
-            ctx.setVariable("errorMsg", "Utente non trovata");
+            ctx.setVariable("errorMsg", "Utente non trovato");
             templateEngine.process(path, ctx, response.getWriter());
             return;
         }
