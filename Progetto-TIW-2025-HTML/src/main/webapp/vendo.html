@@ -6,8 +6,8 @@
 </head>
 <body>
 
-<a href="Index.html"><button type="button">Logout</button></a><br><br>
-<a href="Home.html"><button type="button">Torna alla home</button></a><br>
+<a href="index.html"><button type="button">Logout</button></a><br><br>
+<a href="home.html"><button type="button">Torna alla home</button></a><br>
 
 
 <h2>Lista aste aperte</h2>
@@ -23,7 +23,7 @@
 </div>
 
 
-<form id="articolo" action="/AggiungiArticolo" method="POST">
+<form action="AggiungiArticolo" method="POST">
     <h2>Aggiungi un articolo</h2>
     <input type="int" name="codice" placeholder="Codice Articolo" required><br><br>
     <input type="text" name="nome" placeholder="Nome" required><br><br>
@@ -32,13 +32,87 @@
     <input type="number" name="prezzo" placeholder="Prezzo" required><br><br>
     <button type="submit">Aggiungi Articolo</button>
 </form>
-<form id="asta">
-    <h2>Seleziona gli articoli per l'asta</h2>
-    <div>Nessun articolo disponibile per la creazione di aste</div>
-    <div>
-        <!-- Qui verranno inseriti gli articoli dinamicamente via JS -->
+<h2>Seleziona gli articoli per l'asta</h2>
+
+<div th:if="${articoliMsg}">
+    <span th:text="${articoliMsg}"></span>
+</div>
+
+<form action="#" method="post"> <!-- Metti qui il nome corretto della servlet -->
+
+    <div th:if="${listaArticoli}">
+        <h3>Articoli disponibili</h3>
+        <table border="1">
+            <thead>
+            <tr>
+                <th>Seleziona</th>
+                <th>Codice</th>
+                <th>Nome</th>
+                <th>Descrizione</th>
+                <th>Immagine</th>
+                <th>Prezzo</th>
+                <th>Id Asta</th>
+                <th>Proprietario</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="articolo : ${listaArticoli}">
+                <td>
+                    <input type="checkbox" name="articoliSelezionati"
+                           th:value="${articolo.codice}" />
+                </td>
+                <td th:text="${articolo.codice}">codice</td>
+                <td th:text="${articolo.nome}">nome</td>
+                <td th:text="${articolo.descrizione}">descrizione</td>
+                <td>
+                    <img th:src="@{${articolo.immagine}}" alt="Immagine articolo" width="100"/>
+                </td>
+                <td th:text="${#numbers.formatDecimal(articolo.prezzo, 1, 'COMMA', 2, 'POINT')}">prezzo</td>
+                <td th:text="${articolo.idAsta}">idAsta</td>
+                <td th:text="${articolo.proprietario}">proprietario</td>
+            </tr>
+            </tbody>
+        </table>
+
+        <br><br>
+        <button type="submit">Crea Asta</button>
     </div>
-    <button type="submit">Crea Asta</button>
 </form>
+
 </body>
 </html>
+
+<!--
+<div th:if="${asteTrovateMsg}">
+    <span th:text="${asteTrovateMsg}"></span>
+</div>
+<div th:if="${asteTrovate}">
+    <table border="1">
+        <thead>
+        <tr>
+            <th>ID Asta</th>
+            <th>Prezzo Iniziale</th>
+            <th>Rialzo Minimo</th>
+            <th>Scadenza</th>
+            <th>Proprietario</th>
+            <th>Articoli</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="a : ${asteTrovate}">
+            <td><a th:href="@{/GetOfferte(idAsta=${a.id})}" th:text="${a.id}"></a></td>
+            <td th:text="${a.prezzoIniziale} + ' €'"></td>
+            <td th:text="${a.rialzoMinimo} + '.00 €'"></td>
+            <td th:text="${a.scadenza}"></td>
+            <td th:text="${a.proprietario}"></td>
+            <td th:each="art : ${a.articoli}">
+                <span th:text="${art.codice}"></span>
+                <span th:text="${art.nome}"></span>
+                <span th:text="${art.descrizione}"></span>
+                <span th:text="${art.immagine}"></span>
+                <span th:text="${art.prezzo} + '€'"></span>
+        </tr>
+        </tbody>
+    </table>
+</div>
+-->
