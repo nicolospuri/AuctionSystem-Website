@@ -81,11 +81,11 @@ public class AggiungiArticolo extends HttpServlet{
                 return;
             }
 
-            Articolo articolo = new Articolo("0", nome, descrizione, immagine, prezzo, proprietario);
+            Articolo articolo = new Articolo(0, nome, descrizione, immagine, prezzo, proprietario);
             ArticoloDAO articoloDAO = new ArticoloDAO(connection);
             articoloDAO.addArticolo(articolo);
 
-            response.sendRedirect(request.getContextPath() + "/ListaArticoli");
+            response.sendRedirect(request.getContextPath() + "/VendoServlet");
         } catch (SQLException e) {
             e.printStackTrace();
             response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Errore durante l'aggiunta dell'articolo: " + e.getMessage());

@@ -5,6 +5,7 @@ import it.polimi.progettotiw2025html.beans.Asta;
 import it.polimi.progettotiw2025html.beans.Utente;
 import it.polimi.progettotiw2025html.dao.ArticoloDAO;
 import it.polimi.progettotiw2025html.dao.AstaDAO;
+import it.polimi.progettotiw2025html.dao.OffertaDAO;
 import it.polimi.progettotiw2025html.utils.ConnectionHandler;
 import jakarta.servlet.ServletContext;
 import jakarta.servlet.UnavailableException;
@@ -24,13 +25,13 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.List;
 
-@WebServlet("/AcquistoServlet")
-public class AcquistoServlet extends HttpServlet {
+@WebServlet("/VendoServlet")
+public class VendoServlet extends HttpServlet {
     private static final long serialVersionUID = 1L;
     private TemplateEngine templateEngine;
     private Connection connection;
 
-    public AcquistoServlet() {
+    public VendoServlet() {
         super();
     }
 
@@ -58,45 +59,55 @@ public class AcquistoServlet extends HttpServlet {
         ServletContext servletContext = getServletContext();
         JakartaServletWebApplication webApplication = JakartaServletWebApplication.buildApplication(servletContext);
         WebContext ctx = new WebContext(webApplication.buildExchange(request, response), request.getLocale());
-        String path = "acquisto";
+        String path = "vendo";
 
-        String keyword = request.getParameter("keyword");
         HttpSession session = request.getSession();
         Utente utente = (Utente) session.getAttribute("utente");
 
         try {
             AstaDAO astaDAO = new AstaDAO(connection);
             ArticoloDAO articoloDAO = new ArticoloDAO(connection);
-            List<Asta> asteTrovate = null;
+            OffertaDAO offertaDAO = new OffertaDAO(connection);
+            List<Asta> asteAperte = null;
+            List<Asta> asteChiuse = null;
             List<Articolo> articoli = null;
-            if (keyword != null && !keyword.isEmpty()) {
-                asteTrovate = astaDAO.getAsteAperteByKeyword(keyword);
-            }
-            List<Asta> asteVinte = null;
+
             if (utente != null) {
-                asteVinte = astaDAO.getAsteVinteByUsername(utente.getUsername());
+                asteAperte = astaDAO.getAsteAperteByUsername(utente.getUsername());
+                asteChiuse = astaDAO.getAsteChiuseByUsername(utente.getUsername());
             }
 
-            ctx.setVariable("keyword", keyword);
+            if (asteAperte == null || asteAperte.isEmpty()) {
+                ctx.setVariable("asteAperteMsg", "Nessuna asta aperta");
+            } else {
+                for (Asta a : asteAperte) {
+                    articoli = articoloDAO.getArticoliByIdAsta(a.getId());
+                    a.setArticoli(articoli);
+                    a.tempoMancante();
+                    a.setOffertaMassima(offertaDAO.getMaxOffertaByIdAsta(a.getId()));
+                }
+                ctx.setVariable("asteAperte", asteAperte);
+            }
+            if (asteChiuse == null || asteChiuse.isEmpty()) {
+                ctx.setVariable("asteChiuseMsg", "Nessuna asta chiusa");
+            } else {
+                for (Asta a : asteChiuse) {
+                    articoli = articoloDAO.getArticoliByIdAsta(a.getId());
+                    a.setArticoli(articoli);
+                    a.setOffertaMassima(offertaDAO.getMaxOffertaByIdAsta(a.getId()));
+                }
+                ctx.setVariable("asteChiuse", asteChiuse);
+            }
 
-            if (asteTrovate == null || asteTrovate.isEmpty()) {
-                ctx.setVariable("asteTrovateMsg", "Nessuna asta trovata");
-            } else {
-                for (Asta a : asteTrovate) {
-                    articoli = articoloDAO.getArticoliByIdAsta(a.getId());
-                    a.setArticoli(articoli);
-                }
-                ctx.setVariable("asteTrovate", asteTrovate);
+            if (utente != null) {
+                articoli = articoloDAO.getArticoliDisponibili(utente.getUsername());
             }
-            if (asteVinte == null || asteVinte.isEmpty()) {
-                ctx.setVariable("asteVinteMsg", "Nessuna asta vinta");
+            if (articoli == null || articoli.isEmpty()) {
+                ctx.setVariable("articoliMsg", "Non ci sono articoli disponibili al momento.");
             } else {
-                for (Asta a : asteVinte) {
-                    articoli = articoloDAO.getArticoliByIdAsta(a.getId());
-                    a.setArticoli(articoli);
-                }
-                ctx.setVariable("asteVinte", asteVinte);
+                ctx.setVariable("listaArticoli", articoli); // nuova variabile per la lista
             }
+
             templateEngine.process(path, ctx, response.getWriter());
         } catch (SQLException e) {
             response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Errore interno del server durante la ricerca delle aste");
@@ -110,9 +121,9 @@ public class AcquistoServlet extends HttpServlet {
 
     @Override
     public void destroy() {
-        try{
+        try {
             ConnectionHandler.closeConnection(connection);
-        }catch(SQLException e){
+        } catch(SQLException e){
             e.printStackTrace();
         }
     }

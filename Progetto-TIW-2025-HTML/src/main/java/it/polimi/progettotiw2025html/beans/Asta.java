@@ -14,6 +14,7 @@ public class Asta {
     private Offerta offertaMassima;
     private String aggiudicatario;
     private List<Articolo> articoli;
+    private String tempoMancante;
 
     public Asta(int id, double prezzoIniziale, int rialzoMinimo, LocalDateTime scadenza, String proprietario) {
         this.id = id;
@@ -68,6 +69,10 @@ public class Asta {
         return articoli;
     }
 
+    public String getTempoMancante() {
+        return tempoMancante;
+    }
+
     public void setPrezzoIniziale(double prezzoIniziale) {
         this.prezzoIniziale = prezzoIniziale;
     }
@@ -94,12 +99,12 @@ public class Asta {
         this.chiusa = true;
     }
 
-    public String getTempoMancante() {
+    public void tempoMancante() {
         LocalDateTime now = LocalDateTime.now();
-        if (now.isAfter(scadenza)) return "scaduta";
+        if (now.isAfter(scadenza)) tempoMancante = "scaduta";
         Duration dur = Duration.between(now, scadenza);
         long days = dur.toDays();
         long hours = dur.minusDays(days).toHours();
-        return days + " giorni e " + hours + " ore";
+        tempoMancante = days + " giorni e " + hours + " ore";
     }
 }
