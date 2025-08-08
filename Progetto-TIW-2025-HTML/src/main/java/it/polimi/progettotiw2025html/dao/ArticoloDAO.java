@@ -15,10 +15,9 @@ public class ArticoloDAO {
 
 
     public void addArticolo(Articolo articolo) throws SQLException {
-        String query = "INSERT INTO Articolo (Codice, Nome, Descrizione, Immagine, Prezzo) VALUES (?, ?, ?, ?, ?)";
+        String query = "INSERT INTO Articolo (Nome, Descrizione, Immagine, Prezzo) VALUES (?, ?, ?, ?)";
 
         try (PreparedStatement stmt = connection.prepareStatement(query)) {
-            stmt.setString(1, articolo.getCodice());
             stmt.setString(2, articolo.getNome());
             stmt.setString(3, articolo.getDescrizione());
             stmt.setString(4, articolo.getImmagine());
@@ -41,7 +40,7 @@ public class ArticoloDAO {
         stmt.setString(1, proprietario);
         ResultSet rs = stmt.executeQuery();
         while (rs.next()) {
-            articoli.add(new Articolo(rs.getString("Codice"),
+            articoli.add(new Articolo(rs.getInt("Codice"),
                     rs.getString("Nome"),
                     rs.getString("Descrizione"),
                     rs.getString("Immagine"),
@@ -59,7 +58,7 @@ public class ArticoloDAO {
         stmt.setInt(1, idAsta);
         ResultSet rs = stmt.executeQuery();
         while (rs.next()) {
-            result.add(new Articolo(rs.getString("Codice"),
+            result.add(new Articolo(rs.getInt("Codice"),
                     rs.getString("Nome"),
                     rs.getString("Descrizione"),
                     rs.getString("Immagine"),

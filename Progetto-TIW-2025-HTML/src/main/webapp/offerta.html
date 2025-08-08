@@ -7,7 +7,6 @@
     <body>
         <a th:href="@{/Logout}"><button type="submit">Logout</button></a><br><br>
         <a th:href="@{/AcquistoServlet}"><button type="submit">Torna alle aste</button></a><br><br>
-        <br><br>
         <h2>Articoli nell'asta</h2>
         <table border="1">
             <thead>
@@ -59,7 +58,7 @@
             <div th:if="${errorMsg}">
                 <span th:text="${errorMsg}"></span>
             </div>
-            <form action="FaiOfferta" method="POST">
+            <form th:action="@{/FaiOfferta}" method="POST">
                 <input type="double" name="prezzoOfferto" placeholder="Prezzo Offerto" required><br><br>
                 <input type="submit" value="Fai offerta">
             </form>

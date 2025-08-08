@@ -42,7 +42,7 @@ public class AstaDAO {
     }
 
     public List<Asta> getAsteVinteByUsername(String username) throws SQLException {
-        String sql = "SELECT * FROM Asta WHERE aggiudicatario = ? AND chiusa = true ORDER BY scadenza DESC";
+        String sql = "SELECT * FROM Asta WHERE Aggiudicatario = ? AND Chiusa = true ORDER BY Scadenza DESC";
         List<Asta> result = new ArrayList<>();
 
         PreparedStatement stmt = connection.prepareStatement(sql);
@@ -58,6 +58,43 @@ public class AstaDAO {
                         rs.getString("Proprietario"),
                         rs.getString("Aggiudicatario")));
             }
+        }
+        return result;
+    }
+
+    public List<Asta> getAsteChiuseByUsername(String username) throws SQLException {
+        String sql = "SELECT * FROM Asta WHERE Proprietario = ? AND Chiusa = true ORDER BY Scadenza ASC";
+        List<Asta> result = new ArrayList<>();
+
+        PreparedStatement stmt = connection.prepareStatement(sql);
+        stmt.setString(1, username);
+
+        ResultSet rs = stmt.executeQuery();
+        while (rs.next()) {
+            result.add(new Asta(rs.getInt("Id"),
+                    rs.getDouble("Prezzo"),
+                    rs.getInt("RialzoMinimo"),
+                    rs.getTimestamp("Scadenza").toLocalDateTime(),
+                    rs.getString("Proprietario"),
+                    rs.getString("Aggiudicatario")));
+        }
+        return result;
+    }
+
+    public List<Asta> getAsteAperteByUsername(String username) throws SQLException {
+        String sql = "SELECT * FROM Asta WHERE Proprietario = ? AND Chiusa = false AND Scadenza > NOW() ORDER BY Scadenza ASC";
+        List<Asta> result = new ArrayList<>();
+
+        PreparedStatement stmt = connection.prepareStatement(sql);
+        stmt.setString(1, username);
+
+        ResultSet rs = stmt.executeQuery();
+        while (rs.next()) {
+            result.add(new Asta(rs.getInt("Id"),
+                    rs.getDouble("Prezzo"),
+                    rs.getInt("RialzoMinimo"),
+                    rs.getTimestamp("Scadenza").toLocalDateTime(),
+                    rs.getString("Proprietario")));
         }
         return result;
     }

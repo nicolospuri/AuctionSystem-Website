@@ -1,7 +1,7 @@
 package it.polimi.progettotiw2025html.beans;
 
 public class Articolo {
-    private final String codice;
+    private final int codice;
     private final String nome;
     private final String descrizione;
     private String immagine;
@@ -9,7 +9,7 @@ public class Articolo {
     private int idAsta;
     private final String proprietario;
 
-    public Articolo(String codice, String nome, String descrizione, String immagine, double prezzo, String proprietario) {
+    public Articolo(int codice, String nome, String descrizione, String immagine, double prezzo, String proprietario) {
         this.codice = codice;
         this.nome = nome;
         this.descrizione = descrizione;
@@ -18,7 +18,7 @@ public class Articolo {
         this.proprietario = proprietario;
     }
 
-    public Articolo(String codice, String nome, String descrizione, double prezzo, String proprietario) {
+    public Articolo(int codice, String nome, String descrizione, double prezzo, String proprietario) {
         this.codice = codice;
         this.nome = nome;
         this.descrizione = descrizione;
@@ -28,7 +28,7 @@ public class Articolo {
 
     //----------------- Getter e Setter -----------------
 
-    public String getCodice() {
+    public int getCodice() {
         return codice;
     }
 

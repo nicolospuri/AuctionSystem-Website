@@ -6,19 +6,18 @@
     </head>
     <body>
         <a th:href="@{/Logout}"><button type="submit">Logout</button></a><br><br>
-        <a th:href="@{/HomeServlet}"><button type="button">Torna alla home</button></a>
-        <br><br>
+        <a th:href="@{/HomeServlet}"><button type="submit">Torna alla home</button></a><br><br>
         <h2>Ricerca Aste</h2>
-        <form action="AcquistoServlet" method="GET">
+        <form th:action="@{/AcquistoServlet}" method="GET">
             <input type="text" name="keyword" placeholder="Parola chiave" required>
             <button type="submit">Cerca</button>
         </form>
         <br><br>
-        <h2>Aste Trovate</h2>
         <div th:if="${asteTrovateMsg}">
             <span th:text="${asteTrovateMsg}"></span>
         </div>
         <div th:if="${asteTrovate}">
+            <h2>Aste Trovate</h2>
             <table border="1">
                 <thead>
                     <tr align="center">
@@ -50,11 +49,11 @@
             </table>
         </div>
         <br><br>
-        <h2>Aste vinte</h2>
         <div th:if="${asteVinteMsg}">
             <span th:text="${asteVinteMsg}"></span>
         </div>
         <div th:if="${asteVinte}">
+            <h2>Aste vinte</h2>
             <table border="1">
                 <thead>
                     <tr align="center">
@@ -66,7 +65,7 @@
                 <tbody>
                     <tr align="center">
                         <td th:text="${a.id}"></td>
-                        <td th:text="${a.offertaMassima.prezzo + '€'}"></td>
+                        <td th:text="${a.offertaMassima.prezzo + ' €'}"></td>
                         <td>
                             <ul>
                                 <li th:each="art : ${a.articoli}">
