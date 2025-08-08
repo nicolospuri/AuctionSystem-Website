@@ -26,13 +26,13 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.List;
 
-@WebServlet("/GetOfferte")
-public class GetOfferte extends HttpServlet {
+@WebServlet("/OfferteServlet")
+public class OfferteServlet extends HttpServlet {
     private static final long serialVersionUID = 1L;
     private TemplateEngine templateEngine;
     private Connection connection;
 
-    public GetOfferte() {
+    public OfferteServlet() {
         super();
     }
 
@@ -91,6 +91,9 @@ public class GetOfferte extends HttpServlet {
 
             if (utente != null && !utente.getUsername().equals(asta.getProprietario())) {
                 ctx.setVariable("canOffer", true);
+            }
+            if (request.getParameter("errorMsg") != null) {
+                ctx.setVariable("errorMsg", request.getParameter("errorMsg"));
             }
             path = "offerta";
             templateEngine.process(path, ctx, response.getWriter());

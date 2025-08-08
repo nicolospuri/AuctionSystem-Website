@@ -5,11 +5,11 @@
         <title>Acquisto</title>
     </head>
     <body>
-        <form action="Logout" method="POST"><button type="submit">Logout</button></form><br><br>
-        <a href="home.html"><button type="button">Torna alla home</button></a>
+        <a th:href="@{/Logout}"><button type="submit">Logout</button></a><br><br>
+        <a th:href="@{/HomeServlet}"><button type="button">Torna alla home</button></a>
         <br><br>
         <h2>Ricerca Aste</h2>
-        <form action="RicercaAste" method="GET">
+        <form action="AcquistoServlet" method="GET">
             <input type="text" name="keyword" placeholder="Parola chiave" required>
             <button type="submit">Cerca</button>
         </form>
@@ -32,7 +32,7 @@
                 </thead>
                 <tbody>
                     <tr th:each="a : ${asteTrovate}" align="center">
-                        <td><a th:href="@{/GetOfferte(idAsta=${a.id})}" th:text="${a.id}"></a></td>
+                        <td><a th:href="@{/OfferteServlet(idAsta=${a.id})}" th:text="${a.id}"></a></td>
                         <td th:text="${a.prezzoIniziale} + ' €'"></td>
                         <td th:text="${a.rialzoMinimo} + '.00 €'"></td>
                         <td th:text="${a.scadenza}"></td>

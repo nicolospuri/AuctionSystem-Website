@@ -24,13 +24,13 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.List;
 
-@WebServlet("/RicercaAste")
-public class RicercaAste extends HttpServlet {
+@WebServlet("/AcquistoServlet")
+public class AcquistoServlet extends HttpServlet {
     private static final long serialVersionUID = 1L;
     private TemplateEngine templateEngine;
     private Connection connection;
 
-    public RicercaAste() {
+    public AcquistoServlet() {
         super();
     }
 
@@ -106,6 +106,11 @@ public class RicercaAste extends HttpServlet {
         } catch (SQLException e) {
             response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Errore interno del server durante la ricerca delle aste");
         }
+    }
+
+    @Override
+    public void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
+        doGet(request, response);
     }
 
     @Override
