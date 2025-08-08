@@ -5,8 +5,8 @@
         <title>Offerta</title>
     </head>
     <body>
-        <form action="Logout" method="POST"><button type="submit">Logout</button></form><br><br>
-        <a href="acquisto.html"><button type="button">Torna alle aste</button></a>
+        <a th:href="@{/Logout}"><button type="submit">Logout</button></a><br><br>
+        <a th:href="@{/AcquistoServlet}"><button type="submit">Torna alle aste</button></a><br><br>
         <br><br>
         <h2>Articoli nell'asta</h2>
         <table border="1">

@@ -69,10 +69,10 @@ public class Login extends HttpServlet {
             UtenteDAO utenteDAO = new UtenteDAO(connection);
             Utente utente = utenteDAO.login(username, password);
             if (utente != null) {
-                path = request.getContextPath() + "/home.html";
                 HttpSession session = request.getSession();
                 session.setAttribute("utente", utente);      // Associa l'utente alla sessione
-                response.sendRedirect(path);          // Accedi al sito
+                path = request.getContextPath() + "/HomeServlet";
+                response.sendRedirect(path);
             } else {
                 path = "index";
                 ctx.setVariable("errorMsg", "Username o password errati");

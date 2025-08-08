@@ -66,56 +66,41 @@ public class FaiOfferta extends HttpServlet {
         Utente utente = (Utente) session.getAttribute("utente");
         Integer idAsta = (Integer) session.getAttribute("idAsta");
 
-        String path = "offerta";
+        String path = request.getContextPath() + "/OfferteServlet?idAsta=" + idAsta;
         if (idAsta == null) {
             response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Errore nella richiesta: idAsta non presente nella sessione.");
             return;
         }
 
         try {
-            // variabili di contesto per ricaricare la pagina delle offerte corretta
-            ArticoloDAO articoloDAO = new ArticoloDAO(connection);
-            List<Articolo> articoli = articoloDAO.getArticoliByIdAsta(idAsta);
-            ctx.setVariable("articoli", articoli);
             AstaDAO astaDAO = new AstaDAO(connection);
             Asta asta = astaDAO.getAstaById(idAsta);
-            ctx.setVariable("rialzoMinimo", asta.getRialzoMinimo());
             OffertaDAO offertaDAO = new OffertaDAO(connection);
             List<Offerta> offerte = offertaDAO.getOfferteByIdAsta(idAsta);
-            if (offerte != null && !offerte.isEmpty()) {
-                ctx.setVariable("offerte", offerte);
-            } else {
-                ctx.setVariable("offerteMsg", "Nessuna offerta trovata");
-            }
-            if (utente != null && !utente.getUsername().equals(asta.getProprietario())) {
-                ctx.setVariable("canOffer", true);
-            }
-
-            // Controllo sul prezzo offerto
             double prezzo = 0.0;
             try {
                 prezzo = Double.parseDouble(request.getParameter("prezzoOfferto"));
             } catch (NumberFormatException e) {
-                ctx.setVariable("errorMsg", "Prezzo non valido.");
-                templateEngine.process(path, ctx, response.getWriter());
+                path += "&errorMsg=Prezzo non valido";
+                response.sendRedirect(path);
                 return;
             }
             if (prezzo <= 0) {
-                ctx.setVariable("errorMsg", "Il prezzo deve essere maggiore di zero.");
-                templateEngine.process(path, ctx, response.getWriter());
+                path += "&errorMsg=Il prezzo deve essere maggiore di zero";
+                response.sendRedirect(path);
                 return;
             }
 
             // Asta scaduta
             if (asta.getScadenza().isBefore(LocalDateTime.now())) {
-                ctx.setVariable("errorMsg", "Asta scaduta, non è possibile fare offerte");
-                templateEngine.process(path, ctx, response.getWriter());
+                path += "&errorMsg=Asta scaduta, non è possibile fare offerte";
+                response.sendRedirect(path);
                 return;
             }
             // Asta propria
             if (asta.getProprietario().equals(utente.getUsername())) {
-                ctx.setVariable("errorMsg", "Non puoi fare offerte su una tua asta");
-                templateEngine.process(path, ctx, response.getWriter());
+                path += "&errorMsg=Non puoi fare offerte su una tua asta";
+                response.sendRedirect(path);
                 return;
             }
             // Offerte troppo basse
@@ -123,19 +108,22 @@ public class FaiOfferta extends HttpServlet {
                 Offerta maxOfferta = offertaDAO.getMaxOffertaByIdAsta(idAsta);
                 if (asta.getRialzoMinimo() > prezzo - asta.getPrezzoIniziale() ||
                         (maxOfferta != null && asta.getRialzoMinimo() > prezzo - maxOfferta.getPrezzo())) {
-                    ctx.setVariable("errorMsg", "L'offerta deve rialzare il prezzo almeno quanto il rialzo minimo");
-                    templateEngine.process(path, ctx, response.getWriter());
+                    path += "&errorMsg=L'offerta deve rialzare il prezzo almeno quanto il rialzo minimo";
+                    response.sendRedirect(path);
                     return;
                 }
             }
 
             offertaDAO.addOfferta(utente.getUsername(), prezzo, idAsta);
-            offerte = offertaDAO.getOfferteByIdAsta(idAsta);
-            ctx.setVariable("offerte", offerte);
-            templateEngine.process(path, ctx, response.getWriter());
+            response.sendRedirect(path);
         } catch (SQLException e) {
             response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Errore interno del server");
         }
+    }
+
+    @Override
+    public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
+        doPost(request, response);
     }
 
     @Override

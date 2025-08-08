@@ -78,7 +78,7 @@ public class SignUp extends HttpServlet {
                 if (isRegistered) {
                     HttpSession session = request.getSession();
                     session.setAttribute("utente", utente);
-                    path = request.getContextPath() + "/home.html";
+                    path = request.getContextPath() + "/HomeServlet";
                     response.sendRedirect(path);
                 } else {
                     path = "index";
