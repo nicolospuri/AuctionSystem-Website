@@ -7,7 +7,8 @@ public class Articolo {
     private String immagine;
     private final double prezzo;
     private int idAsta;
-    private final String proprietario;
+    private String proprietario;
+
 
     public Articolo(int codice, String nome, String descrizione, String immagine, double prezzo, String proprietario) {
         this.codice = codice;
@@ -15,15 +16,7 @@ public class Articolo {
         this.descrizione = descrizione;
         this.immagine = immagine;
         this.prezzo = prezzo;
-        this.proprietario = proprietario;
-    }
-
-    public Articolo(int codice, String nome, String descrizione, double prezzo, String proprietario) {
-        this.codice = codice;
-        this.nome = nome;
-        this.descrizione = descrizione;
-        this.prezzo = prezzo;
-        this.proprietario = proprietario;
+        this.proprietario = null; // Proprietario non specificato
     }
 
     //----------------- Getter e Setter -----------------

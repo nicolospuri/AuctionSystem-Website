@@ -59,7 +59,6 @@ public class AggiungiArticolo extends HttpServlet{
         String descrizione = request.getParameter("descrizione");
         String immagine = request.getParameter("immagine");
         double prezzo = Double.parseDouble(request.getParameter("prezzo"));
-        String proprietario = request.getParameter("proprietario");
 
         ServletContext servletContext = getServletContext();
         JakartaServletWebApplication webApplication = JakartaServletWebApplication.buildApplication(servletContext);
@@ -76,12 +75,12 @@ public class AggiungiArticolo extends HttpServlet{
 
         try {
             UtenteDAO utenteDAO = new UtenteDAO(connection);
-            if (!utenteDAO.checkRegistration(proprietario)) {
+            if (!utenteDAO.checkRegistration(utente.getUsername())) {
                 response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Utente non registrato");
                 return;
             }
 
-            Articolo articolo = new Articolo(0, nome, descrizione, immagine, prezzo, proprietario);
+            Articolo articolo = new Articolo(0, nome, descrizione, immagine, prezzo, utente.getUsername());
             ArticoloDAO articoloDAO = new ArticoloDAO(connection);
             articoloDAO.addArticolo(articolo);
 
