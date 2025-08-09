@@ -44,8 +44,7 @@ public class ArticoloDAO {
                     rs.getString("Nome"),
                     rs.getString("Descrizione"),
                     rs.getString("Immagine"),
-                    rs.getDouble("Prezzo"),
-                    rs.getString("Proprietario")));
+                    rs.getDouble("Prezzo"), rs.getString("Proprietario")));
         }
         return articoli;
     }
