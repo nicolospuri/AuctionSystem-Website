@@ -1,34 +1,29 @@
-package it.polimi.tiw.Servlets;
+package it.polimi.progettotiw2025html.controllers;
 
-import java.io.IOException;
-import java.sql.Connection;
-import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.List;
-
-import it.polimi.tiw.ConnectionManager;
-import it.polimi.tiw.dao.ArticoliDAO;
-import it.polimi.tiw.dao.ArticoliDAOImpl;
-import it.polimi.tiw.dao.AsteDAO;
-import it.polimi.tiw.dao.AsteDAOImpl;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
+import it.polimi.progettotiw2025html.dao.ArticoloDAO;
+import it.polimi.progettotiw2025html.dao.AstaDAO;
+import it.polimi.progettotiw2025html.utils.ConnectionHandler;
+
+import java.io.IOException;
+import java.sql.Connection;
+import java.sql.Date;
+import java.sql.SQLException;
+import java.sql.Time;
+import java.time.LocalDate;
+import java.time.LocalTime;
+import java.util.ArrayList;
+import java.util.List;
+
 @WebServlet("/CreaAsta")
-public class CreaAstaServlet extends HttpServlet {
+public class CreaAsta extends HttpServlet {
+
     private static final long serialVersionUID = 1L;
-
-    private AsteDAO asteDAO;
-    private ArticoliDAO articoliDAO;
-
-    @Override
-    public void init() throws ServletException {
-        asteDAO = new AsteDAOImpl();
-        articoliDAO = new ArticoliDAOImpl();
-    }
 
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
@@ -47,7 +42,7 @@ public class CreaAstaServlet extends HttpServlet {
             return;
         }
 
-        List<Integer> articoliIds = new ArrayList<>();
+        ArrayList<Integer> articoliIds = new ArrayList<>();
         try {
             for (String idStr : articoliSelezionati) {
                 articoliIds.add(Integer.parseInt(idStr));
@@ -57,30 +52,32 @@ public class CreaAstaServlet extends HttpServlet {
             return;
         }
 
-        try (Connection conn = ConnectionManager.getConnection()) {
-            // Verifica che gli articoli appartengano all’utente
-            if (!articoliDAO.areAllArticlesOfUser(conn, username, articoliIds)) {
+        try (Connection conn = ConnectionHandler.getConnection()) {
+            ArticoloDAO articoloDAO = new ArticoloDAO(conn);
+            AstaDAO astaDAO = new AstaDAO(conn);
+
+            // Controlla che appartengano all'utente
+            if (!articoloDAO.areAllArticlesOfUser(conn, username, articoliIds)) {
                 response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Puoi selezionare solo i tuoi articoli");
                 return;
             }
 
-            // Verifica che non siano già in un'asta
-            if (!articoliDAO.areAllArticlesFree(conn, articoliIds)) {
+            // Controlla che siano liberi
+            if (!articoloDAO.areAllArticlesFree(conn, articoliIds)) {
                 response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Alcuni articoli sono già in un'asta");
                 return;
             }
 
             conn.setAutoCommit(false);
             try {
-                int prezzoIniziale = articoliDAO.getSumOfPrice(conn, articoliIds);
+                int prezzoIniziale = articoloDAO.getSumOfPrice(conn,articoliIds);
 
-                // Rialzo minimo e scadenza puoi aggiungerli come parametri del form se servono
-                float rialzoMinimo = 1.0f; // valore di default
-                java.sql.Date dataFine = java.sql.Date.valueOf(java.time.LocalDate.now().plusDays(7));
-                java.sql.Time oraFine = java.sql.Time.valueOf(java.time.LocalTime.now().plusHours(1));
+                // Parametri fissi (puoi sostituirli con valori dal form)
+                float rialzoMinimo = 1.0f;
+                Date dataFine = Date.valueOf(LocalDate.now().plusDays(7));
+                Time oraFine = Time.valueOf(LocalTime.now().plusHours(1));
 
-                int idAsta = asteDAO.insertNewAsta(
-                        conn,
+                int idAsta = astaDAO.insertNewAsta(
                         username,
                         prezzoIniziale,
                         rialzoMinimo,
@@ -88,7 +85,7 @@ public class CreaAstaServlet extends HttpServlet {
                         oraFine
                 );
 
-                articoliDAO.updateIdAstaInArticles(conn, articoliIds, idAsta);
+                articoloDAO.updateIdAstaInArticles(articoliIds, idAsta);
 
                 conn.commit();
                 response.sendRedirect(request.getContextPath() + "/aste?creazioneOk=true");

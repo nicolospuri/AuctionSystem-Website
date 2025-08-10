@@ -2,9 +2,12 @@ package it.polimi.progettotiw2025html.dao;
 
 import java.sql.*;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import it.polimi.progettotiw2025html.beans.*;
+import it.polimi.progettotiw2025html.utils.ConnectionHandler;
 
 public class ArticoloDAO {
     private final Connection connection;
@@ -64,5 +67,79 @@ public class ArticoloDAO {
                     rs.getString("Proprietario")));
         }
         return result;
+    }
+
+    public boolean areAllArticlesOfUser(Connection conn, String usernameProprietario, ArrayList<Integer> idArticoli) throws SQLException {
+        String query = "SELECT cod FROM articolo WHERE proprietario = ?";
+
+        try (PreparedStatement ps = conn.prepareStatement(query)) {
+            ps.setString(1, usernameProprietario);
+
+            try (ResultSet resultSet = ps.executeQuery()) {
+                // trasformo il result set in un array di integer (lista di codici dell'utente)
+                Set<Integer> userArticles = new HashSet<>();
+                while (resultSet.next()) {
+                    userArticles.add(resultSet.getInt("codice"));
+                }
+
+                // appena uno degli articoli da inserire non è tra quelli dell'utente, restituisce false
+                for (int idArticolo : idArticoli) {
+                    if (!userArticles.contains(idArticolo)) {
+                        return false;
+                    }
+                }
+                return true;
+            }
+        }
+    }
+
+    public boolean areAllArticlesFree(Connection conn, ArrayList<Integer> idArticoliToInsertInAsta) throws SQLException {
+        String query = "SELECT count(*) AS notFreeArticles "
+                + "FROM articolo "
+                + "WHERE IdAsta IS NOT NULL "
+                + "AND Codice IN (";
+        for(int i = 0; i < idArticoliToInsertInAsta.size(); i++) {		// i dati presenti in idArticoliToInsertInAsta sono sanificati e non si rischia SQL injection
+            query += idArticoliToInsertInAsta.get(i);
+            if(i < idArticoliToInsertInAsta.size() - 1) {
+                query += ", ";
+            }
+        }
+        query += ")";
+
+        try(
+                PreparedStatement ps = conn.prepareStatement(query);
+                ResultSet resultSet = ps.executeQuery()
+        ){
+            if (resultSet.next() && resultSet.getInt("notFreeArticles") > 0) {	// false se almeno un articolo non è libero
+                return false;
+            }
+            return true;
+        }
+    }
+
+    public int getSumOfPrice(Connection conn, ArrayList<Integer> articoliIds) throws SQLException {
+        if (articoliIds == null || articoliIds.isEmpty()) {
+            return 0; // nessun elemento
+        }
+
+        StringBuilder query = new StringBuilder("SELECT SUM(prezzo) FROM articoli WHERE codice IN (");
+        for (int i = 0; i < articoliIds.size(); i++) {
+            query.append(articoliIds.get(i));
+            if (i < articoliIds.size() - 1) {
+                query.append(", ");
+            }
+        }
+        query.append(")");
+
+        try (
+                PreparedStatement stmt = conn.prepareStatement(query.toString());
+                ResultSet rs = stmt.executeQuery()
+        ) {
+            if (rs.next()) {
+                return rs.getInt(1);
+            } else {
+                return 0;
+            }
+        }
     }
 }
