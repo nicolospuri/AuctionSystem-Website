@@ -97,7 +97,7 @@
             <table border="1">
                 <thead>
                 <tr>
-                    <th></th>
+                    <th>Seleziona</th>
                     <th>Codice</th>
                     <th>Nome</th>
                     <th>Descrizione</th>
@@ -110,12 +110,20 @@
                 <tbody>
                 <tr th:each="articolo : ${listaArticoli}">
                     <td>
-                        <input type="checkbox" name="articoliSelezionati" th:value="${articolo.codice}"/>
+                        <input type="checkbox" name="articoliSelezionati"
+                               th:value="${articolo.codice}">
                     </td>
                     <td th:text="${articolo.codice}"></td>
                     <td th:text="${articolo.nome}"></td>
                     <td th:text="${articolo.descrizione}"></td>
-                    <!--<td><img th:src="@{${articolo.immagine}}" alt="Immagine articolo" width="100"/></td>-->
+
+                    <!-- Immagine presa dal DB (colonna Immagine) -->
+                    <td>
+                        <img th:src="@{${articolo.immagine}}"
+                             alt="Immagine articolo"
+                             width="100">
+                    </td>
+
                     <td th:text="${articolo.prezzo} + ' €'"></td>
                     <td th:text="${articolo.idAsta}"></td>
                     <td th:text="${articolo.proprietario}"></td>
@@ -126,5 +134,6 @@
             <button type="submit">Crea Asta</button>
         </div>
     </form>
+
 </body>
 </html>
