@@ -72,14 +72,20 @@
         </table>
     </div>
 
-    <form th:action="@{/AggiungiArticolo}" method="POST">
+    <form th:action="@{/AggiungiArticolo}" method="POST" enctype="multipart/form-data">
         <h2>Aggiungi un articolo</h2>
+
         <input type="text" name="nome" placeholder="Nome" required><br><br>
+
         <textarea name="descrizione" placeholder="Descrizione" required></textarea><br><br>
+
         <input type="file" name="immagine" placeholder="Immagine" accept="image/*" required><br><br>
+
         <input type="number" name="prezzo" placeholder="Prezzo" required><br><br>
+
         <button type="submit">Aggiungi Articolo</button>
     </form>
+
 
     <h2>Seleziona gli articoli per creare un'asta</h2>
     <div th:if="${articoliMsg}">
@@ -104,8 +110,7 @@
                 <tbody>
                 <tr th:each="articolo : ${listaArticoli}">
                     <td>
-                        <input type="checkbox" name="articoliSelezionati"
-                               th:value="${articolo.codice}" />
+                        <input type="checkbox" name="articoliSelezionati" th:value="${articolo.codice}"/>
                     </td>
                     <td th:text="${articolo.codice}"></td>
                     <td th:text="${articolo.nome}"></td>

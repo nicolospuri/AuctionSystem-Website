@@ -18,19 +18,18 @@ public class ArticoloDAO {
         String query = "INSERT INTO Articolo (Nome, Descrizione, Immagine, Prezzo) VALUES (?, ?, ?, ?)";
 
         try (PreparedStatement stmt = connection.prepareStatement(query)) {
-            stmt.setString(2, articolo.getNome());
-            stmt.setString(3, articolo.getDescrizione());
-            stmt.setString(4, articolo.getImmagine());
-            stmt.setDouble(5, articolo.getPrezzo());
+            stmt.setString(1, articolo.getNome());
+            stmt.setString(2, articolo.getDescrizione());
+            stmt.setString(3, articolo.getImmagine()); // percorso file
+            stmt.setDouble(4, articolo.getPrezzo());
 
-            stmt.executeUpdate(); // Esegue l'operazione SQL che modifica i dati
-
-
+            stmt.executeUpdate();
         } catch (SQLException e) {
             e.printStackTrace();
             throw new SQLException("Errore durante l'aggiunta dell'articolo: " + e.getMessage());
         }
     }
+
 
     public List<Articolo> getArticoliDisponibili(String proprietario) throws SQLException {
         String sql = "SELECT * FROM Articolo WHERE idAsta IS NULL AND Proprietario = ?";

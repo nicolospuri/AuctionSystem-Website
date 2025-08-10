@@ -10,18 +10,19 @@ import it.polimi.progettotiw2025html.utils.ConnectionHandler;
 import jakarta.servlet.ServletContext;
 import jakarta.servlet.UnavailableException;
 import jakarta.servlet.annotation.WebServlet;
-import jakarta.servlet.http.HttpServlet;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
-import jakarta.servlet.http.HttpSession;
+import jakarta.servlet.http.*;
 import org.thymeleaf.TemplateEngine;
 import org.thymeleaf.context.WebContext;
 import org.thymeleaf.templatemode.TemplateMode;
 import org.thymeleaf.templateresolver.WebApplicationTemplateResolver;
 import org.thymeleaf.web.servlet.JakartaServletWebApplication;
+
+import java.io.File;
 import java.io.IOException;
+import java.nio.file.Paths;
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.UUID;
 
 @WebServlet("/AggiungiArticolo")
 public class AggiungiArticolo extends HttpServlet{
@@ -53,23 +54,47 @@ public class AggiungiArticolo extends HttpServlet{
         }
     }
 
+    @Override
     public void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
         System.out.println("Post di AggiungiArticolo");
+
         String nome = request.getParameter("nome");
         String descrizione = request.getParameter("descrizione");
-        String immagine = request.getParameter("immagine");
         double prezzo = Double.parseDouble(request.getParameter("prezzo"));
+
+        // Gestione file immagine
+        String immaginePath = null;
+        try {
+            Part filePart = request.getPart("immagine"); // nome del campo file
+            if (filePart != null && filePart.getSize() > 0) {
+                // crea cartella uploads se non esiste
+                String uploadDir = getServletContext().getRealPath("") + File.separator + "uploads";
+                File dir = new File(uploadDir);
+                if (!dir.exists()) dir.mkdir();
+
+                // genera nome univoco per evitare conflitti
+                String fileName = UUID.randomUUID() + "_" + Paths.get(filePart.getSubmittedFileName()).getFileName().toString();
+
+                // salva il file fisicamente
+                filePart.write(uploadDir + File.separator + fileName);
+
+                // memorizza percorso relativo
+                immaginePath = "uploads/" + fileName;
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Errore nel caricamento dell'immagine");
+            return;
+        }
 
         ServletContext servletContext = getServletContext();
         JakartaServletWebApplication webApplication = JakartaServletWebApplication.buildApplication(servletContext);
         WebContext ctx = new WebContext(webApplication.buildExchange(request, response), request.getLocale());
-        String path = null;
 
         Utente utente = (Utente) request.getSession().getAttribute("utente");
         if (utente == null) {
-            path = "index";
             ctx.setVariable("errorMsg", "Utente non trovato");
-            templateEngine.process(path, ctx, response.getWriter());
+            templateEngine.process("index", ctx, response.getWriter());
             return;
         }
 
@@ -80,7 +105,7 @@ public class AggiungiArticolo extends HttpServlet{
                 return;
             }
 
-            Articolo articolo = new Articolo(0, nome, descrizione, immagine, prezzo, utente.getUsername());
+            Articolo articolo = new Articolo(0, nome, descrizione, immaginePath, prezzo, utente.getUsername());
             ArticoloDAO articoloDAO = new ArticoloDAO(connection);
             articoloDAO.addArticolo(articolo);
 
