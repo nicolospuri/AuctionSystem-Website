@@ -2,10 +2,7 @@ package it.polimi.progettotiw2025html.dao;
 
 import it.polimi.progettotiw2025html.beans.Asta;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -114,4 +111,31 @@ public class AstaDAO {
         }
         return null;
     }
+
+    public int insertNewAsta(String proprietario, double prezzo, float rialzoMinimo, Timestamp scadenza) throws SQLException {
+        String query = "INSERT INTO Aste (Prezzo, RialzoMinimo, Scadenza, Proprietario, Chiusa, Aggiudicatario) " +
+                "VALUES (?, ?, ?, ?, 0, NULL)";
+
+        try (PreparedStatement ps = connection.prepareStatement(query, Statement.RETURN_GENERATED_KEYS)) {
+            ps.setDouble(1, prezzo);
+            ps.setFloat(2, rialzoMinimo);
+            ps.setTimestamp(3, scadenza);
+            ps.setString(4, proprietario);
+
+            int affectedRows = ps.executeUpdate();
+            if (affectedRows == 0) {
+                throw new SQLException("Creazione asta fallita, nessuna riga inserita.");
+            }
+
+            try (ResultSet rs = ps.getGeneratedKeys()) {
+                if (rs.next()) {
+                    return rs.getInt(1);
+                } else {
+                    throw new SQLException("Creazione asta fallita, nessun ID generato.");
+                }
+            }
+        }
+    }
+
+
 }
