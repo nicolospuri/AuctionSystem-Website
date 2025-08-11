@@ -29,11 +29,11 @@
             </tbody>
         </table>
         <br><br>
-        <h2>Offerte</h2>
         <div th:if="${offerteMsg}">
             <span th:text="${offerteMsg}"></span>
         </div>
         <div th:if="${offerte}">
+            <h2>Offerte</h2>
             <table border="1">
                 <thead>
                     <tr align="center">
@@ -58,7 +58,7 @@
             <div th:if="${errorMsg}">
                 <span th:text="${errorMsg}"></span>
             </div>
-            <form th:action="@{/FaiOfferta}" method="POST">
+            <form th:action="@{/FaiOfferta(idAsta=${idAsta})}" method="POST">
                 <input type="double" name="prezzoOfferto" placeholder="Prezzo Offerto" required><br><br>
                 <input type="submit" value="Fai offerta">
             </form>

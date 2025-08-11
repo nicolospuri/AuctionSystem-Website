@@ -27,7 +27,7 @@ public class OffertaDAO {
             result.add(new Offerta(rs.getInt("Id"),
                     rs.getString("Offerente"),
                     rs.getDouble("Prezzo"),
-                    rs.getDate("Data"),
+                    rs.getTimestamp("Data").toLocalDateTime(),
                     rs.getInt("IdAsta")));
         }
         return result;
@@ -45,7 +45,7 @@ public class OffertaDAO {
             return new Offerta(rs.getInt("Id"),
                     rs.getString("Offerente"),
                     rs.getDouble("Prezzo"),
-                    rs.getDate("Data"),
+                    rs.getTimestamp("Data").toLocalDateTime(),
                     rs.getInt("IdAsta"));
         } else {
             return null;
