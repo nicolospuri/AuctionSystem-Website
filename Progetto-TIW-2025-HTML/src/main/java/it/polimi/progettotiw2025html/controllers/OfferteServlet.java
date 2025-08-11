@@ -60,14 +60,14 @@ public class OfferteServlet extends HttpServlet {
         ServletContext servletContext = getServletContext();
         JakartaServletWebApplication webApplication = JakartaServletWebApplication.buildApplication(servletContext);
         WebContext ctx = new WebContext(webApplication.buildExchange(request, response), request.getLocale());
-        String path;
+        String path = "offerta";
 
         HttpSession session = request.getSession();
         Utente utente = (Utente) session.getAttribute("utente");
         Integer idAsta = 0;
         try {
             idAsta = Integer.parseInt(request.getParameter("idAsta"));
-            session.setAttribute("idAsta", idAsta);
+            ctx.setVariable("idAsta", idAsta);
         } catch (NumberFormatException e) {
             response.sendError(HttpServletResponse.SC_BAD_REQUEST, "ID Asta non valido");
             return;
@@ -91,11 +91,12 @@ public class OfferteServlet extends HttpServlet {
 
             if (utente != null && !utente.getUsername().equals(asta.getProprietario())) {
                 ctx.setVariable("canOffer", true);
+            } else {
+                ctx.setVariable("canOffer", false);
             }
             if (request.getParameter("errorMsg") != null) {
                 ctx.setVariable("errorMsg", request.getParameter("errorMsg"));
             }
-            path = "offerta";
             templateEngine.process(path, ctx, response.getWriter());
         } catch (SQLException e) {
             response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Errore interno del server");

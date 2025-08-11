@@ -142,7 +142,7 @@ public class CreaAsta extends HttpServlet {
                         scadenza // unica data-ora combinata
                 );
 
-                articoloDAO.updateIdAstaInArticles(articoliIds, idAsta);
+                //articoloDAO.updateIdAstaInArticles(articoliIds, idAsta);
 
                 conn.commit();
                 response.sendRedirect(request.getContextPath() + "/aste?creazioneOk=true");

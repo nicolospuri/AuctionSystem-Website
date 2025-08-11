@@ -64,13 +64,15 @@ public class FaiOfferta extends HttpServlet {
 
         HttpSession session = request.getSession();
         Utente utente = (Utente) session.getAttribute("utente");
-        Integer idAsta = (Integer) session.getAttribute("idAsta");
-
-        String path = request.getContextPath() + "/OfferteServlet?idAsta=" + idAsta;
-        if (idAsta == null) {
-            response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Errore nella richiesta: idAsta non presente nella sessione.");
+        Integer idAsta = 0;
+        try {
+            idAsta = Integer.parseInt(request.getParameter("idAsta"));
+        } catch (NumberFormatException e) {
+            response.sendError(HttpServletResponse.SC_BAD_REQUEST, "ID Asta non valido");
             return;
         }
+
+        String path = request.getContextPath() + "/OfferteServlet?idAsta=" + idAsta;
 
         try {
             AstaDAO astaDAO = new AstaDAO(connection);

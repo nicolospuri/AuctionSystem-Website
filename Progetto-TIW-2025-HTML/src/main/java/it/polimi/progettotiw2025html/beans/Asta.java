@@ -99,12 +99,19 @@ public class Asta {
         this.chiusa = true;
     }
 
-    public void tempoMancante() {
+    public void setTempoMancante() {
         LocalDateTime now = LocalDateTime.now();
         if (now.isAfter(scadenza)) tempoMancante = "scaduta";
         Duration dur = Duration.between(now, scadenza);
         long days = dur.toDays();
         long hours = dur.minusDays(days).toHours();
         tempoMancante = days + " giorni e " + hours + " ore";
+    }
+
+    public boolean canBeClosed() {
+        if (LocalDateTime.now().isAfter(scadenza)) {
+            return true;
+        }
+        return false;
     }
 }

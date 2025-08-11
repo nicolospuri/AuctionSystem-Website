@@ -83,7 +83,7 @@ public class VendoServlet extends HttpServlet {
                 for (Asta a : asteAperte) {
                     articoli = articoloDAO.getArticoliByIdAsta(a.getId());
                     a.setArticoli(articoli);
-                    a.tempoMancante();
+                    a.setTempoMancante();
                     a.setOffertaMassima(offertaDAO.getMaxOffertaByIdAsta(a.getId()));
                 }
                 ctx.setVariable("asteAperte", asteAperte);

@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Dettagio Asta</title>
+</head>
+  <body>
+    <a th:href="@{/Logout}"><button type="submit">Logout</button></a><br><br>
+    <a th:href="@{/VendoServlet}"><button type="submit">Torna alla pagina vendo</button></a><br><br>
+
+    <div th:if="${astaAperta}">
+      <ul>
+        <li>ID Asta: <span th:text="${astaAperta.id}"></span></li>
+        <li>Prezzo Iniziale: <span th:text="${astaAperta.prezzoIniziale}"></span></li>
+        <li>Rialzo Minimo: <span th:text="${astaAperta.rialzoMinimo} + '.00 €'"></span></li>
+        <li>Scadenza: <span th:text="${astaAperta.scadenza}"></span></li>
+        <li>Articoli:
+          <ul>
+            <li th:each="art : ${astaAperta.articoli}">
+              <span th:text="${art.codice}"></span>
+              <span th:text="${art.nome}"></span>
+            </li>
+          </ul>
+        </li>
+      </ul>
+      <br><br>
+
+      <div th:if="${offerteMsg}">
+        <span th:text="${offerteMsg}"></span>
+      </div>
+      <div th:if="${offerte}">
+        <h2>Offerte</h2>
+        <table border="1">
+          <thead>
+          <tr align="center">
+            <th>Offerente</th>
+            <th>Prezzo Offerto</th>
+            <th>Data Offerta</th>
+          </tr>
+          </thead>
+          <tbody>
+          <tr th:each="o : ${offerte}" align="center">
+            <td th:text="${o.offerente}"></td>
+            <td th:text="${o.prezzo} + '€'"></td>
+            <td th:text="${o.data}"></td>
+          </tr>
+          </tbody>
+        </table>
+      </div>
+      <br><br>
+
+      <div th:if="${canBeClosed}">
+        <a th:href="@{/ChiudiAsta(idAsta=${astaAperta.id})}"><button type="submit">Chiudi asta</button></a><br><br>
+      </div>
+    </div>
+
+    <div th:if="${astaChiusa}">
+      <ul>
+        <li>ID Asta: <span th:text="${astaChiusa.id}"></span></li>
+        <li>Prezzo Iniziale: <span th:text="${astaChiusa.prezzoIniziale}"></span></li>
+        <li>Rialzo Minimo: <span th:text="${astaChiusa.rialzoMinimo} + '.00 €'"></span></li>
+        <li>Scadenza: <span th:text="${astaChiusa.scadenza}"></span></li>
+        <li>Aggiudicatario: <span th:text="${astaChiusa.aggiudicatario}"></span></li>
+        <li>Prezzo Finale: <span th:text="${astaChiusa.offertaMassima.prezzo}"></span></li>
+        <li>Indirizzo: <span th:text="${astaChiusa.aggiudicatario.indirizzo}"></span></li>
+        <li>Articoli:
+          <ul>
+            <li th:each="art : ${astaChiusa.articoli}">
+              <span th:text="${art.codice}"></span>
+              <span th:text="${art.nome}"></span>
+            </li>
+          </ul>
+        </li>
+      </ul>
+    </div>
+  </body>
+</html>
