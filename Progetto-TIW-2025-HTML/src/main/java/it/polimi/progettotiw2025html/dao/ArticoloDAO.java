@@ -70,7 +70,7 @@ public class ArticoloDAO {
     }
 
     public boolean areAllArticlesOfUser(Connection conn, String usernameProprietario, ArrayList<Integer> idArticoli) throws SQLException {
-        String query = "SELECT cod FROM articolo WHERE proprietario = ?";
+        String query = "SELECT codice FROM articolo WHERE proprietario = ?";
 
         try (PreparedStatement ps = conn.prepareStatement(query)) {
             ps.setString(1, usernameProprietario);
@@ -94,10 +94,7 @@ public class ArticoloDAO {
     }
 
     public boolean areAllArticlesFree(Connection conn, ArrayList<Integer> idArticoliToInsertInAsta) throws SQLException {
-        String query = "SELECT count(*) AS notFreeArticles "
-                + "FROM articolo "
-                + "WHERE IdAsta IS NOT NULL "
-                + "AND Codice IN (";
+        String query = "SELECT count(*) AS notFreeArticles FROM articolo WHERE IdAsta IS NOT NULL AND Codice IN (";
         for(int i = 0; i < idArticoliToInsertInAsta.size(); i++) {		// i dati presenti in idArticoliToInsertInAsta sono sanificati e non si rischia SQL injection
             query += idArticoliToInsertInAsta.get(i);
             if(i < idArticoliToInsertInAsta.size() - 1) {
@@ -142,4 +139,26 @@ public class ArticoloDAO {
             }
         }
     }
+
+    public void updateIdAstaInArticles(Connection conn, ArrayList<Integer> articles, int idAsta) throws SQLException {
+        if (articles == null || articles.isEmpty()) return;
+
+        StringBuilder query = new StringBuilder("UPDATE Articoli SET id_asta = ? WHERE cod IN (");
+        for (int i = 0; i < articles.size(); i++) {
+            query.append("?");
+            if (i < articles.size() - 1) {
+                query.append(", ");
+            }
+        }
+        query.append(")");
+
+        try (PreparedStatement stmt = conn.prepareStatement(query.toString())) {
+            stmt.setInt(1, idAsta);
+            for (int i = 0; i < articles.size(); i++) {
+                stmt.setInt(i + 2, articles.get(i)); // +2 perché il primo parametro è idAsta
+            }
+            stmt.executeUpdate();
+        }
+    }
+
 }
