@@ -56,6 +56,7 @@ public class CreaAsta extends HttpServlet {
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
 
+        // Controllo login
         if (request.getSession(false) == null) {
             response.sendRedirect(request.getContextPath() + "/login");
             return;
@@ -64,11 +65,13 @@ public class CreaAsta extends HttpServlet {
         String username = (String) request.getSession().getAttribute("username");
         String[] articoliSelezionati = request.getParameterValues("articoliSelezionati");
 
+        // Nessun articolo selezionato
         if (articoliSelezionati == null || articoliSelezionati.length == 0) {
             response.sendRedirect(request.getContextPath() + "/ArticoliDisponibili?noArticoliSelezionati=true");
             return;
         }
 
+        // Conversione a lista di interi
         ArrayList<Integer> articoliIds = new ArrayList<>();
         try {
             for (String idStr : articoliSelezionati) {
@@ -79,47 +82,11 @@ public class CreaAsta extends HttpServlet {
             return;
         }
 
-        // Recupera altri parametri dal form
-        String rialzoMinimoStr = request.getParameter("rialzoMinimo");
-        String dataFineStr = request.getParameter("dataFine");
-        String oraFineStr = request.getParameter("oraFine");
-
-        if (rialzoMinimoStr == null || dataFineStr == null || oraFineStr == null) {
-            response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Parametri mancanti per creare l'asta");
-            return;
-        }
-
-        float rialzoMinimo;
-        try {
-            rialzoMinimo = Float.parseFloat(rialzoMinimoStr);
-            if (rialzoMinimo <= 0) {
-                response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Rialzo minimo non valido");
-                return;
-            }
-        } catch (NumberFormatException e) {
-            response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Rialzo minimo non è un numero valido");
-            return;
-        }
-
-        Timestamp scadenza;
-        try {
-            LocalDate data = LocalDate.parse(dataFineStr);
-            LocalTime ora = LocalTime.parse(oraFineStr);
-            if (data.isBefore(LocalDate.now()) || (data.isEqual(LocalDate.now()) && ora.isBefore(LocalTime.now()))) {
-                response.sendError(HttpServletResponse.SC_BAD_REQUEST, "La scadenza deve essere nel futuro");
-                return;
-            }
-            scadenza = Timestamp.valueOf(LocalDateTime.of(data, ora));
-        } catch (DateTimeParseException e) {
-            response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Formato data/ora scadenza non valido");
-            return;
-        }
-
         try (Connection conn = ConnectionHandler.getConnection()) {
             ArticoloDAO articoloDAO = new ArticoloDAO(conn);
             AstaDAO astaDAO = new AstaDAO(conn);
 
-            // Controlla che appartengano all'utente
+            // Controlla che gli articoli appartengano all'utente
             if (!articoloDAO.areAllArticlesOfUser(conn, username, articoliIds)) {
                 response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Puoi selezionare solo i tuoi articoli");
                 return;
@@ -133,19 +100,27 @@ public class CreaAsta extends HttpServlet {
 
             conn.setAutoCommit(false);
             try {
+                // Prezzo iniziale = somma dei prezzi articoli
                 double prezzoIniziale = articoloDAO.getSumOfPrice(conn, articoliIds);
 
+                // Parametri asta
+                int rialzoMinimo = 1; // fisso, o prendere da form
+                LocalDateTime scadenza = LocalDateTime.now().plusDays(7).withHour(23).withMinute(0).withSecond(0);
+
+                // Inserimento asta
                 int idAsta = astaDAO.insertNewAsta(
                         username,
                         prezzoIniziale,
                         rialzoMinimo,
-                        scadenza // unica data-ora combinata
+                        Timestamp.valueOf(scadenza)
                 );
 
-                //articoloDAO.updateIdAstaInArticles(articoliIds, idAsta);
+                // Aggiornamento articoli con id_asta
+                articoloDAO.updateIdAstaInArticles(conn, articoliIds, idAsta);
 
                 conn.commit();
                 response.sendRedirect(request.getContextPath() + "/aste?creazioneOk=true");
+
             } catch (SQLException e) {
                 conn.rollback();
                 throw new ServletException("Errore durante la creazione dell'asta", e);
