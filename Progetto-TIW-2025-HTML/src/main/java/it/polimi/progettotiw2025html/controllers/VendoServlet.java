@@ -2,6 +2,7 @@ package it.polimi.progettotiw2025html.controllers;
 
 import it.polimi.progettotiw2025html.beans.Articolo;
 import it.polimi.progettotiw2025html.beans.Asta;
+import it.polimi.progettotiw2025html.beans.Offerta;
 import it.polimi.progettotiw2025html.beans.Utente;
 import it.polimi.progettotiw2025html.dao.ArticoloDAO;
 import it.polimi.progettotiw2025html.dao.AstaDAO;
@@ -71,6 +72,7 @@ public class VendoServlet extends HttpServlet {
             List<Asta> asteAperte = null;
             List<Asta> asteChiuse = null;
             List<Articolo> articoli = null;
+            Offerta offertaMax = null;
 
             if (utente != null) {
                 asteAperte = astaDAO.getAsteAperteByUsername(utente.getUsername());
@@ -83,8 +85,14 @@ public class VendoServlet extends HttpServlet {
                 for (Asta a : asteAperte) {
                     articoli = articoloDAO.getArticoliByIdAsta(a.getId());
                     a.setArticoli(articoli);
+
                     a.setTempoMancante();
-                    a.setOffertaMassima(offertaDAO.getMaxOffertaByIdAsta(a.getId()));
+
+                    offertaMax = offertaDAO.getMaxOffertaByIdAsta(a.getId());
+                    a.setOffertaMassima(offertaMax);
+                    if (offertaMax != null) {
+                        a.setPrezzoOffertaMassima(offertaMax.getPrezzo());
+                    }
                 }
                 ctx.setVariable("asteAperte", asteAperte);
             }
@@ -94,7 +102,12 @@ public class VendoServlet extends HttpServlet {
                 for (Asta a : asteChiuse) {
                     articoli = articoloDAO.getArticoliByIdAsta(a.getId());
                     a.setArticoli(articoli);
-                    a.setOffertaMassima(offertaDAO.getMaxOffertaByIdAsta(a.getId()));
+
+                    offertaMax = offertaDAO.getMaxOffertaByIdAsta(a.getId());
+                    a.setOffertaMassima(offertaMax);
+                    if (offertaMax != null) {
+                        a.setPrezzoOffertaMassima(offertaMax.getPrezzo());
+                    }
                 }
                 ctx.setVariable("asteChiuse", asteChiuse);
             }

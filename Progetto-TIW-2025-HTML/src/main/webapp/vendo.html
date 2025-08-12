@@ -26,7 +26,7 @@
             <tr th:each="a : ${asteAperte}" align="center">
                 <td><a th:href="@{/DettaglioAstaServlet(idAsta=${a.id})}" th:text="${a.id}"></a></td>
                 <td th:text="${a.tempoMancante}"></td>
-                <td th:text="${a.offertaMassima.prezzo} + ' €'"></td>
+                <td th:text="${a.prezzoOffertaMassima + ' €'}"></td>
                 <td>
                     <ul>
                         <li th:each="art : ${a.articoli}">
@@ -56,9 +56,9 @@
             </tr>
             </thead>
             <tbody>
-            <tr align="center">
+            <tr th:each="a : ${asteChiuse}" align="center">
                 <td><a th:href="@{/DettaglioAstaServlet(idAsta=${a.id})}" th:text="${a.id}"></a></td>
-                <td th:text="${a.offertaMassima.prezzo + ' €'}"></td>
+                <td th:text="${a.prezzoOffertaMassima + ' €'}"></td>
                 <td th:text="${a.aggiudicatario}"></td>
                 <td>
                     <ul>
