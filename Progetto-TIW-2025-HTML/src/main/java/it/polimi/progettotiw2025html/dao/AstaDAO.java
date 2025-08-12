@@ -137,5 +137,26 @@ public class AstaDAO {
         }
     }
 
+    // Chiudi asta con aggiudicatario
+    public boolean chiudiAsta(int idAsta, String aggiudicatario) throws SQLException {
+        String query = "UPDATE Asta SET Chiusa = true, Aggiudicatario = ? WHERE Id = ?";
 
+        PreparedStatement ps = connection.prepareStatement(query);
+        ps.setString(1, aggiudicatario);
+        ps.setInt(2, idAsta);
+
+        int affectedRows = ps.executeUpdate();
+        return affectedRows != 0;
+    }
+
+    // Chiudi asta senza aggiudicatario
+    public boolean chiudiAsta(int idAsta) throws SQLException {
+        String query = "UPDATE Asta SET Chiusa = true WHERE Id = ?";
+
+        PreparedStatement ps = connection.prepareStatement(query);
+        ps.setInt(1, idAsta);
+
+        int affectedRows = ps.executeUpdate();
+        return affectedRows != 0;
+    }
 }

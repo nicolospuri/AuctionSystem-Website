@@ -49,8 +49,16 @@
       </div>
       <br><br>
 
+      <div th:if="${successMsg}">
+        <span th:text="${successMsg}"></span>
+      </div>
       <div th:if="${canBeClosed}">
-        <a th:href="@{/ChiudiAsta(idAsta=${astaAperta.id})}"><button type="submit">Chiudi asta</button></a><br><br>
+        <div th:if="${errorMsg}">
+          <span th:text="${errorMsg}"></span>
+        </div>
+        <form th:action="@{/ChiudiAsta(idAsta=${idAsta})}" method="POST">
+          <button type="submit">Chiudi asta</button>
+        </form>
       </div>
     </div>
 
