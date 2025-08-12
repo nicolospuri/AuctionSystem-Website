@@ -99,7 +99,7 @@ public class AcquistoServlet extends HttpServlet {
             }
             templateEngine.process(path, ctx, response.getWriter());
         } catch (SQLException e) {
-            response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Errore interno del server durante la ricerca delle aste");
+            response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Errore interno del server");
         }
     }
 

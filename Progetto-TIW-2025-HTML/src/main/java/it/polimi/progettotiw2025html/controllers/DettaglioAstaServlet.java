@@ -104,10 +104,30 @@ public class DettaglioAstaServlet extends HttpServlet {
             } else {
                 ctx.setVariable("offerteMsg", "Nessuna offerta trovata");
             }
+            if (request.getParameter("errorMsg") != null) {
+                ctx.setVariable("errorMsg", request.getParameter("errorMsg"));
+            }
+            if (request.getParameter("successMsg") != null) {
+                ctx.setVariable("successMsg", request.getParameter("errorMsg"));
+            }
 
             templateEngine.process(path, ctx, response.getWriter());
         } catch (SQLException e) {
-            response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Errore interno del server durante la ricerca delle aste");
+            response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Errore interno del server");
+        }
+    }
+
+    @Override
+    public void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
+        doGet(request, response);
+    }
+
+    @Override
+    public void destroy() {
+        try {
+            ConnectionHandler.closeConnection(connection);
+        } catch(SQLException e){
+            e.printStackTrace();
         }
     }
 }
