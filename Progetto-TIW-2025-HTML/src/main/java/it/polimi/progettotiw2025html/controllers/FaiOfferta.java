@@ -117,7 +117,11 @@ public class FaiOfferta extends HttpServlet {
                 }
             }
 
-            offertaDAO.addOfferta(utente.getUsername(), prezzo, idAsta);
+            if (offertaDAO.addOfferta(utente.getUsername(), prezzo, idAsta)) {
+                path += "&successMsg=Offerta effettuata con successo";
+            } else {
+                path += "&errorMsg=Errore durante l'inserimento dell'offerta";
+            }
             response.sendRedirect(path);
         } catch (SQLException e) {
             response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Errore interno del server");
