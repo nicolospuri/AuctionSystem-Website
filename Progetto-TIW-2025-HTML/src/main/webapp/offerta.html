@@ -55,6 +55,9 @@
         <div th:if="${canOffer}">
             <h2>Fai un'offerta</h2>
             <h3>Rialzo minimo: <span th:text="${rialzoMinimo} + '.00 €'"></span></h3>
+            <div th:if="${successMsg}">
+                <span th:text="${successMsg}"></span>
+            </div>
             <div th:if="${errorMsg}">
                 <span th:text="${errorMsg}"></span>
             </div>

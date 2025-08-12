@@ -95,6 +95,9 @@ public class OfferteServlet extends HttpServlet {
             if (request.getParameter("errorMsg") != null) {
                 ctx.setVariable("errorMsg", request.getParameter("errorMsg"));
             }
+            if (request.getParameter("successMsg") != null) {
+                ctx.setVariable("successMsg", request.getParameter("successMsg"));
+            }
             templateEngine.process(path, ctx, response.getWriter());
         } catch (SQLException e) {
             response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Errore interno del server");
