@@ -15,7 +15,10 @@ public class Asta {
     private String aggiudicatario;
     private List<Articolo> articoli;
     private String tempoMancante;
+    private double prezzoOffertaMassima;
+    private String indirizzoAggiudicatario;
 
+    // Asta aperta
     public Asta(int id, double prezzoIniziale, int rialzoMinimo, LocalDateTime scadenza, String proprietario) {
         this.id = id;
         this.prezzoIniziale = prezzoIniziale;
@@ -25,13 +28,14 @@ public class Asta {
         this.chiusa = false;
     }
 
-    public Asta(int id, double prezzoIniziale, int rialzoMinimo, LocalDateTime scadenza, String proprietario, String aggiudicatario) {
+    // Asta chiusa
+    public Asta(int id, double prezzoIniziale, int rialzoMinimo, LocalDateTime scadenza, String proprietario, boolean chiusa, String aggiudicatario) {
         this.id = id;
         this.prezzoIniziale = prezzoIniziale;
         this.rialzoMinimo = rialzoMinimo;
         this.scadenza = scadenza;
         this.proprietario = proprietario;
-        this.chiusa = true;
+        this.chiusa = chiusa;
         this.aggiudicatario = aggiudicatario;
     }
 
@@ -73,6 +77,14 @@ public class Asta {
         return tempoMancante;
     }
 
+    public double getPrezzoOffertaMassima() {
+        return prezzoOffertaMassima;
+    }
+
+    public String getIndirizzoAggiudicatario() {
+        return indirizzoAggiudicatario;
+    }
+
     public void setPrezzoIniziale(double prezzoIniziale) {
         this.prezzoIniziale = prezzoIniziale;
     }
@@ -89,6 +101,14 @@ public class Asta {
         this.articoli = articoli;
     }
 
+    public void setPrezzoOffertaMassima(double prezzo) {
+        this.prezzoOffertaMassima = prezzo;
+    }
+
+    public void setIndirizzoAggiudicatario(String indirizzoAggiudicatario) {
+        this.indirizzoAggiudicatario = indirizzoAggiudicatario;
+    }
+
     //----------------- Stato Asta -----------------
 
     public boolean isChiusa() {
@@ -101,7 +121,10 @@ public class Asta {
 
     public void setTempoMancante() {
         LocalDateTime now = LocalDateTime.now();
-        if (now.isAfter(scadenza)) tempoMancante = "scaduta";
+        if (now.isAfter(scadenza)) {
+            tempoMancante = "scaduta";
+            return;
+        }
         Duration dur = Duration.between(now, scadenza);
         long days = dur.toDays();
         long hours = dur.minusDays(days).toHours();
@@ -109,9 +132,6 @@ public class Asta {
     }
 
     public boolean canBeClosed() {
-        if (LocalDateTime.now().isAfter(scadenza)) {
-            return true;
-        }
-        return false;
+        return LocalDateTime.now().isAfter(scadenza) && !isChiusa();
     }
 }

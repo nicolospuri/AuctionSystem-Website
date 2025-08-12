@@ -76,25 +76,27 @@ public class DettaglioAstaServlet extends HttpServlet {
         try {
             AstaDAO astaDAO = new AstaDAO(connection);
             ArticoloDAO articoloDAO = new ArticoloDAO(connection);
-            List<Articolo> articoli = null;
             OffertaDAO offertaDAO = new OffertaDAO(connection);
+            List<Articolo> articoli = null;
             Asta asta = astaDAO.getAstaById(idAsta);
             if (asta != null) {
                 articoli = articoloDAO.getArticoliByIdAsta(idAsta);
                 asta.setArticoli(articoli);
+
+                Offerta offertaMax = offertaDAO.getMaxOffertaByIdAsta(idAsta);
+                asta.setOffertaMassima(offertaMax);
+                if (offertaMax != null) {
+                    asta.setPrezzoOffertaMassima(offertaMax.getPrezzo());
+                }
                 asta.setTempoMancante();
-                asta.setOffertaMassima(offertaDAO.getMaxOffertaByIdAsta(idAsta));
 
                 if (asta.isChiusa()) {
                     ctx.setVariable("astaChiusa", asta);
                 } else {
                     ctx.setVariable("astaAperta", asta);
-                }
-
-                if (asta.canBeClosed()) {
-                    ctx.setVariable("canBeClosed", true);
-                } else {
-                    ctx.setVariable("canBeClosed", false);
+                    if (asta.canBeClosed()) {
+                        ctx.setVariable("canBeClosed", true);
+                    }
                 }
             }
 

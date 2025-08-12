@@ -53,6 +53,7 @@ public class AstaDAO {
                         rs.getInt("RialzoMinimo"),
                         rs.getTimestamp("Scadenza").toLocalDateTime(),
                         rs.getString("Proprietario"),
+                        rs.getBoolean("Chiusa"),
                         rs.getString("Aggiudicatario")));
             }
         }
@@ -73,13 +74,14 @@ public class AstaDAO {
                     rs.getInt("RialzoMinimo"),
                     rs.getTimestamp("Scadenza").toLocalDateTime(),
                     rs.getString("Proprietario"),
+                    rs.getBoolean("Chiusa"),
                     rs.getString("Aggiudicatario")));
         }
         return result;
     }
 
     public List<Asta> getAsteAperteByUsername(String username) throws SQLException {
-        String sql = "SELECT * FROM Asta WHERE Proprietario = ? AND Chiusa = false AND Scadenza > NOW() ORDER BY Scadenza ASC";
+        String sql = "SELECT * FROM Asta WHERE Proprietario = ? AND Chiusa = false ORDER BY Scadenza ASC";
         List<Asta> result = new ArrayList<>();
 
         PreparedStatement stmt = connection.prepareStatement(sql);
@@ -107,7 +109,9 @@ public class AstaDAO {
                     rs.getDouble("Prezzo"),
                     rs.getInt("RialzoMinimo"),
                     rs.getTimestamp("Scadenza").toLocalDateTime(),
-                    rs.getString("Proprietario"));
+                    rs.getString("Proprietario"),
+                    rs.getBoolean("Chiusa"),
+                    rs.getString("Aggiudicatario"));
         }
         return null;
     }
