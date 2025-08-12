@@ -91,8 +91,6 @@ public class OfferteServlet extends HttpServlet {
 
             if (utente != null && !utente.getUsername().equals(asta.getProprietario())) {
                 ctx.setVariable("canOffer", true);
-            } else {
-                ctx.setVariable("canOffer", false);
             }
             if (request.getParameter("errorMsg") != null) {
                 ctx.setVariable("errorMsg", request.getParameter("errorMsg"));

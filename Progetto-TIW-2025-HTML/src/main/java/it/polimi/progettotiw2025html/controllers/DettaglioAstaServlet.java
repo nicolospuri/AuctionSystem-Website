@@ -110,7 +110,7 @@ public class DettaglioAstaServlet extends HttpServlet {
                 ctx.setVariable("errorMsg", request.getParameter("errorMsg"));
             }
             if (request.getParameter("successMsg") != null) {
-                ctx.setVariable("successMsg", request.getParameter("errorMsg"));
+                ctx.setVariable("successMsg", request.getParameter("successMsg"));
             }
 
             templateEngine.process(path, ctx, response.getWriter());
