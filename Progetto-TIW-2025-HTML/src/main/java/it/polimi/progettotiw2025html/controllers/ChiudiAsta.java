@@ -92,7 +92,7 @@ public class ChiudiAsta extends HttpServlet {
                     Offerta offertaMax = offertaDAO.getMaxOffertaByIdAsta(idAsta);
                     if (offertaMax == null) {
                         if (astaDAO.chiudiAsta(idAsta)) {
-                            path += "&successMsg=Asta chiusa con successo senza offerte";
+                            path += "&successMsg=Asta chiusa con successo";
                         } else {
                             path += "&errorMsg=Errore durante la chiusura dell'asta";
                         }
