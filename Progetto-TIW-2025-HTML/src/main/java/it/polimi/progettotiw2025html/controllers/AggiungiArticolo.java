@@ -58,9 +58,26 @@ public class AggiungiArticolo extends HttpServlet{
     public void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
         System.out.println("Post di AggiungiArticolo");
 
+        // Parametri testuali
         String nome = request.getParameter("nome");
         String descrizione = request.getParameter("descrizione");
-        double prezzo = Double.parseDouble(request.getParameter("prezzo"));
+        String prezzoParam = request.getParameter("prezzo");
+
+        // Validazione base
+        if (nome == null || nome.trim().isEmpty() ||
+                descrizione == null || descrizione.trim().isEmpty() ||
+                prezzoParam == null || prezzoParam.trim().isEmpty()) {
+            response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Tutti i campi sono obbligatori");
+            return;
+        }
+
+        double prezzo;
+        try {
+            prezzo = Double.parseDouble(prezzoParam.trim());
+        } catch (NumberFormatException e) {
+            response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Il prezzo deve essere un numero valido");
+            return;
+        }
 
         // Gestione file immagine
         String immaginePath = null;
