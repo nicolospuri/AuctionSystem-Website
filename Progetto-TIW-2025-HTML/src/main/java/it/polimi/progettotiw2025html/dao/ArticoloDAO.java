@@ -17,14 +17,14 @@ public class ArticoloDAO {
     }
 
 
-    public void addArticolo(Articolo articolo) throws SQLException {
-        String query = "INSERT INTO Articolo (Nome, Descrizione, Immagine, Prezzo) VALUES (?, ?, ?, ?)";
+    public void addArticolo(String Nome, String Descrizione, String Proprietario, Double Prezzo) throws SQLException {
+        String query = "INSERT INTO Articolo (Nome, Descrizione, Proprietario, Prezzo) VALUES (?, ?, ?, ?)";
 
         try (PreparedStatement stmt = connection.prepareStatement(query)) {
-            stmt.setString(1, articolo.getNome());
-            stmt.setString(2, articolo.getDescrizione());
-            stmt.setString(3, articolo.getImmagine()); // percorso file
-            stmt.setDouble(4, articolo.getPrezzo());
+            stmt.setString(1, Nome);
+            stmt.setString(2, Descrizione);
+            stmt.setString(3, Proprietario);
+            stmt.setDouble(4, Prezzo);
 
             stmt.executeUpdate();
         } catch (SQLException e) {
@@ -41,12 +41,14 @@ public class ArticoloDAO {
         PreparedStatement stmt = connection.prepareStatement(sql);
         stmt.setString(1, proprietario);
         ResultSet rs = stmt.executeQuery();
+
         while (rs.next()) {
             articoli.add(new Articolo(rs.getInt("Codice"),
                     rs.getString("Nome"),
                     rs.getString("Descrizione"),
                     rs.getString("Immagine"),
-                    rs.getDouble("Prezzo"), rs.getString("Proprietario")));
+                    rs.getDouble("Prezzo"),
+                    rs.getString("Proprietario")));
         }
         return articoli;
     }
