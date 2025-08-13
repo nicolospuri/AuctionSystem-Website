@@ -26,7 +26,7 @@
             <tr th:each="a : ${asteAperte}" align="center">
                 <td><a th:href="@{/DettaglioAstaServlet(idAsta=${a.id})}" th:text="${a.id}"></a></td>
                 <td th:text="${a.tempoMancante}"></td>
-                <td th:text="${a.prezzoOffertaMassima + ' €'}"></td>
+                <td th:text="${a.prezzoOffertaMassima} + ' €'"></td>
                 <td>
                     <ul>
                         <li th:each="art : ${a.articoli}">
@@ -58,7 +58,7 @@
             <tbody>
             <tr th:each="a : ${asteChiuse}" align="center">
                 <td><a th:href="@{/DettaglioAstaServlet(idAsta=${a.id})}" th:text="${a.id}"></a></td>
-                <td th:text="${a.prezzoOffertaMassima + ' €'}"></td>
+                <td th:text="${a.prezzoOffertaMassima} + ' €'"></td>
                 <td th:text="${a.aggiudicatario}"></td>
                 <td>
                     <ul>
@@ -74,14 +74,14 @@
     </div>
     <br><br>
 
-    <form th:action="@{/AggiungiArticolo}" method="POST" enctype="multipart/form-data">
+    <form th:action="@{/AggiungiArticolo}" method="POST">
         <h2>Aggiungi un articolo</h2>
 
         <input type="text" name="nome" placeholder="Nome" required><br><br>
 
         <textarea name="descrizione" placeholder="Descrizione" required></textarea><br><br>
 
-        <input type="file" name="immagine" placeholder="Immagine" accept="image/*" required><br><br>
+        <input type="file" name="immagine" placeholder="Immagine" accept="image/*"><br><br>
 
         <input type="number" name="prezzo" placeholder="Prezzo" required><br><br>
 
@@ -103,9 +103,8 @@
                     <th>Codice</th>
                     <th>Nome</th>
                     <th>Descrizione</th>
-                    <th>Immagine</th>
+                    <!--<th>Immagine</th>-->
                     <th>Prezzo</th>
-                    <th>Id Asta</th>
                     <th>Proprietario</th>
                 </tr>
                 </thead>
@@ -118,16 +117,8 @@
                     <td th:text="${articolo.codice}"></td>
                     <td th:text="${articolo.nome}"></td>
                     <td th:text="${articolo.descrizione}"></td>
-
-                    <!-- Immagine presa dal DB (colonna Immagine) -->
-                    <td>
-                        <img th:src="@{${articolo.immagine}}"
-                             alt="Immagine articolo"
-                             width="100">
-                    </td>
-
+                    <!--<td><img th:src="@{${articolo.immagine}}" alt="Immagine articolo" width="100"></td>-->
                     <td th:text="${articolo.prezzo} + ' €'"></td>
-                    <td th:text="${articolo.idAsta}"></td>
                     <td th:text="${articolo.proprietario}"></td>
                 </tr>
                 </tbody>
@@ -137,7 +128,7 @@
                 <input type="number" id="rialzo minimo" name="rialzo minimo" placeholder="Rialzo minimo" min="1" step="1" required>
             <br><br>
             <label for="scadenza">Data scadenza:</label>
-                <input type="datetime-local" id="scadenza" name="scandeza" placeholder="Scandeza" required>
+                <input type="datetime-local" id="scadenza" name="scadenza" placeholder="Scadenza" required>
             <br><br>
             <button type="submit">Crea Asta</button>
         </div>

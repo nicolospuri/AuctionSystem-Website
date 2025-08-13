@@ -71,7 +71,7 @@ public class AggiungiArticolo extends HttpServlet{
             return;
         }
 
-        double prezzo;
+        double prezzo = 0.0;
         try {
             prezzo = Double.parseDouble(prezzoParam.trim());
         } catch (NumberFormatException e) {
@@ -79,6 +79,7 @@ public class AggiungiArticolo extends HttpServlet{
             return;
         }
 
+        /*
         // Gestione file immagine
         String immaginePath = null;
         try {
@@ -103,6 +104,7 @@ public class AggiungiArticolo extends HttpServlet{
             response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Errore nel caricamento dell'immagine");
             return;
         }
+        */
 
         ServletContext servletContext = getServletContext();
         JakartaServletWebApplication webApplication = JakartaServletWebApplication.buildApplication(servletContext);
@@ -122,9 +124,8 @@ public class AggiungiArticolo extends HttpServlet{
                 return;
             }
 
-            Articolo articolo = new Articolo(0, nome, descrizione, immaginePath, prezzo, utente.getUsername());
             ArticoloDAO articoloDAO = new ArticoloDAO(connection);
-            articoloDAO.addArticolo(articolo);
+            articoloDAO.addArticolo(nome, descrizione, utente.getUsername(), prezzo);
 
             response.sendRedirect(request.getContextPath() + "/VendoServlet");
         } catch (SQLException e) {
