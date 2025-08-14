@@ -124,10 +124,10 @@ public class VendoServlet extends HttpServlet {
             if (request.getParameter("prezzoMsg") != null) {
                 ctx.setVariable("prezzoMsg", request.getParameter("prezzoMsg"));
             }
-            if (request.getParameter("rialzoMsg") != null) {
+            if (request.getAttribute("rialzoMsg") != null) {
                 ctx.setVariable("rialzoMsg", request.getParameter("rialzoMsg"));
             }
-            if (request.getParameter("scadenzaMsg") != null) {
+            if (request.getAttribute("scadenzaMsg") != null) {
                 ctx.setVariable("scadenzaMsg", request.getParameter("scadenzaMsg"));
             }
 
