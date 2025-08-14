@@ -121,6 +121,16 @@ public class VendoServlet extends HttpServlet {
                 ctx.setVariable("listaArticoli", articoli); // nuova variabile per la lista
             }
 
+            if (request.getParameter("prezzoMsg") != null) {
+                ctx.setVariable("prezzoMsg", request.getParameter("prezzoMsg"));
+            }
+            if (request.getParameter("rialzoMsg") != null) {
+                ctx.setVariable("rialzoMsg", request.getParameter("rialzoMsg"));
+            }
+            if (request.getParameter("scadenzaMsg") != null) {
+                ctx.setVariable("scadenzaMsg", request.getParameter("scadenzaMsg"));
+            }
+
             templateEngine.process(path, ctx, response.getWriter());
         } catch (SQLException e) {
             response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Errore interno del server");

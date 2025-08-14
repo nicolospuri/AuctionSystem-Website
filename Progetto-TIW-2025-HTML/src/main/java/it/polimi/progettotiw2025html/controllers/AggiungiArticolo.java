@@ -56,8 +56,6 @@ public class AggiungiArticolo extends HttpServlet{
 
     @Override
     public void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
-        System.out.println("Post di AggiungiArticolo");
-
         // Parametri testuali
         String nome = request.getParameter("nome");
         String descrizione = request.getParameter("descrizione");
@@ -109,6 +107,7 @@ public class AggiungiArticolo extends HttpServlet{
         ServletContext servletContext = getServletContext();
         JakartaServletWebApplication webApplication = JakartaServletWebApplication.buildApplication(servletContext);
         WebContext ctx = new WebContext(webApplication.buildExchange(request, response), request.getLocale());
+        String path = request.getContextPath() + "/VendoServlet";
 
         Utente utente = (Utente) request.getSession().getAttribute("utente");
         if (utente == null) {
@@ -124,10 +123,16 @@ public class AggiungiArticolo extends HttpServlet{
                 return;
             }
 
+            if (prezzo <= 0) {
+                path += "?prezzoMsg=Il prezzo deve essere maggiore di zero";
+                response.sendRedirect(path);
+                return;
+            }
+
             ArticoloDAO articoloDAO = new ArticoloDAO(connection);
             articoloDAO.addArticolo(nome, descrizione, utente.getUsername(), prezzo);
 
-            response.sendRedirect(request.getContextPath() + "/VendoServlet");
+            response.sendRedirect(path);
         } catch (SQLException e) {
             e.printStackTrace();
             response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Errore durante l'aggiunta dell'articolo: " + e.getMessage());
