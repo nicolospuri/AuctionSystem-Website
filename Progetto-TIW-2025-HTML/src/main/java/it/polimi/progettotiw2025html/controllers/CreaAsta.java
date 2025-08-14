@@ -104,8 +104,51 @@ public class CreaAsta extends HttpServlet {
                 double prezzoIniziale = articoloDAO.getSumOfPrice(conn, articoliIds);
 
                 // Parametri asta
-                int rialzoMinimo = 1; // fisso, o prendere da form
-                LocalDateTime scadenza = LocalDateTime.now().plusDays(7).withHour(23).withMinute(0).withSecond(0);
+                String rialzoMinimoParam = request.getParameter("rialzoMinimo");
+                int rialzoMinimo;
+
+                if (rialzoMinimoParam == null || rialzoMinimoParam.trim().isEmpty()) {
+                    request.setAttribute("rialzoMsg", "Il rialzo minimo deve essere maggiore di 0");
+                    request.getRequestDispatcher("/VendoServlet").forward(request, response);
+                    return;
+                }
+
+                try {
+                    rialzoMinimo = Integer.parseInt(rialzoMinimoParam.trim());
+                    if (rialzoMinimo <= 0) {
+                        request.setAttribute("rialzoMsg", "Il rialzo minimo deve essere maggiore di 0");
+                        request.getRequestDispatcher("/VendoServlet").forward(request, response);
+                        return;
+                    }
+
+
+                } catch (NumberFormatException e) {
+                    response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Il rialzo minimo deve essere un numero intero valido");
+                    return;
+                }
+
+                //LocalDateTime scadenza = LocalDateTime.now().plusDays(7).withHour(23).withMinute(0).withSecond(0);
+
+                String scadenzaParam = request.getParameter("scadenza");
+                LocalDateTime scadenza;
+
+                if (scadenzaParam == null || scadenzaParam.trim().isEmpty()) {
+                    request.setAttribute("scadenzaMsg", "La scadenza è obbligatoria");
+                    request.getRequestDispatcher("/VendoServlet").forward(request, response);
+                    return;
+                }
+
+                try {
+                    scadenza = LocalDateTime.parse(scadenzaParam); // richiede formato ISO: yyyy-MM-ddTHH:mm
+                    if (scadenza.isBefore(LocalDateTime.now())) {
+                        request.setAttribute("scadenzaMsg", "La scadenza deve essere nel futuro");
+                        request.getRequestDispatcher("/VendoServlet").forward(request, response);
+                        return;
+                    }
+                } catch (DateTimeParseException e) {
+                    response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Formato data scadenza non valido");
+                    return;
+                }
 
                 // Inserimento asta
                 int idAsta = astaDAO.insertNewAsta(
