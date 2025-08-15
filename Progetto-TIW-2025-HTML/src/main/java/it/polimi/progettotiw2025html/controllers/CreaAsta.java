@@ -1,5 +1,6 @@
 package it.polimi.progettotiw2025html.controllers;
 
+import it.polimi.progettotiw2025html.beans.Utente;
 import jakarta.servlet.ServletContext;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.UnavailableException;
@@ -57,12 +58,13 @@ public class CreaAsta extends HttpServlet {
             throws ServletException, IOException {
 
         // Controllo login
+        Utente utente = (Utente) request.getSession().getAttribute("utente");
         if (request.getSession(false) == null) {
             response.sendRedirect(request.getContextPath() + "/login");
             return;
         }
 
-        String username = (String) request.getSession().getAttribute("username");
+        String username = utente.getUsername();
         String[] articoliSelezionati = request.getParameterValues("articoliSelezionati");
 
         // Nessun articolo selezionato
@@ -85,6 +87,7 @@ public class CreaAsta extends HttpServlet {
         try (Connection conn = ConnectionHandler.getConnection()) {
             ArticoloDAO articoloDAO = new ArticoloDAO(conn);
             AstaDAO astaDAO = new AstaDAO(conn);
+
 
             // Controlla che gli articoli appartengano all'utente
             if (!articoloDAO.areAllArticlesOfUser(conn, username, articoliIds)) {
