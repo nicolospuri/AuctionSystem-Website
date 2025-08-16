@@ -137,6 +137,10 @@
             <button type="submit">Crea Asta</button>
         </div>
     </form>
+    <div th:if="${successMsg}">
+        <p style="color: green;" th:text="${successMsg}"></p>
+    </div>
+
 
 </body>
 </html>

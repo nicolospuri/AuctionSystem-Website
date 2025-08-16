@@ -18,7 +18,7 @@ public class ArticoloDAO {
 
 
     public void addArticolo(String Nome, String Descrizione, String Proprietario, Double Prezzo) throws SQLException {
-        String query = "INSERT INTO Articolo (Nome, Descrizione, Proprietario, Prezzo) VALUES (?, ?, ?, ?)";
+        String query = "INSERT INTO articolo (Nome, Descrizione, Proprietario, Prezzo) VALUES (?, ?, ?, ?)";
 
         try (PreparedStatement stmt = connection.prepareStatement(query)) {
             stmt.setString(1, Nome);
@@ -35,7 +35,7 @@ public class ArticoloDAO {
 
 
     public List<Articolo> getArticoliDisponibili(String proprietario) throws SQLException {
-        String sql = "SELECT * FROM Articolo WHERE idAsta IS NULL AND Proprietario = ?";
+        String sql = "SELECT * FROM articolo WHERE idAsta IS NULL AND Proprietario = ?";
         List<Articolo> articoli = new ArrayList<>();
 
         PreparedStatement stmt = connection.prepareStatement(sql);
@@ -54,7 +54,7 @@ public class ArticoloDAO {
     }
 
     public List<Articolo> getArticoliByIdAsta(int idAsta) throws SQLException {
-        String sql = "SELECT * FROM Articolo WHERE IdAsta = ?";
+        String sql = "SELECT * FROM articolo WHERE IdAsta = ?";
         List<Articolo> result = new ArrayList<>();
 
         PreparedStatement stmt = connection.prepareStatement(sql);
@@ -121,7 +121,7 @@ public class ArticoloDAO {
             return 0; // nessun elemento
         }
 
-        StringBuilder query = new StringBuilder("SELECT SUM(prezzo) FROM articoli WHERE codice IN (");
+        StringBuilder query = new StringBuilder("SELECT SUM(prezzo) FROM articolo WHERE codice IN (");
         for (int i = 0; i < articoliIds.size(); i++) {
             query.append(articoliIds.get(i));
             if (i < articoliIds.size() - 1) {
@@ -145,7 +145,7 @@ public class ArticoloDAO {
     public void updateIdAstaInArticles(Connection conn, ArrayList<Integer> articles, int idAsta) throws SQLException {
         if (articles == null || articles.isEmpty()) return;
 
-        StringBuilder query = new StringBuilder("UPDATE Articoli SET id_asta = ? WHERE cod IN (");
+        StringBuilder query = new StringBuilder("UPDATE Articolo SET IdAsta = ? WHERE codice IN (");
         for (int i = 0; i < articles.size(); i++) {
             query.append("?");
             if (i < articles.size() - 1) {
@@ -161,6 +161,41 @@ public class ArticoloDAO {
             }
             stmt.executeUpdate();
         }
+    }
+
+    public List<Articolo> findArticlesByUser(Connection conn, String username) throws SQLException {
+        List<Articolo> articoli = new ArrayList<>();
+
+        String query = "SELECT codice, nome, descrizione, immagine, prezzo, IdAsta, proprietario " +
+                "FROM articolo WHERE proprietario = ?";
+
+        try (PreparedStatement pstatement = conn.prepareStatement(query)) {
+            pstatement.setString(1, username);
+
+            try (ResultSet result = pstatement.executeQuery()) {
+                while (result.next()) {
+                    String immagine = result.getString("immagine");
+                    if (immagine == null || immagine.trim().isEmpty()) {
+                        immagine = "img/default.png"; // default se nullo
+                    }
+
+                    Articolo articolo = new Articolo(
+                            result.getInt("codice"),
+                            result.getString("nome"),
+                            result.getString("descrizione"),
+                            immagine,
+                            result.getDouble("prezzo"),
+                            result.getString("proprietario")
+                    );
+                    articolo.setIdAsta(result.getInt("IdAsta"));
+
+
+                    articoli.add(articolo);
+                }
+            }
+        }
+
+        return articoli;
     }
 
 }
