@@ -63,4 +63,26 @@ public class UtenteDAO {
         }
     }
 
+    public Utente getUtenteByUsername(String username) throws SQLException {
+        String query = "SELECT * FROM utente WHERE Username = ?";
+        try {
+            PreparedStatement stmt = connection.prepareStatement(query);
+            stmt.setString(1, username);
+
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {     //se l'utente esiste il ResultSet avrà una riga e quindi rs.next()=true
+                    return new Utente(
+                            rs.getString("Username"),
+                            rs.getString("Password"),
+                            rs.getString("Nome"),
+                            rs.getString("Cognome"),
+                            rs.getString("Indirizzo")
+                    );
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
 }

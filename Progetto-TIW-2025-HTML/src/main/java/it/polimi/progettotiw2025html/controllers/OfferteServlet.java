@@ -24,6 +24,7 @@ import org.thymeleaf.web.servlet.JakartaServletWebApplication;
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @WebServlet("/OfferteServlet")
@@ -89,7 +90,8 @@ public class OfferteServlet extends HttpServlet {
                 ctx.setVariable("offerteMsg", "Nessuna offerta trovata");
             }
 
-            if (utente != null && !utente.getUsername().equals(asta.getProprietario())) {
+            if (utente != null && !utente.getUsername().equals(asta.getProprietario())
+                    && !asta.isChiusa() && asta.getScadenza().isAfter(LocalDateTime.now())) {
                 ctx.setVariable("canOffer", true);
             }
             if (request.getParameter("errorMsg") != null) {

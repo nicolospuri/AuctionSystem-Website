@@ -16,7 +16,7 @@ public class AstaDAO {
     public List<Asta> getAsteAperteByKeyword(String keyword) throws SQLException {
         String sql = "SELECT a.* " +
                 "FROM asta a JOIN Articolo art ON art.idAsta = a.id " +
-                "WHERE a.chiusa = FALSE AND a.scadenza > NOW() AND (art.nome LIKE ? OR art.descrizione LIKE ?) " +
+                "WHERE a.chiusa = FALSE AND (art.nome LIKE ? OR art.descrizione LIKE ?) " +
                 "ORDER BY a.scadenza DESC";
         List<Asta> result = new ArrayList<>();
 
