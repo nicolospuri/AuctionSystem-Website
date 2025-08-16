@@ -7,6 +7,7 @@ import it.polimi.progettotiw2025html.beans.Utente;
 import it.polimi.progettotiw2025html.dao.ArticoloDAO;
 import it.polimi.progettotiw2025html.dao.AstaDAO;
 import it.polimi.progettotiw2025html.dao.OffertaDAO;
+import it.polimi.progettotiw2025html.dao.UtenteDAO;
 import it.polimi.progettotiw2025html.utils.ConnectionHandler;
 import jakarta.servlet.ServletContext;
 import jakarta.servlet.UnavailableException;
@@ -77,6 +78,7 @@ public class DettaglioAstaServlet extends HttpServlet {
             AstaDAO astaDAO = new AstaDAO(connection);
             ArticoloDAO articoloDAO = new ArticoloDAO(connection);
             OffertaDAO offertaDAO = new OffertaDAO(connection);
+            UtenteDAO utenteDAO = new UtenteDAO(connection);
             List<Articolo> articoli = null;
             Asta asta = astaDAO.getAstaById(idAsta);
             if (asta != null) {
@@ -91,6 +93,9 @@ public class DettaglioAstaServlet extends HttpServlet {
                 asta.setTempoMancante();
 
                 if (asta.isChiusa()) {
+                    if (asta.getAggiudicatario() != null) {
+                        asta.setIndirizzoAggiudicatario(utenteDAO.getUtenteByUsername(asta.getAggiudicatario()).getIndirizzo());
+                    }
                     ctx.setVariable("astaChiusa", asta);
                 } else {
                     ctx.setVariable("astaAperta", asta);
