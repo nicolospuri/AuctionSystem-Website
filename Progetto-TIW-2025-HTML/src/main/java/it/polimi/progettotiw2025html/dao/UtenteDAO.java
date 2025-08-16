@@ -11,7 +11,7 @@ public class UtenteDAO {
     }
 
     public Utente login(String username, String password) throws SQLException {
-        String query = "SELECT * FROM Utente WHERE Username = ? AND Password = ?";
+        String query = "SELECT * FROM utente WHERE Username = ? AND Password = ?";
         System.out.println("Eseguo query login per utente: " + username);
         try {
             PreparedStatement stmt = connection.prepareStatement(query);
@@ -36,7 +36,7 @@ public class UtenteDAO {
     }
 
     public boolean checkRegistration(String username) throws SQLException {
-        String query = "SELECT * FROM Utente WHERE Username = ?";
+        String query = "SELECT * FROM utente WHERE Username = ?";
         PreparedStatement statement = connection.prepareStatement(query);
         statement.setString(1, username);
         ResultSet result = statement.executeQuery(); //Contiene tutte le righe trovate dal DB
@@ -45,7 +45,7 @@ public class UtenteDAO {
     }
 
     public boolean signUp(Utente utente) throws SQLException {
-        String query = "INSERT INTO Utente (Username, Password, Nome, Cognome, Indirizzo) VALUES (?, ?, ?, ?, ?)";
+        String query = "INSERT INTO utente (Username, Password, Nome, Cognome, Indirizzo) VALUES (?, ?, ?, ?, ?)";
 
         try {
             PreparedStatement stmt = connection.prepareStatement(query);

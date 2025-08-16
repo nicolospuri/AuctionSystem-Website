@@ -17,7 +17,7 @@ public class OffertaDAO {
     }
 
     public List<Offerta> getOfferteByIdAsta(int idAsta) throws SQLException {
-        String sql = "SELECT * FROM Offerta WHERE idAsta = ? ORDER BY Prezzo DESC";
+        String sql = "SELECT * FROM offerta WHERE idAsta = ? ORDER BY Prezzo DESC";
         List<Offerta> result = new ArrayList<>();
 
         PreparedStatement stmt = connection.prepareStatement(sql);
@@ -34,8 +34,8 @@ public class OffertaDAO {
     }
 
     public Offerta getMaxOffertaByIdAsta(int idAsta) throws SQLException {
-        String sql = "SELECT * FROM Offerta WHERE IdAsta = ? " +
-                "AND Prezzo = (SELECT MAX(Prezzo) FROM Offerta WHERE IdAsta = ?)";
+        String sql = "SELECT * FROM offerta WHERE IdAsta = ? " +
+                "AND Prezzo = (SELECT MAX(Prezzo) FROM offerta WHERE IdAsta = ?)";
         PreparedStatement stmt = connection.prepareStatement(sql);
         stmt.setInt(1, idAsta);
         stmt.setInt(2, idAsta);
@@ -53,7 +53,7 @@ public class OffertaDAO {
     }
 
     public boolean addOfferta(String offerente, double prezzo, int idAsta) throws SQLException {
-        String sql = "INSERT INTO Offerta (Offerente, Prezzo, Data, IdAsta) VALUES (?, ?, NOW(), ?)";
+        String sql = "INSERT INTO offerta (Offerente, Prezzo, Data, IdAsta) VALUES (?, ?, NOW(), ?)";
         PreparedStatement stmt = connection.prepareStatement(sql);
         stmt.setString(1, offerente);
         stmt.setDouble(2, prezzo);

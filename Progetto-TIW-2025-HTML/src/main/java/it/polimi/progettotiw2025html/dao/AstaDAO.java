@@ -15,7 +15,7 @@ public class AstaDAO {
 
     public List<Asta> getAsteAperteByKeyword(String keyword) throws SQLException {
         String sql = "SELECT a.* " +
-                "FROM Asta a JOIN Articolo art ON art.idAsta = a.id " +
+                "FROM asta a JOIN Articolo art ON art.idAsta = a.id " +
                 "WHERE a.chiusa = FALSE AND a.scadenza > NOW() AND (art.nome LIKE ? OR art.descrizione LIKE ?) " +
                 "ORDER BY a.scadenza DESC";
         List<Asta> result = new ArrayList<>();
@@ -39,7 +39,7 @@ public class AstaDAO {
     }
 
     public List<Asta> getAsteVinteByUsername(String username) throws SQLException {
-        String sql = "SELECT * FROM Asta WHERE Aggiudicatario = ? AND Chiusa = true ORDER BY Scadenza DESC";
+        String sql = "SELECT * FROM asta WHERE Aggiudicatario = ? AND Chiusa = true ORDER BY Scadenza DESC";
         List<Asta> result = new ArrayList<>();
 
         PreparedStatement stmt = connection.prepareStatement(sql);
@@ -61,7 +61,7 @@ public class AstaDAO {
     }
 
     public List<Asta> getAsteChiuseByUsername(String username) throws SQLException {
-        String sql = "SELECT * FROM Asta WHERE Proprietario = ? AND Chiusa = true ORDER BY Scadenza ASC";
+        String sql = "SELECT * FROM asta WHERE Proprietario = ? AND Chiusa = true ORDER BY Scadenza ASC";
         List<Asta> result = new ArrayList<>();
 
         PreparedStatement stmt = connection.prepareStatement(sql);
@@ -81,7 +81,7 @@ public class AstaDAO {
     }
 
     public List<Asta> getAsteAperteByUsername(String username) throws SQLException {
-        String sql = "SELECT * FROM Asta WHERE Proprietario = ? AND Chiusa = false ORDER BY Scadenza ASC";
+        String sql = "SELECT * FROM asta WHERE Proprietario = ? AND Chiusa = false ORDER BY Scadenza ASC";
         List<Asta> result = new ArrayList<>();
 
         PreparedStatement stmt = connection.prepareStatement(sql);
@@ -99,7 +99,7 @@ public class AstaDAO {
     }
 
     public Asta getAstaById(int idAsta) throws SQLException {
-        String sql = "SELECT * FROM Asta WHERE Id = ?";
+        String sql = "SELECT * FROM asta WHERE Id = ?";
         PreparedStatement stmt = connection.prepareStatement(sql);
         stmt.setInt(1, idAsta);
 
@@ -117,7 +117,7 @@ public class AstaDAO {
     }
 
     public int insertNewAsta(String proprietario, double prezzo, float rialzoMinimo, Timestamp scadenza) throws SQLException {
-        String query = "INSERT INTO Aste (Prezzo, RialzoMinimo, Scadenza, Proprietario, Chiusa, Aggiudicatario) " +
+        String query = "INSERT INTO asta (Prezzo, RialzoMinimo, Scadenza, Proprietario, Chiusa, Aggiudicatario) " +
                 "VALUES (?, ?, ?, ?, 0, NULL)";
 
         try (PreparedStatement ps = connection.prepareStatement(query, Statement.RETURN_GENERATED_KEYS)) {
@@ -143,7 +143,7 @@ public class AstaDAO {
 
     // Chiudi asta con aggiudicatario
     public boolean chiudiAsta(int idAsta, String aggiudicatario) throws SQLException {
-        String query = "UPDATE Asta SET Chiusa = true, Aggiudicatario = ? WHERE Id = ?";
+        String query = "UPDATE asta SET Chiusa = true, Aggiudicatario = ? WHERE Id = ?";
 
         PreparedStatement ps = connection.prepareStatement(query);
         ps.setString(1, aggiudicatario);
@@ -155,7 +155,7 @@ public class AstaDAO {
 
     // Chiudi asta senza aggiudicatario
     public boolean chiudiAsta(int idAsta) throws SQLException {
-        String query = "UPDATE Asta SET Chiusa = true WHERE Id = ?";
+        String query = "UPDATE asta SET Chiusa = true WHERE Id = ?";
 
         PreparedStatement ps = connection.prepareStatement(query);
         ps.setInt(1, idAsta);

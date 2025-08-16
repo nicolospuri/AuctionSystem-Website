@@ -1,5 +1,6 @@
 package it.polimi.progettotiw2025html.controllers;
 
+import it.polimi.progettotiw2025html.beans.Articolo;
 import it.polimi.progettotiw2025html.beans.Utente;
 import jakarta.servlet.ServletContext;
 import jakarta.servlet.ServletException;
@@ -165,7 +166,19 @@ public class CreaAsta extends HttpServlet {
                 articoloDAO.updateIdAstaInArticles(conn, articoliIds, idAsta);
 
                 conn.commit();
-                response.sendRedirect(request.getContextPath() + "/aste?creazioneOk=true");
+//                response.sendRedirect(request.getContextPath() + "/CreaAsta?creazioneOk=true");
+                // Dopo conn.commit()
+
+// Ricarica lista articoli aggiornata
+                List<Articolo> listaAggiornata = articoloDAO.findArticlesByUser(conn, username);
+
+// Metti i dati nella request
+                request.setAttribute("listaArticoli", listaAggiornata);
+                request.setAttribute("successMsg", "Asta creata con successo!");
+
+// Rimani sulla stessa pagina (es: vendo.html)
+                request.getRequestDispatcher("/WEB-INF/VendoServlet.html").forward(request, response);
+
 
             } catch (SQLException e) {
                 conn.rollback();
@@ -178,4 +191,7 @@ public class CreaAsta extends HttpServlet {
         }
     }
 
+    public void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        doPost(req, resp);
+    }
 }
