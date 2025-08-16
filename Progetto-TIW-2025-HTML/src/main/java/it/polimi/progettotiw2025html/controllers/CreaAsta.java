@@ -14,18 +14,16 @@ import it.polimi.progettotiw2025html.dao.ArticoloDAO;
 import it.polimi.progettotiw2025html.dao.AstaDAO;
 import it.polimi.progettotiw2025html.utils.ConnectionHandler;
 import org.thymeleaf.TemplateEngine;
+import org.thymeleaf.context.WebContext;
 import org.thymeleaf.templatemode.TemplateMode;
 import org.thymeleaf.templateresolver.WebApplicationTemplateResolver;
 import org.thymeleaf.web.servlet.JakartaServletWebApplication;
 
 import java.io.IOException;
 import java.sql.*;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.LocalTime;
 import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
-import java.util.List;
 
 @WebServlet("/CreaAsta")
 public class CreaAsta extends HttpServlet {
@@ -55,13 +53,16 @@ public class CreaAsta extends HttpServlet {
         }
     }
     @Override
-    protected void doPost(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException {
+    protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        ServletContext servletContext = getServletContext();
+        JakartaServletWebApplication webApplication = JakartaServletWebApplication.buildApplication(servletContext);
+        WebContext ctx = new WebContext(webApplication.buildExchange(request, response), request.getLocale());
+        String path = request.getContextPath() + "/VendoServlet";
 
         // Controllo login
         Utente utente = (Utente) request.getSession().getAttribute("utente");
         if (request.getSession(false) == null) {
-            response.sendRedirect(request.getContextPath() + "/login");
+            templateEngine.process("index", ctx, response.getWriter());            // In caso di credenziali vuote o mancanti, torna al login
             return;
         }
 
@@ -70,7 +71,8 @@ public class CreaAsta extends HttpServlet {
 
         // Nessun articolo selezionato
         if (articoliSelezionati == null || articoliSelezionati.length == 0) {
-            response.sendRedirect(request.getContextPath() + "/ArticoliDisponibili?noArticoliSelezionati=true");
+            path += "?nessunArticoloMsg=Nessun articolo selezionato";
+            response.sendRedirect(path);
             return;
         }
 
@@ -85,107 +87,82 @@ public class CreaAsta extends HttpServlet {
             return;
         }
 
-        try (Connection conn = ConnectionHandler.getConnection()) {
-            ArticoloDAO articoloDAO = new ArticoloDAO(conn);
-            AstaDAO astaDAO = new AstaDAO(conn);
+        ArticoloDAO articoloDAO = new ArticoloDAO(connection);
+        AstaDAO astaDAO = new AstaDAO(connection);
 
-
+        try {
             // Controlla che gli articoli appartengano all'utente
-            if (!articoloDAO.areAllArticlesOfUser(conn, username, articoliIds)) {
+            if (!articoloDAO.areAllArticlesOfUser(username, articoliIds)) {
                 response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Puoi selezionare solo i tuoi articoli");
                 return;
             }
 
             // Controlla che siano liberi
-            if (!articoloDAO.areAllArticlesFree(conn, articoliIds)) {
+            if (!articoloDAO.areAllArticlesFree(articoliIds)) {
                 response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Alcuni articoli sono già in un'asta");
                 return;
             }
 
-            conn.setAutoCommit(false);
-            try {
-                // Prezzo iniziale = somma dei prezzi articoli
-                double prezzoIniziale = articoloDAO.getSumOfPrice(conn, articoliIds);
+            // Prezzo iniziale = somma dei prezzi articoli
+            double prezzoIniziale = articoloDAO.getSumOfPrice(articoliIds);
 
-                // Parametri asta
-                String rialzoMinimoParam = request.getParameter("rialzoMinimo");
-                int rialzoMinimo;
+            // Parametri asta
+            String rialzoMinimoParam = request.getParameter("rialzoMinimo");
+            int rialzoMinimo;
 
-                if (rialzoMinimoParam == null || rialzoMinimoParam.trim().isEmpty()) {
-                    request.setAttribute("rialzoMsg", "Il rialzo minimo deve essere maggiore di 0");
-                    request.getRequestDispatcher("/VendoServlet").forward(request, response);
-                    return;
-                }
-
-                try {
-                    rialzoMinimo = Integer.parseInt(rialzoMinimoParam.trim());
-                    if (rialzoMinimo <= 0) {
-                        request.setAttribute("rialzoMsg", "Il rialzo minimo deve essere maggiore di 0");
-                        request.getRequestDispatcher("/VendoServlet").forward(request, response);
-                        return;
-                    }
-
-
-                } catch (NumberFormatException e) {
-                    response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Il rialzo minimo deve essere un numero intero valido");
-                    return;
-                }
-
-                //LocalDateTime scadenza = LocalDateTime.now().plusDays(7).withHour(23).withMinute(0).withSecond(0);
-
-                String scadenzaParam = request.getParameter("scadenza");
-                LocalDateTime scadenza;
-
-                if (scadenzaParam == null || scadenzaParam.trim().isEmpty()) {
-                    request.setAttribute("scadenzaMsg", "La scadenza è obbligatoria");
-                    request.getRequestDispatcher("/VendoServlet").forward(request, response);
-                    return;
-                }
-
-                try {
-                    scadenza = LocalDateTime.parse(scadenzaParam); // richiede formato ISO: yyyy-MM-ddTHH:mm
-                    if (scadenza.isBefore(LocalDateTime.now())) {
-                        request.setAttribute("scadenzaMsg", "La scadenza deve essere nel futuro");
-                        request.getRequestDispatcher("/VendoServlet").forward(request, response);
-                        return;
-                    }
-                } catch (DateTimeParseException e) {
-                    response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Formato data scadenza non valido");
-                    return;
-                }
-
-                // Inserimento asta
-                int idAsta = astaDAO.insertNewAsta(
-                        username,
-                        prezzoIniziale,
-                        rialzoMinimo,
-                        Timestamp.valueOf(scadenza)
-                );
-
-                // Aggiornamento articoli con id_asta
-                articoloDAO.updateIdAstaInArticles(conn, articoliIds, idAsta);
-
-                conn.commit();
-//                response.sendRedirect(request.getContextPath() + "/CreaAsta?creazioneOk=true");
-                // Dopo conn.commit()
-
-// Ricarica lista articoli aggiornata
-                List<Articolo> listaAggiornata = articoloDAO.findArticlesByUser(conn, username);
-
-// Metti i dati nella request
-                request.setAttribute("listaArticoli", listaAggiornata);
-                request.setAttribute("successMsg", "Asta creata con successo!");
-
-// Rimani sulla stessa pagina (es: vendo.html)
-                request.getRequestDispatcher("/WEB-INF/VendoServlet.html").forward(request, response);
-
-
-            } catch (SQLException e) {
-                conn.rollback();
-                throw new ServletException("Errore durante la creazione dell'asta", e);
-            } finally {
-                conn.setAutoCommit(true);
+            if (rialzoMinimoParam == null || rialzoMinimoParam.trim().isEmpty()) {
+                path += "?rialzoMsg=Il rialzo minimo deve essere maggiore di 0";
+                response.sendRedirect(path);
+                return;
             }
+
+            try {
+                rialzoMinimo = Integer.parseInt(rialzoMinimoParam.trim());
+                if (rialzoMinimo <= 0) {
+                    path += "?rialzoMsg=Il rialzo minimo deve essere maggiore di 0";
+                    response.sendRedirect(path);
+                    return;
+                }
+            } catch (NumberFormatException e) {
+                path += "?rialzoMsg=Rialzo minimo non valido";
+                response.sendRedirect(path);
+                return;
+            }
+
+            String scadenzaParam = request.getParameter("scadenza");
+            LocalDateTime scadenza;
+
+            if (scadenzaParam == null || scadenzaParam.trim().isEmpty()) {
+                path += "?scadenzaMsg=La scadenza è obbligatoria";
+                response.sendRedirect(path);
+                return;
+            }
+
+            try {
+                scadenza = LocalDateTime.parse(scadenzaParam); // richiede formato ISO: yyyy-MM-ddTHH:mm
+                if (scadenza.isBefore(LocalDateTime.now())) {
+                    path += "?scadenzaMsg=La scadenza deve essere nel futuro";
+                    response.sendRedirect(path);
+                    return;
+                }
+            } catch (DateTimeParseException e) {
+                path += "?scadenzaMsg=Formato scadenza non valido";
+                response.sendRedirect(path);
+                return;
+            }
+
+            // Inserimento asta
+            int idAsta = astaDAO.insertNewAsta(
+                    username,
+                    prezzoIniziale,
+                    rialzoMinimo,
+                    Timestamp.valueOf(scadenza)
+            );
+
+            // Aggiornamento articoli con id_asta
+            articoloDAO.updateIdAstaInArticles(articoliIds, idAsta);
+
+            response.sendRedirect(path);
         } catch (SQLException e) {
             throw new ServletException(e);
         }
