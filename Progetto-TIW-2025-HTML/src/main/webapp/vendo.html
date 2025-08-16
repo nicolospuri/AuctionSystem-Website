@@ -134,6 +134,9 @@
             <label for="scadenza">Data scadenza:</label>
                 <input type="datetime-local" id="scadenza" name="scadenza" placeholder="Scadenza" required>
             <br><br>
+            <div th:if="${nessunArticoloMsg}">
+                <span th:text="${nessunArticoloMsg}"></span>
+            </div>
             <button type="submit">Crea Asta</button>
         </div>
     </form>

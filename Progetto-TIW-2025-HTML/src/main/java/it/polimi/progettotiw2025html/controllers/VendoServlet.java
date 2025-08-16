@@ -124,11 +124,14 @@ public class VendoServlet extends HttpServlet {
             if (request.getParameter("prezzoMsg") != null) {
                 ctx.setVariable("prezzoMsg", request.getParameter("prezzoMsg"));
             }
-            if (request.getAttribute("rialzoMsg") != null) {
+            if (request.getParameter("rialzoMsg") != null) {
                 ctx.setVariable("rialzoMsg", request.getParameter("rialzoMsg"));
             }
-            if (request.getAttribute("scadenzaMsg") != null) {
+            if (request.getParameter("scadenzaMsg") != null) {
                 ctx.setVariable("scadenzaMsg", request.getParameter("scadenzaMsg"));
+            }
+            if (request.getParameter("nessunArticoloMsg") != null) {
+                ctx.setVariable("nessunArticoloMsg", request.getParameter("nessunArticoloMsg"));
             }
 
             templateEngine.process(path, ctx, response.getWriter());

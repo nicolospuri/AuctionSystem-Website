@@ -132,6 +132,8 @@ public class AggiungiArticolo extends HttpServlet{
             ArticoloDAO articoloDAO = new ArticoloDAO(connection);
             articoloDAO.addArticolo(nome, descrizione, utente.getUsername(), prezzo);
 
+            // todo: gestire l'immagine se necessario
+
             response.sendRedirect(path);
         } catch (SQLException e) {
             e.printStackTrace();
