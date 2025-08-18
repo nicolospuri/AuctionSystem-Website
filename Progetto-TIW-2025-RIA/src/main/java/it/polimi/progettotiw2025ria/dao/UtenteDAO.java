@@ -1,5 +1,7 @@
 package it.polimi.progettotiw2025ria.dao;
 
+import it.polimi.progettotiw2025ria.beans.Utente;
+
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
