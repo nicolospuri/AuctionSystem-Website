@@ -50,6 +50,18 @@ public class AggiungiArticolo extends HttpServlet{
 
     @Override
     public void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
+        ServletContext servletContext = getServletContext();
+        JakartaServletWebApplication webApplication = JakartaServletWebApplication.buildApplication(servletContext);
+        WebContext ctx = new WebContext(webApplication.buildExchange(request, response), request.getLocale());
+        String path = request.getContextPath() + "/VendoServlet";
+
+        Utente utente = (Utente) request.getSession().getAttribute("utente");
+        if (utente == null) {
+            ctx.setVariable("errorMsg", "Utente non trovato");
+            templateEngine.process("index", ctx, response.getWriter());
+            return;
+        }
+
         // Parametri testuali
         String nome = request.getParameter("nome");
         String descrizione = request.getParameter("descrizione");
@@ -97,18 +109,6 @@ public class AggiungiArticolo extends HttpServlet{
             return;
         }
         */
-
-        ServletContext servletContext = getServletContext();
-        JakartaServletWebApplication webApplication = JakartaServletWebApplication.buildApplication(servletContext);
-        WebContext ctx = new WebContext(webApplication.buildExchange(request, response), request.getLocale());
-        String path = request.getContextPath() + "/VendoServlet";
-
-        Utente utente = (Utente) request.getSession().getAttribute("utente");
-        if (utente == null) {
-            ctx.setVariable("errorMsg", "Utente non trovato");
-            templateEngine.process("index", ctx, response.getWriter());
-            return;
-        }
 
         try {
             UtenteDAO utenteDAO = new UtenteDAO(connection);

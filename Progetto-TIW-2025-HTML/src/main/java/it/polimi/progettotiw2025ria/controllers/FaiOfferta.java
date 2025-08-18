@@ -62,6 +62,11 @@ public class FaiOfferta extends HttpServlet {
 
         HttpSession session = request.getSession();
         Utente utente = (Utente) session.getAttribute("utente");
+        if (utente == null) {
+            ctx.setVariable("errorMsg", "Utente non trovato");
+            templateEngine.process("index", ctx, response.getWriter());
+            return;
+        }
         Integer idAsta = 0;
         try {
             idAsta = Integer.parseInt(request.getParameter("idAsta"));

@@ -64,6 +64,11 @@ public class CreaAsta extends HttpServlet {
             templateEngine.process("index", ctx, response.getWriter());            // In caso di credenziali vuote o mancanti, torna al login
             return;
         }
+        if (utente == null) {
+            ctx.setVariable("errorMsg", "Utente non trovato");
+            templateEngine.process("index", ctx, response.getWriter());
+            return;
+        }
 
         String username = utente.getUsername();
         String[] articoliSelezionati = request.getParameterValues("articoliSelezionati");

@@ -64,6 +64,11 @@ public class VendoServlet extends HttpServlet {
 
         HttpSession session = request.getSession();
         Utente utente = (Utente) session.getAttribute("utente");
+        if (utente == null) {
+            ctx.setVariable("errorMsg", "Utente non trovato");
+            templateEngine.process("index", ctx, response.getWriter());
+            return;
+        }
 
         try {
             AstaDAO astaDAO = new AstaDAO(connection);

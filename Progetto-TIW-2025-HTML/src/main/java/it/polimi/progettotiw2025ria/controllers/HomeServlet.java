@@ -1,11 +1,13 @@
 package it.polimi.progettotiw2025ria.controllers;
 
+import it.polimi.progettotiw2025ria.beans.Utente;
 import jakarta.servlet.ServletContext;
 import jakarta.servlet.UnavailableException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 import org.thymeleaf.TemplateEngine;
 import org.thymeleaf.context.WebContext;
 import org.thymeleaf.templatemode.TemplateMode;
@@ -41,6 +43,14 @@ public class HomeServlet extends HttpServlet {
         ServletContext servletContext = getServletContext();
         JakartaServletWebApplication webApplication = JakartaServletWebApplication.buildApplication(servletContext);
         WebContext ctx = new WebContext(webApplication.buildExchange(request, response), request.getLocale());
+
+        HttpSession session = request.getSession();
+        Utente utente = (Utente) session.getAttribute("utente");
+        if (utente == null) {
+            ctx.setVariable("errorMsg", "Utente non trovato");
+            templateEngine.process("index", ctx, response.getWriter());
+            return;
+        }
 
         String path = "/home.html";
         templateEngine.process(path, ctx, response.getWriter());
