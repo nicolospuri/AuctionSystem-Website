@@ -1,4 +1,4 @@
-// js/Vendo.js
+// js/vendo.js
 
 document.addEventListener("DOMContentLoaded", () => {
     const btn = document.getElementById("submitNewArticolo"); //Senza questo, rischi di cercare gli elementi id=submitNewArticolo prima che esistano.
