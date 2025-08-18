@@ -1,5 +1,7 @@
 package it.polimi.progettotiw2025ria.beans;
 
+import it.polimi.progettotiw2025ria.beans.Articolo;
+
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.List;
