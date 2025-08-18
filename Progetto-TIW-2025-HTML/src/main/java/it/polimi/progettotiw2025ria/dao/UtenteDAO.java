@@ -1,0 +1,88 @@
+package it.polimi.progettotiw2025ria.dao;
+
+import java.sql.*;
+import it.polimi.progettotiw2025ria.beans.*;
+
+public class UtenteDAO {
+    private final Connection connection;
+
+    public UtenteDAO(Connection connection){
+        this.connection = connection;
+    }
+
+    public Utente login(String username, String password) throws SQLException {
+        String query = "SELECT * FROM utente WHERE Username = ? AND Password = ?";
+        System.out.println("Eseguo query login per utente: " + username);
+        try {
+            PreparedStatement stmt = connection.prepareStatement(query);
+            stmt.setString(1, username);
+            stmt.setString(2, password);
+
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {     //se l'utente esiste il ResultSet avrà una riga e quindi rs.next()=true
+                    return new Utente(
+                            rs.getString("Username"),
+                            rs.getString("Password"),
+                            rs.getString("Nome"),
+                            rs.getString("Cognome"),
+                            rs.getString("Indirizzo")
+                    );
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    public boolean checkRegistration(String username) throws SQLException {
+        String query = "SELECT * FROM utente WHERE Username = ?";
+        PreparedStatement statement = connection.prepareStatement(query);
+        statement.setString(1, username);
+        ResultSet result = statement.executeQuery(); //Contiene tutte le righe trovate dal DB
+
+        return result.isBeforeFirst(); //Ritorna false se è vuoto, non esiste nessun utente con quel username
+    }
+
+    public boolean signUp(Utente utente) throws SQLException {
+        String query = "INSERT INTO utente (Username, Password, Nome, Cognome, Indirizzo) VALUES (?, ?, ?, ?, ?)";
+
+        try {
+            PreparedStatement stmt = connection.prepareStatement(query);
+            stmt.setString(1, utente.getUsername());
+            stmt.setString(2, utente.getPassword());
+            stmt.setString(3, utente.getNome());
+            stmt.setString(4, utente.getCognome());
+            stmt.setString(5, utente.getIndirizzo());
+
+            stmt.executeUpdate(); //serve per eseguire operazioni SQL che modificano i dati
+            return true;
+        } catch (Exception e) {
+            System.out.println("Errore: username già esistente!");
+            return false; // Username già esistente
+        }
+    }
+
+    public Utente getUtenteByUsername(String username) throws SQLException {
+        String query = "SELECT * FROM utente WHERE Username = ?";
+        try {
+            PreparedStatement stmt = connection.prepareStatement(query);
+            stmt.setString(1, username);
+
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {     //se l'utente esiste il ResultSet avrà una riga e quindi rs.next()=true
+                    return new Utente(
+                            rs.getString("Username"),
+                            rs.getString("Password"),
+                            rs.getString("Nome"),
+                            rs.getString("Cognome"),
+                            rs.getString("Indirizzo")
+                    );
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+}

@@ -106,19 +106,8 @@
                     <th>Proprietario</th>
                 </tr>
                 </thead>
-                <tbody>
-                <tr th:each="articolo : ${listaArticoli}">
-                    <td>
-                        <input type="checkbox" name="articoliSelezionati"
-                               th:value="${articolo.codice}">
-                    </td>
-                    <td th:text="${articolo.codice}"></td>
-                    <td th:text="${articolo.nome}"></td>
-                    <td th:text="${articolo.descrizione}"></td>
-                    <!--<td><img th:src="@{${articolo.immagine}}" alt="Immagine articolo" width="100"></td>-->
-                    <td th:text="${articolo.prezzo} + ' €'"></td>
-                    <td th:text="${articolo.proprietario}"></td>
-                </tr>
+                <tbody id="tabellaArticoliBody">
+                <!-- le righe saranno inserite via JavaScript -->
                 </tbody>
             </table>
             <br>
