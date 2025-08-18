@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Aste Online</title>
+    <script type="module" th:src="@{/js/vendo.js}" defer></script>
+</head>
+<body>
+  <div id="vendoPage" >
+
+    <h2>Le tue aste aperte</h2>
+    <div id="listaAsteAperte">
+      <table border="1">
+        <thead>
+        <tr>
+          <th>IdAsta</th>
+          <th>Prezzo iniziale</th>
+          <th>Offerta Massima</th>
+          <th>Data Scadenza</th>
+          <th>Ora Scadenza</th>
+          <th>Giorni Rimanenti</th>
+          <th>Ore Rimanenti</th>
+          <th>Articoli inclusi</th>
+          <th></th>
+        </tr>
+        </thead>
+        <tbody id="bodyTabellaAsteAperte">
+        <!-- qui vengono aggiunte tutte le aste aperte, secondo il template "astaApertaRow" -->
+        </tbody>
+
+      </table>
+
+      <template id="astaApertaRow">
+        <tr>
+          <!-- td con text = id asta -->
+          <!-- td con text = prezzo iniziale asta -->
+          <!-- td con text = offerta massima asta -->
+          <!-- td con text = data scadenza asta -->
+          <!-- td con text = ora scadenza asta -->
+          <!-- td con text = giorni rimanenti -->
+          <!-- td con text = ora rimanenti -->
+          <!-- td  -->
+          <!-- table -->
+          <!-- tr -->
+          <!-- td con text = codice articolo -->
+          <!-- td con text = nome articolo -->
+          <!-- td con text = prezzo articolo -->
+          <!-- tr -->
+          <!-- /table -->
+          <!-- /td -->
+          <!-- <td><button class="dettaglioAstaApertaButton">Dettaglio asta</button></td> <!-- va aggiunto value = id asta -->
+        </tr>
+      </template>
+    </div>
+
+    <br>
+    <h2>Le tue aste chiuse</h2>
+    <div id="listaAsteChiuse">
+      <table border="1" id="tabelleAsteChiuse">
+        <thead>
+        <tr>
+          <th>IdAsta</th>
+          <th>Prezzo iniziale</th>
+          <th>Offerta Massima</th>
+          <th>Data Scadenza</th>
+          <th>Ora Scadenza</th>
+        </tr>
+        </thead>
+        <tbody id="bodyTabellaAsteChiuse">
+        <!-- qui vengono aggiunte tutte le aste chiuse, seguendo il template "astaChiusaRow" -->
+        </tbody>
+      </table>
+
+      <template id="astaChiusaRow">
+        <tr>
+          <!-- td con text = id asta -->
+          <!-- td con text = prezzo iniziale asta -->
+          <!-- td con text = offerta massima asta -->
+          <!-- td con text = data scadenza asta -->
+          <!-- td con text = ora scadenza asta -->
+          <!-- <td><button class="dettaglioAstaChiusaButton">Dettaglio asta</button></td> <!-- va aggiunto value = id asta -->
+        </tr>
+      </template>
+    </div>
+
+    <br>
+    <h2>Inserisci un nuovo articolo:</h2>
+    <div id="formNuovoArticolo">
+      <input type="text" id="nomeNewArticolo" placeholder="Nome" required><br><br>
+      <textarea placeholder="Descrizione" id="descrizioneNewArticolo" required></textarea><br><br>
+      <input type="file" id="immagineNewArticolo" placeholder="Immagine" accept="image/*"><br><br>
+      <input type="number" id="prezzoNewArticolo" placeholder="Prezzo" min="0"><br><br>
+
+      <button id="submitNewArticolo">Inserisci articolo</button><br>
+      <div id="newArticoloMessage"></div>
+    </div>
+
+    <h2>Crea asta:</h2>
+    <div id="newAstaMessage"></div>
+    <div id="formNewAsta">
+      <table border="1" id="tabellaArticoliNewAsta">
+        <thead>
+        <tr>
+          <th>Seleziona</th>
+          <th>Id articolo</th>
+          <th>Nome articolo</th>
+          <th>Descrizione</th>
+          <th>Prezzo</th>
+        </tr>
+        </thead>
+        <tbody id="bodyTabellaArticoliNewAsta">
+        <!-- qui vengono aggiunti tutti gli articoli selezionabili per una nuova asta, secondo il template "articoliSelezionabiliRow" -->
+        </tbody>
+      </table>
+
+      <!-- template di una riga della tabella tabellaArticoliNewAsta -->
+      <template id="articoliSelezionabiliRow">
+        <tr>
+          <td><input type="checkbox" name="codiceArticolo"></td>	<!-- value = codice articolo -->
+          <!-- td con text = codice articolo -->
+          <!-- td con text = nome articolo -->
+          <!-- td con text = descrizione articolo -->
+          <!-- td con text = prezzo articolo -->
+        </tr>
+      </template><br>
+
+      <label for="rialzoMinimo">Rialzo minimo (in €):</label>
+      <input type="number" id="rialzoMinimo" min="1" step="1" required><br><br>
+
+      <label for="scadenza">Data scadenza:</label>
+      <input type="datetime-local" id="scadenza" required><br><br>
+
+      <button id="submitNewAsta">Crea Asta</button>
+
+    </div>
+  </div>
+</body>
+</html>
