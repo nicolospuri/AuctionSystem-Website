@@ -63,9 +63,9 @@
                     </tr>
                 </thead>
                 <tbody>
-                    <tr align="center">
+                <tr th:each="a : ${asteVinte}" align="center">
                         <td th:text="${a.id}"></td>
-                        <td th:text="${a.offertaMassima.prezzo + ' €'}"></td>
+                        <td th:text="${a.prezzoOffertaMassima} + ' €'"></td>
                         <td>
                             <ul>
                                 <li th:each="art : ${a.articoli}">

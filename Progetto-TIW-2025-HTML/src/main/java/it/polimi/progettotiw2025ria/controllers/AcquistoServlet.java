@@ -2,9 +2,11 @@ package it.polimi.progettotiw2025ria.controllers;
 
 import it.polimi.progettotiw2025ria.beans.Articolo;
 import it.polimi.progettotiw2025ria.beans.Asta;
+import it.polimi.progettotiw2025ria.beans.Offerta;
 import it.polimi.progettotiw2025ria.beans.Utente;
 import it.polimi.progettotiw2025ria.dao.ArticoloDAO;
 import it.polimi.progettotiw2025ria.dao.AstaDAO;
+import it.polimi.progettotiw2025ria.dao.OffertaDAO;
 import it.polimi.progettotiw2025ria.utils.ConnectionHandler;
 import jakarta.servlet.ServletContext;
 import jakarta.servlet.UnavailableException;
@@ -63,12 +65,19 @@ public class AcquistoServlet extends HttpServlet {
         String keyword = request.getParameter("keyword");
         HttpSession session = request.getSession();
         Utente utente = (Utente) session.getAttribute("utente");
+        if (utente == null) {
+            ctx.setVariable("errorMsg", "Utente non trovato");
+            templateEngine.process("index", ctx, response.getWriter());
+            return;
+        }
 
         try {
             AstaDAO astaDAO = new AstaDAO(connection);
             ArticoloDAO articoloDAO = new ArticoloDAO(connection);
+            OffertaDAO offertaDAO = new OffertaDAO(connection);
             List<Asta> asteTrovate = null;
             List<Articolo> articoli = null;
+            Offerta offertaMax = null;
             if (keyword != null && !keyword.isEmpty()) {
                 asteTrovate = astaDAO.getAsteAperteByKeyword(keyword);
             }
@@ -92,6 +101,11 @@ public class AcquistoServlet extends HttpServlet {
                 ctx.setVariable("asteVinteMsg", "Nessuna asta vinta");
             } else {
                 for (Asta a : asteVinte) {
+                    offertaMax = offertaDAO.getMaxOffertaByIdAsta(a.getId());
+                    if (offertaMax != null) {
+                        a.setOffertaMassima(offertaMax);
+                        a.setPrezzoOffertaMassima(offertaMax.getPrezzo());
+                    }
                     articoli = articoloDAO.getArticoliByIdAsta(a.getId());
                     a.setArticoli(articoli);
                 }
