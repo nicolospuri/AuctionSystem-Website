@@ -68,7 +68,7 @@ public class AggiungiArticolo extends HttpServlet {
         }
 
         // Recupero utente dalla sessione
-        HttpSession session = request.getSession(false);
+        HttpSession session = request.getSession(false); // false per non creare una nuova sessione se non esiste
         Utente utente = (session != null) ? (Utente) session.getAttribute("utente") : null;
         if (utente == null) {
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
