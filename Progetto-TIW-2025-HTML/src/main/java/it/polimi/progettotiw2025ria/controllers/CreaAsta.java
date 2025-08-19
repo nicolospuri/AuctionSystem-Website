@@ -59,11 +59,15 @@ public class CreaAsta extends HttpServlet {
         String path = request.getContextPath() + "/VendoServlet";
 
         // Controllo login
-        Utente utente = (Utente) request.getSession().getAttribute("utente");
-        if (request.getSession(false) == null) {
-            templateEngine.process("index", ctx, response.getWriter());            // In caso di credenziali vuote o mancanti, torna al login
+        if (request.getSession() == null) {
+            response.sendRedirect(request.getContextPath() + "/index.html");
             return;
         }
+        if (request.getSession().getAttribute("utente") == null) {
+            response.sendRedirect(request.getContextPath() + "/index.html");
+            return;
+        }
+        Utente utente = (Utente) request.getSession().getAttribute("utente");
         if (utente == null) {
             ctx.setVariable("errorMsg", "Utente non trovato");
             templateEngine.process("index", ctx, response.getWriter());

@@ -28,6 +28,10 @@ public class Logout extends HttpServlet {
 
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
+        if (request.getSession() == null) {
+            response.sendRedirect(request.getContextPath() + "/index.html");
+            return;
+        }
         HttpSession session = request.getSession(false);
         if (session != null) {
             session.invalidate();
