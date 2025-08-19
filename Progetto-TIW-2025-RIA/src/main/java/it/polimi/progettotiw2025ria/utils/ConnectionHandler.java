@@ -11,7 +11,7 @@ public class ConnectionHandler {
         final String DATABASE = "Progetto_Web";
         final String USER = "progetto_web";
         final String PASSWORD = "progetto_web";
-        final String URL = "jdbc:mysql://localhost:3306/" + DATABASE + "?serverTimezone=UTC";;
+        final String URL = "jdbc:mysql://localhost:3306/" + DATABASE + "?serverTimezone=Europe/Rome";;
         Connection connection = null;
         // Load the JDBC driver
         try {
