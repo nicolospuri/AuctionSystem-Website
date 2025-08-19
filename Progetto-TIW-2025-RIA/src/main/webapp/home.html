@@ -15,7 +15,8 @@
         <span id="moveToVendo" hidden>Vendo</span><br>
         <span id="moveToAcquisto" hidden>Acquisto</span><br><br>
 
-        <div id="vendoPage" hidden>
+        <!--inserire hidden appena funzionano vendo-->
+        <div id="vendoPage">
             <h2>Le tue aste aperte</h2>
             <div id="listaAsteAperte">
               <table border="1">
@@ -83,15 +84,15 @@
 
             <br>
             <h2>Inserisci un nuovo articolo:</h2>
-            <div id="formNuovoArticolo">
+            <form id="formNuovoArticolo">
               <input type="text" id="nomeNewArticolo" placeholder="Nome" required><br><br>
               <textarea placeholder="Descrizione" id="descrizioneNewArticolo" required></textarea><br><br>
               <input type="file" id="immagineNewArticolo" placeholder="Immagine" accept="image/*"><br><br>
               <input type="number" id="prezzoNewArticolo" placeholder="Prezzo" min="0"><br><br>
 
-              <button id="submitNewArticolo">Inserisci articolo</button><br>
+              <button id="submitNewArticolo">Inserisci articolo</button><br><br>
               <div id="newArticoloMessage"></div>
-            </div>
+            </form>
 
             <h2>Crea asta:</h2>
             <div id="newAstaMessage"></div>
