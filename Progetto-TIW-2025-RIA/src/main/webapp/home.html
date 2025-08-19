@@ -5,6 +5,7 @@
         <title>Aste Online</title>
         <script type="module" th:src="@{/js/home.js}" defer></script>
         <script type="module" th:src="@{/js/vendo.js}" defer></script>
+        <script type="module" th:src="@{/js/acquisto.js}" defer></script>
     </head>
     <body>
         <h5>Menu:</h5>
@@ -127,6 +128,76 @@
 
               <button id="submitNewAsta">Crea Asta</button>
 
+            </div>
+        </div>
+
+        <div id="acquistoPage" hidden>
+            <h2>Ricerca Aste</h2>
+            <div>
+                <label for="keyword">Parola chiave:</label>
+                <input type="text" id="keyword" name="keyword" placeholder="Parola chiave" required>
+
+                <button id="cercaPerParolaChiave">Cerca</button>
+            </div>
+            <br><br>
+
+            <div id="asteTrovateMsg"></div>
+            <div id="asteTrovate" hidden>
+                <h2>Aste Trovate</h2>
+                <table border="1">
+                    <thead>
+                        <tr align="center">
+                            <th>ID Asta</th>
+                            <th>Prezzo Iniziale</th>
+                            <th>Rialzo Minimo</th>
+                            <th>Scadenza</th>
+                            <th>Proprietario</th>
+                            <th>Articoli</th>
+                        </tr>
+                    </thead>
+                    <tbody id="asteTrovateBody">
+                        <!-- qui vengono aggiunte tutte le aste legate a quella parola chiave -->
+                    </tbody>
+                </table>
+            </div>
+            <br><br>
+
+            <div id="asteVisitateMsg"></div>
+            <div id="asteVisitate" hidden>
+                <h3>Aste viste in precedenza</h3>
+                <table border="1">
+                    <thead>
+                    <tr align="center">
+                        <th>ID Asta</th>
+                        <th>Prezzo Iniziale</th>
+                        <th>Rialzo Minimo</th>
+                        <th>Scadenza</th>
+                        <th>Proprietario</th>
+                        <th>Articoli</th>
+                    </tr>
+                    </thead>
+                    <tbody id="asteVisitateBody">
+                        <!-- qui vengono aggiunte tutte le aste visitate in precedenza -->
+                    </tbody>
+                </table>
+            </div>
+            <br><br>
+
+            <div id="asteVinteMsg"></div>
+            <div id="asteVinte" hidden>
+                <h2>Aste vinte</h2>
+                <table border="1">
+                    <thead>
+                    <tr align="center">
+                        <th>ID Asta</th>
+                        <th>Prezzo</th>
+                        <th>Articoli</th>
+                    </tr>
+                    </thead>
+                    <tbody id="asteVinteBody">
+                        <!-- qui vengono aggiunte tutte le aste vinte -->
+                    </tbody>
+                </table>
             </div>
         </div>
     </body>

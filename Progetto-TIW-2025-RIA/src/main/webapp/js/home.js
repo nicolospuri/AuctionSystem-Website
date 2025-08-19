@@ -1,10 +1,10 @@
-// import {renderAcquistoPage} from "./acquisto.js";
-import {renderVendoPage} from "./vendo.js";
+import {renderAcquistoPage} from "./acquisto.js";
+// import {renderVendoPage} from "./vendo.js";
 
 
-document.addEventListener('DOMContentLoaded', () => {
-    const moveToVendo = document.getElementById('moveToVendo');
-    const moveToAcquisto = document.getElementById('moveToAcquisto');
+document.addEventListener("DOMContentLoaded", () => {
+    const moveToVendo = document.getElementById("moveToVendo");
+    const moveToAcquisto = document.getElementById("moveToAcquisto");
 
     moveToVendo.addEventListener('click', () => {
         showVendo();
@@ -17,31 +17,32 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 export function showVendo() {
-    moveToAcquisto.removeAttribute('hidden');
-    moveToVendo.setAttribute('hidden', true);  // Mostra solo il pulsante "Acquisto"
+    moveToAcquisto.removeAttribute("hidden");
+    moveToVendo.setAttribute("hidden", true);  // Mostra solo il pulsante "Acquisto"
     hideAllPages();
     // renderVendoPage();
 }
 
 export function showAcquisto() {
-    moveToVendo.removeAttribute('hidden');
-    moveToAcquisto.setAttribute('hidden', true); // Mostra solo il pulsante "Acquisto"
+    moveToVendo.removeAttribute("hidden");
+    moveToAcquisto.setAttribute("hidden", true); // Mostra solo il pulsante "Acquisto"
     hideAllPages();
     renderAcquistoPage();
 }
 
 // Nasconde tutte le pagine
 export function hideAllPages() {
-    document.getElementById('vendoPage').hidden = true;
-    document.getElementById('acquistoPage').hidden = true;
-    document.getElementById('dettaglioAstaPage').hidden = true;
-    document.getElementById('offertaPage').hidden = true;
-    document.getElementById('back').hidden = true;
+    document.getElementById("vendoPage").hidden = true;
+    document.getElementById("acquistoPage").hidden = true;
+    /*
+    document.getElementById("dettaglioAstaPage").hidden = true;
+    document.getElementById("offertaPage").hidden = true;
+     */
 }
 
 function renderPageByLastAction() {
     const request = new XMLHttpRequest();
-    request.open("POST",  "/Progetto_TIW_2025_RIA_war_exploded/HomeServlet");
+    request.open("POST",  "HomeServlet");
 
     request.onreadystatechange = () => {
         if(request.readyState === 4){

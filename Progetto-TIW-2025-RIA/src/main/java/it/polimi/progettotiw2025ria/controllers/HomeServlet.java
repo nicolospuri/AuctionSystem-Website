@@ -127,10 +127,9 @@ public class HomeServlet extends HttpServlet {
         JsonObject jsonObject = new JsonObject();
         jsonObject.addProperty("userLastActionWasAddedAsta", userLastActionWasAddedAsta);
 
-        // scrittura JSON nella response
         response.setContentType("application/json");
         response.setCharacterEncoding("UTF-8");
-        response.getWriter().print(jsonObject.toString());
+        response.getWriter().print(jsonObject);
     }
 
     @Override
