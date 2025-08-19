@@ -58,7 +58,7 @@ public class VendoServlet extends HttpServlet {
             AstaDAO astaDAO = new AstaDAO(connection);
             ArticoloDAO articoloDAO = new ArticoloDAO(connection);
 
-            // 🔹 Aste aperte + chiuse
+            // Aste aperte + chiuse
             if (renderAllAste == null || renderAllAste.equals("true")) {
                 List<Asta> openAste = astaDAO.getAsteAperteByUsername(username);
                 for (Asta asta : openAste) {
