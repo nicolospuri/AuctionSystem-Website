@@ -63,7 +63,15 @@ public class ChiudiAsta extends HttpServlet {
         JakartaServletWebApplication webApplication = JakartaServletWebApplication.buildApplication(servletContext);
         WebContext ctx = new WebContext(webApplication.buildExchange(request, response), request.getLocale());
 
+        if (request.getSession() == null) {
+            response.sendRedirect(request.getContextPath() + "/index.html");
+            return;
+        }
         HttpSession session = request.getSession();
+        if (session.getAttribute("utente") == null) {
+            response.sendRedirect(request.getContextPath() + "/index.html");
+            return;
+        }
         Utente utente = (Utente) session.getAttribute("utente");
         if (utente == null) {
             ctx.setVariable("errorMsg", "Utente non trovato");

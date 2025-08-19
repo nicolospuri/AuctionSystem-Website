@@ -50,6 +50,10 @@ public class SignUp extends HttpServlet {
 
     @Override
     public void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
+        if (request.getSession() == null) {
+            response.sendRedirect(request.getContextPath() + "/index.html");
+            return;
+        }
         String username = request.getParameter("username");
         String password = request.getParameter("password");
         String nome = request.getParameter("nome");

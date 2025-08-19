@@ -55,6 +55,14 @@ public class AggiungiArticolo extends HttpServlet{
         WebContext ctx = new WebContext(webApplication.buildExchange(request, response), request.getLocale());
         String path = request.getContextPath() + "/VendoServlet";
 
+        if (request.getSession() == null) {
+            response.sendRedirect(request.getContextPath() + "/index.html");
+            return;
+        }
+        if (request.getSession().getAttribute("utente") == null) {
+            response.sendRedirect(request.getContextPath() + "/index.html");
+            return;
+        }
         Utente utente = (Utente) request.getSession().getAttribute("utente");
         if (utente == null) {
             ctx.setVariable("errorMsg", "Utente non trovato");

@@ -1,6 +1,7 @@
 package it.polimi.progettotiw2025ria.controllers;
 
 import com.google.gson.JsonObject;
+import it.polimi.progettotiw2025ria.beans.Utente;
 import it.polimi.progettotiw2025ria.utils.ConnectionHandler;
 import jakarta.servlet.ServletContext;
 import jakarta.servlet.UnavailableException;
@@ -49,8 +50,8 @@ public class HomeServlet extends HttpServlet {
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
         String path = "home";
 
-        if(request.getSession(false) == null) {
-            response.sendRedirect(request.getContextPath() + "/login");
+        if(request.getSession() == null) {
+            response.sendRedirect(request.getContextPath() + "/index.html");
             return;
         }
 
@@ -63,23 +64,33 @@ public class HomeServlet extends HttpServlet {
 
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
-        if (request.getSession(false) == null) {
+        if (request.getSession() == null) {
             response.sendRedirect(request.getContextPath() + "/index.html");
             return;
         }
-
         HttpSession session = request.getSession();
-        String username = (String) session.getAttribute("username");
-        if (username == null || username.isEmpty()) {
+
+        if (session.getAttribute("utente") == null) {
             response.sendRedirect(request.getContextPath() + "/index.html");
             return;
         }
+        Utente utente = (Utente) session.getAttribute("utente");
+        if (utente == null) {
+            response.sendRedirect(request.getContextPath() + "/index.html");
+            return;
+        }
+        String username = utente.getUsername();
 
         boolean userLastActionWasAddedAsta = false;
         boolean lastActionFound = false;
 
+        boolean primoAccesso = false;
+        if (session.getAttribute("primoAccesso") != null) {
+            primoAccesso = (boolean) session.getAttribute("primoAccesso");
+        }
+
         // Se non è il primo accesso, cerco il cookie che indica se l'utente ha aggiunto un'asta
-        if (!(Boolean) session.getAttribute("primoAccesso")) {
+        if (!primoAccesso) {
             Cookie[] cookies = request.getCookies();
 
             if (cookies != null) {
@@ -101,7 +112,6 @@ public class HomeServlet extends HttpServlet {
             response.addCookie(lastAction);
         }
 
-        // Setta i cookie di default per la visualizzazione delle tabelle
         Cookie renderAllTablesAste = new Cookie("renderAllTablesAste"+username, "true");
         renderAllTablesAste.setMaxAge(60*60*24*30);
         response.addCookie(renderAllTablesAste);
@@ -118,7 +128,9 @@ public class HomeServlet extends HttpServlet {
         jsonObject.addProperty("userLastActionWasAddedAsta", userLastActionWasAddedAsta);
 
         // scrittura JSON nella response
-        response.getWriter().print(jsonObject);
+        response.setContentType("application/json");
+        response.setCharacterEncoding("UTF-8");
+        response.getWriter().print(jsonObject.toString());
     }
 
     @Override

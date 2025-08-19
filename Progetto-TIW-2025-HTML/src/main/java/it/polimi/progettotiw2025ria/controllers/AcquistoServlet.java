@@ -63,7 +63,15 @@ public class AcquistoServlet extends HttpServlet {
         String path = "acquisto";
 
         String keyword = request.getParameter("keyword");
+        if (request.getSession() == null) {
+            response.sendRedirect(request.getContextPath() + "/index.html");
+            return;
+        }
         HttpSession session = request.getSession();
+        if (session.getAttribute("utente") == null) {
+            response.sendRedirect(request.getContextPath() + "/index.html");
+            return;
+        }
         Utente utente = (Utente) session.getAttribute("utente");
         if (utente == null) {
             ctx.setVariable("errorMsg", "Utente non trovato");
