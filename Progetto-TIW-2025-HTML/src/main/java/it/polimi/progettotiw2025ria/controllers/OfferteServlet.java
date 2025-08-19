@@ -63,7 +63,15 @@ public class OfferteServlet extends HttpServlet {
         WebContext ctx = new WebContext(webApplication.buildExchange(request, response), request.getLocale());
         String path = "offerta";
 
+        if (request.getSession() == null) {
+            response.sendRedirect(request.getContextPath() + "/index.html");
+            return;
+        }
         HttpSession session = request.getSession();
+        if (session.getAttribute("utente") == null) {
+            response.sendRedirect(request.getContextPath() + "/index.html");
+            return;
+        }
         Utente utente = (Utente) session.getAttribute("utente");
         if (utente == null) {
             ctx.setVariable("errorMsg", "Utente non trovato");
