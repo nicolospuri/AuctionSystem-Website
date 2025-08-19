@@ -1,13 +1,11 @@
 package it.polimi.progettotiw2025ria.controllers;
 
+import com.google.gson.JsonObject;
 import it.polimi.progettotiw2025ria.utils.ConnectionHandler;
 import jakarta.servlet.ServletContext;
 import jakarta.servlet.UnavailableException;
 import jakarta.servlet.annotation.WebServlet;
-import jakarta.servlet.http.HttpServlet;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
-import jakarta.servlet.http.HttpSession;
+import jakarta.servlet.http.*;
 import org.thymeleaf.TemplateEngine;
 import org.thymeleaf.context.WebContext;
 import org.thymeleaf.templatemode.TemplateMode;
@@ -49,7 +47,18 @@ public class HomeServlet extends HttpServlet {
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
-        doPost(request, response);
+        String path = "home";
+
+        if(request.getSession(false) == null) {
+            response.sendRedirect(request.getContextPath() + "/login");
+            return;
+        }
+
+        ServletContext servletContext = getServletContext();
+        JakartaServletWebApplication webApplication = JakartaServletWebApplication.buildApplication(servletContext);
+        WebContext ctx = new WebContext(webApplication.buildExchange(request, response), request.getLocale());
+
+        templateEngine.process(path, ctx, response.getWriter());
     }
 
     @Override
@@ -66,10 +75,50 @@ public class HomeServlet extends HttpServlet {
             return;
         }
 
-        if ((Boolean) session.getAttribute("primoAccesso")) {
+        boolean userLastActionWasAddedAsta = false;
+        boolean lastActionFound = false;
 
+        // Se non è il primo accesso, cerco il cookie che indica se l'utente ha aggiunto un'asta
+        if (!(Boolean) session.getAttribute("primoAccesso")) {
+            Cookie[] cookies = request.getCookies();
+
+            if (cookies != null) {
+                for (Cookie c : cookies) {
+                    if (c.getName().equals("lastActionCreaAsta"+username)) {
+                        userLastActionWasAddedAsta = Boolean.parseBoolean(c.getValue());
+                        c.setMaxAge(60*60*24*30);
+                        lastActionFound = true;
+                        response.addCookie(c);
+                        break;
+                    }
+                }
+            }
+        }
+        // Se è il primo accesso o il cookie lastAction è scaduto, crea un nuovo cookie con valore false
+        if(!lastActionFound) {
+            Cookie lastAction = new Cookie("lastActionCreaAsta"+username, "false");
+            lastAction.setMaxAge(60*60*24*30);
+            response.addCookie(lastAction);
         }
 
+        // Setta i cookie di default per la visualizzazione delle tabelle
+        Cookie renderAllTablesAste = new Cookie("renderAllTablesAste"+username, "true");
+        renderAllTablesAste.setMaxAge(60*60*24*30);
+        response.addCookie(renderAllTablesAste);
+
+        Cookie renderTableAsteAperte = new Cookie("renderTableAsteAperte"+username, "true");
+        renderTableAsteAperte.setMaxAge(60*60*24*30);
+        response.addCookie(renderTableAsteAperte);
+
+        Cookie renderArticoli = new Cookie("renderArticoli"+username, "true");
+        renderArticoli.setMaxAge(60*60*24*30);
+        response.addCookie(renderArticoli);
+
+        JsonObject jsonObject = new JsonObject();
+        jsonObject.addProperty("userLastActionWasAddedAsta", userLastActionWasAddedAsta);
+
+        // scrittura JSON nella response
+        response.getWriter().print(jsonObject);
     }
 
     @Override
