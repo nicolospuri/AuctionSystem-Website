@@ -14,6 +14,7 @@ document.addEventListener('DOMContentLoaded', () => {
         .catch(err => console.error("Errore fetch GetArticoliServlet:", err));
 
     const newArticoloForm = document.getElementById("submitNewArticolo");
+    const newAstaForm = document.getElementById("submitNewAsta");
     // aggiunta gestione eventi creazione articolo e asta
     newArticoloForm.addEventListener("click", (e) => {
         e.preventDefault();
@@ -21,10 +22,10 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     //todo: levare commenti quando funziona creaAsta
-    /*document.querySelector("#submitNewAsta").addEventListener(
-        "click",
-        creaAsta
-    );*/
+    newAstaForm.addEventListener("click", (e) => {
+        e.preventDefault();
+        creaAsta();
+    });
 });
 
 
@@ -78,15 +79,16 @@ document.addEventListener('DOMContentLoaded', () => {
         tbody.appendChild(tr);
     }
 
-    // ========== TUO CODICE: AGGIUNGI ARTICOLO ==========
     function aggiungiArticolo(){ // callback del click su "Inserisci articolo"
         const nome = document.getElementById("nomeNewArticolo").value.trim();
         const descrizione = document.getElementById("descrizioneNewArticolo").value.trim();
         const prezzo = document.getElementById("prezzoNewArticolo").value.trim();
         const immagine = document.getElementById("immagineNewArticolo").files[0];
 
+        const msg = document.getElementById("newArticoloMessage");
+        msg.textContent= ""; // reset messaggio
+        msg.style.color = "black"; // reset colore
         if (!nome || !descrizione || !prezzo) {
-            const msg = document.getElementById("newArticoloMessage");
             msg.style.color = "red";
             msg.style.fontWeight = "bold";
             msg.innerText = "Tutti i campi obbligatori";
@@ -104,7 +106,6 @@ document.addEventListener('DOMContentLoaded', () => {
             body: formData })
         .then(response => response.json())
         .then(data => {
-        const msg = document.getElementById("newArticoloMessage");
         if (data.success) {
         emptyArticoloInputs(); // pulisco i campi
         msg.style.color = "green";
@@ -126,9 +127,75 @@ document.addEventListener('DOMContentLoaded', () => {
     })
         .catch(error => {
         console.error("Errore fetch:", error);
-        const msg = document.getElementById("newArticoloMessage");
         msg.style.color = "red";
         msg.style.fontWeight = "bold";
         msg.innerText = "Errore di rete";
     });
     }
+
+    // --- util: articoli selezionati dalla tabella ---
+    function getArticoliSelezionati() {
+    const checked = document.querySelectorAll(
+    '#bodyTabellaArticoliNewAsta input[type="checkbox"][name="codiceArticolo"]:checked'
+    );
+    return Array.from(checked)
+    .map(cb => Number(cb.value))
+    .filter(Number.isFinite);
+}
+
+function toIsoLocalDateTime(value) {
+    // value es: "2025-08-20T14:30" -> "2025-08-20T14:30:00"
+    if (!value) return value;
+    return value.length === 16 ? value + ":00" : value;
+}
+
+function creaAsta(e) {
+    if (e) e.preventDefault();
+    const msg = document.getElementById("newAstaMessage");
+    const btn = document.getElementById("submitNewAsta");
+    const rialzoMinimo = parseInt(document.getElementById("rialzoMinimo").value, 10);
+    const rawScadenza = document.getElementById("scadenza").value;
+
+    msg.textContent= ""; // reset messaggio
+    msg.style.color = "black"; // reset colore
+    const articoli = Array.from(
+        document.querySelectorAll('#bodyTabellaArticoliNewAsta input[type="checkbox"][name="codiceArticolo"]:checked')
+    ).map(cb => Number(cb.value)).filter(Number.isFinite);
+
+    if (!articoli.length) { msg.textContent = "Seleziona almeno un articolo."; msg.style.color = "red"; return; }
+    if (!Number.isInteger(rialzoMinimo) || rialzoMinimo < 1) { msg.textContent = "Rialzo minimo non valido (>=1)."; msg.style.color = "red"; return; }
+    if (!rawScadenza) { msg.textContent = "Inserisci la data di scadenza."; msg.style.color = "red"; return; }
+
+    const payload = {
+        articoli,
+        rialzoMinimo,
+        scadenza: toIsoLocalDateTime(rawScadenza) // <-- compatibile col tuo Adapter
+    };
+
+    if (btn) { btn.disabled = true; btn.dataset.prevText = btn.textContent; btn.textContent = "Creazione…"; }
+    msg.textContent = "";
+
+    fetch("CreaAstaServlet", {
+        method: "POST",
+        headers: { "Content-Type": "application/json;charset=UTF-8" },
+        body: JSON.stringify(payload)
+    })
+        .then(async res => {
+            const text = await res.text();
+            if (!res.ok) throw new Error(`HTTP ${res.status} ${res.statusText} – ${text || "nessun body"}`);
+            try { return JSON.parse(text); } catch { throw new Error("Risposta non JSON: " + text); }
+        })
+        .then(data => {
+            if (data.success) {
+                msg.textContent = `Asta creata.`;
+                msg.style.color = "green";
+                document.querySelectorAll('#bodyTabellaArticoliNewAsta input[type="checkbox"][name="codiceArticolo"]:checked')
+                    .forEach(cb => cb.checked = false);
+            } else {
+                throw new Error(data.error || "Operazione fallita");
+            }
+        })
+        .catch(err => { console.error(err); msg.textContent = "Errore: " + err.message; msg.style.color = "red"; })
+        .finally(() => { if (btn) { btn.disabled = false; btn.textContent = btn.dataset.prevText || "Crea Asta"; } });
+}
+

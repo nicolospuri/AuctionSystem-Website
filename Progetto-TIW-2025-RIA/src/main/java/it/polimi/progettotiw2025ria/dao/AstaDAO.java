@@ -124,22 +124,43 @@ public class AstaDAO {
             ps.setDouble(1, prezzo);
             ps.setFloat(2, rialzoMinimo);
             ps.setTimestamp(3, scadenza);
-            ps.setString(4, proprietario);
 
-            int affectedRows = ps.executeUpdate();
-            if (affectedRows == 0) {
-                throw new SQLException("Creazione asta fallita, nessuna riga inserita.");
+            if (proprietario == null) {
+                ps.setNull(4, java.sql.Types.VARCHAR);  // <-- robusto su tutti i driver
+            } else {
+                ps.setString(4, proprietario);
             }
 
+            int affectedRows = ps.executeUpdate();
+            if (affectedRows == 0) throw new SQLException("Creazione asta fallita, nessuna riga inserita.");
+
             try (ResultSet rs = ps.getGeneratedKeys()) {
-                if (rs.next()) {
-                    return rs.getInt(1);
-                } else {
-                    throw new SQLException("Creazione asta fallita, nessun ID generato.");
-                }
+                if (rs.next()) return rs.getInt(1);
+                throw new SQLException("Creazione asta fallita, nessun ID generato.");
             }
         }
     }
+
+    public int collegaArticoliAllAsta(int idAsta, List<Integer> codiciArticoli, String proprietario) throws SQLException {
+        if (codiciArticoli == null || codiciArticoli.isEmpty()) return 0;
+
+        StringBuilder in = new StringBuilder();
+        for (int i = 0; i < codiciArticoli.size(); i++) {
+            if (i > 0) in.append(',');
+            in.append('?');
+        }
+
+        String sql = "UPDATE articolo SET IdAsta = ? " +
+                "WHERE IdAsta IS NULL AND Proprietario = ? AND Codice IN (" + in + ")";
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+            int idx = 1;
+            ps.setInt(idx++, idAsta);
+            ps.setString(idx++, proprietario);
+            for (Integer c : codiciArticoli) ps.setInt(idx++, c);
+            return ps.executeUpdate();
+        }
+    }
+
 
     // Chiudi asta con aggiudicatario
     public boolean chiudiAsta(int idAsta, String aggiudicatario) throws SQLException {
