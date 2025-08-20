@@ -44,7 +44,7 @@ export function renderOffertaPage(idAsta) {
                     document.getElementById('canOffer').hidden = false;
                     document.getElementById("showRialzoMinimo").textContent = rialzoMinimo + ".00 €";
 
-                    document.getElementById("FaiOfferta").addEventListener("click", (e) => {
+                    document.getElementById("faiOfferta").addEventListener("click", (e) => {
                         e.preventDefault();
                         faiOfferta(prezzoOffertaMassima, rialzoMinimo);
                     })
