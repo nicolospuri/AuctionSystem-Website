@@ -6,12 +6,11 @@ import it.polimi.progettotiw2025ria.utils.ConnectionHandler;
 import jakarta.servlet.UnavailableException;
 import jakarta.servlet.annotation.MultipartConfig;
 import jakarta.servlet.annotation.WebServlet;
-import jakarta.servlet.http.HttpServlet;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
-import jakarta.servlet.http.HttpSession;
+import jakarta.servlet.http.*;
 
+import java.io.File;
 import java.io.IOException;
+import java.nio.file.Paths;
 import java.sql.Connection;
 import java.sql.SQLException;
 
@@ -35,60 +34,67 @@ public class AggiungiArticolo extends HttpServlet {
         response.setContentType("application/json");
         response.setCharacterEncoding("UTF-8");
 
-        String nome = request.getParameter("nome");
-        String descrizione = request.getParameter("descrizione");
-        String prezzoParam = request.getParameter("prezzo");
-
-        // Validazione input
-        if (nome == null || nome.trim().isEmpty()
-                || descrizione == null || descrizione.trim().isEmpty()
-                || prezzoParam == null || prezzoParam.trim().isEmpty()) {
-            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-            response.getWriter().write("{\"success\":false, \"error\":\"Tutti i campi sono obbligatori\"}");
-            System.err.println("[AggiungiArticolo] Errore: campi mancanti.");
-            return;
-        }
-
-        double prezzo;
         try {
-            prezzo = Double.parseDouble(prezzoParam.trim());
-        } catch (NumberFormatException e) {
-            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-            response.getWriter().write("{\"success\":false, \"error\":\"Il prezzo deve essere un numero valido\"}");
-            System.err.println("[AggiungiArticolo] Errore: prezzo non valido -> " + prezzoParam);
-            return;
-        }
+            String nome = request.getParameter("nome");
+            String descrizione = request.getParameter("descrizione");
+            String prezzoParam = request.getParameter("prezzo");
 
-        if (prezzo <= 0) {
-            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-            response.getWriter().write("{\"success\":false, \"error\":\"Il prezzo deve essere maggiore di zero\"}");
-            System.err.println("[AggiungiArticolo] Errore: prezzo <= 0");
-            return;
-        }
+            if (nome == null || nome.trim().isEmpty()
+                    || descrizione == null || descrizione.trim().isEmpty()
+                    || prezzoParam == null || prezzoParam.trim().isEmpty()) {
+                response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+                response.getWriter().write("{\"success\":false, \"error\":\"Tutti i campi sono obbligatori\"}");
+                return;
+            }
 
-        // Recupero utente dalla sessione
-        HttpSession session = request.getSession(false);
-        Utente utente = (session != null) ? (Utente) session.getAttribute("utente") : null;
-        if (utente == null) {
-            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-            response.getWriter().write("{\"success\":false, \"error\":\"Sessione utente scaduta\"}");
-            System.err.println("[AggiungiArticolo] Errore: utente non trovato in sessione");
-            return;
-        }
+            double prezzo;
+            try {
+                prezzo = Double.parseDouble(prezzoParam.trim());
+            } catch (NumberFormatException e) {
+                response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+                response.getWriter().write("{\"success\":false, \"error\":\"Prezzo non valido\"}");
+                return;
+            }
 
-        try {
+            if (prezzo <= 0) {
+                response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+                response.getWriter().write("{\"success\":false, \"error\":\"Il prezzo deve essere maggiore di zero\"}");
+                return;
+            }
+
+            HttpSession session = request.getSession(false);
+            Utente utente = (session != null) ? (Utente) session.getAttribute("utente") : null;
+            if (utente == null) {
+                response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                response.getWriter().write("{\"success\":false, \"error\":\"Sessione scaduta\"}");
+                return;
+            }
+
+            // Gestione immagine
+            Part filePart = request.getPart("immagine");
+            String fileName = "default.png"; // default
+
+            if (filePart != null && filePart.getSize() > 0) {
+                // Qui salvi il file sul filesystem o in DB
+                // Ad esempio in una cartella "uploads"
+                String uploadPath = getServletContext().getRealPath("") + File.separator + "uploads";
+                File uploadDir = new File(uploadPath);
+                if (!uploadDir.exists()) uploadDir.mkdir();
+
+                fileName = Paths.get(filePart.getSubmittedFileName()).getFileName().toString();
+                filePart.write(uploadPath + File.separator + fileName);
+            }
+
+            // Inserimento nel DB (salvando il nome file immagine o path relativo)
             ArticoloDAO articoloDAO = new ArticoloDAO(connection);
-
-            // Inserimento nel DB
-            articoloDAO.addArticolo(nome, descrizione, utente.getUsername(), prezzo);
+            articoloDAO.addArticolo(nome, descrizione, utente.getUsername(), prezzo, fileName);
 
             response.setStatus(HttpServletResponse.SC_OK);
             response.getWriter().write("{\"success\":true}");
-        } catch (SQLException e) {
+        } catch (Exception e) {
             e.printStackTrace();
             response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-            response.getWriter().write("{\"success\":false, \"error\":\"Errore DB: " + e.getMessage() + "\"}");
-            System.err.println("[AggiungiArticolo] Errore SQL: " + e.getMessage());
+            response.getWriter().write("{\"success\":false, \"error\":\"Errore interno: " + e.getMessage() + "\"}");
         }
     }
 

@@ -81,15 +81,15 @@
 
             <br>
             <h2>Inserisci un nuovo articolo:</h2>
-            <form id="formNuovoArticolo">
+            <div id="formNuovoArticolo">
               <input type="text" id="nomeNewArticolo" placeholder="Nome" required><br><br>
               <textarea placeholder="Descrizione" id="descrizioneNewArticolo" required></textarea><br><br>
               <input type="file" id="immagineNewArticolo" placeholder="Immagine" accept="image/*"><br><br>
-              <input type="number" id="prezzoNewArticolo" placeholder="Prezzo" min="0"><br><br>
+              <input type="number" id="prezzoNewArticolo" placeholder="Prezzo" step="0.01" min="0"><br><br>
 
               <button id="submitNewArticolo">Inserisci articolo</button><br><br>
               <div id="newArticoloMessage"></div>
-            </form>
+            </div>
 
             <h2>Crea asta:</h2>
             <form id="formNewAsta">

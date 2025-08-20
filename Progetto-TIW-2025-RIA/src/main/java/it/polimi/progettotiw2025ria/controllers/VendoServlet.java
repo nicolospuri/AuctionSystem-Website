@@ -9,10 +9,7 @@ import it.polimi.progettotiw2025ria.dao.AstaDAO;
 import it.polimi.progettotiw2025ria.utils.ConnectionHandler;
 import jakarta.servlet.UnavailableException;
 import jakarta.servlet.annotation.WebServlet;
-import jakarta.servlet.http.HttpServlet;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
-import jakarta.servlet.http.HttpSession;
+import jakarta.servlet.http.*;
 
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -98,6 +95,7 @@ public class VendoServlet extends HttpServlet {
             resp.getWriter().write("{\"error\":\"Errore caricamento dati\"}");
         }
     }
+
 
     // --- Utilità gestione cookie ---
     private void setCookie(HttpServletResponse response, String name, String value, int days) {
