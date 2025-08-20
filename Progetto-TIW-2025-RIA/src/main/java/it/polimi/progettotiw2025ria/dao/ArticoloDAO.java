@@ -2,10 +2,7 @@ package it.polimi.progettotiw2025ria.dao;
 
 import it.polimi.progettotiw2025ria.beans.Articolo;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.sql.*;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -35,22 +32,26 @@ public class ArticoloDAO {
         }
     }
 
-    public void addArticolo(String Nome, String Descrizione, String Proprietario, Double Prezzo, String Immagine) throws SQLException {
-        String query = "INSERT INTO articolo (Nome, Descrizione, Proprietario, Prezzo, Immagine) VALUES (?, ?, ?, ?, ?)";
+    public Articolo addArticolo(String nome, String descrizione, String immagine, double prezzo, String proprietario) throws SQLException {
+        String sql = "INSERT INTO articolo (Nome, Descrizione, immagine, Prezzo, Proprietario) VALUES (?, ?, ?, ?, ?)";
+        try (PreparedStatement ps = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+            ps.setString(1, nome);
+            ps.setString(2, descrizione);
+            ps.setString(3, immagine);
+            ps.setDouble(4, prezzo);
+            ps.setString(5, proprietario);
+            ps.executeUpdate();
 
-        try (PreparedStatement stmt = connection.prepareStatement(query)) {
-            stmt.setString(1, Nome);
-            stmt.setString(2, Descrizione);
-            stmt.setString(3, Proprietario);
-            stmt.setDouble(4, Prezzo);
-            stmt.setString(5, Immagine);
-
-            stmt.executeUpdate();
-        } catch (SQLException e) {
-            e.printStackTrace();
-            throw new SQLException("Errore durante l'aggiunta dell'articolo: " + e.getMessage());
+            try (ResultSet rs = ps.getGeneratedKeys()) {
+                if (rs.next()) {
+                    int codice = rs.getInt(1);
+                    return new Articolo(codice, nome, descrizione, immagine, prezzo, proprietario);
+                }
+            }
         }
+        return null;
     }
+
 
 
     public List<Articolo> getArticoliDisponibili(String proprietario) throws SQLException {

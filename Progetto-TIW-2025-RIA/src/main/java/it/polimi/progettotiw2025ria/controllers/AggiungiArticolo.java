@@ -1,5 +1,6 @@
 package it.polimi.progettotiw2025ria.controllers;
 
+import it.polimi.progettotiw2025ria.beans.Articolo;
 import it.polimi.progettotiw2025ria.beans.Utente;
 import it.polimi.progettotiw2025ria.dao.ArticoloDAO;
 import it.polimi.progettotiw2025ria.utils.ConnectionHandler;
@@ -7,6 +8,8 @@ import jakarta.servlet.UnavailableException;
 import jakarta.servlet.annotation.MultipartConfig;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.*;
+import org.json.JSONObject;
+
 
 import java.io.File;
 import java.io.IOException;
@@ -39,6 +42,7 @@ public class AggiungiArticolo extends HttpServlet {
             String descrizione = request.getParameter("descrizione");
             String prezzoParam = request.getParameter("prezzo");
 
+            //Validazione base
             if (nome == null || nome.trim().isEmpty()
                     || descrizione == null || descrizione.trim().isEmpty()
                     || prezzoParam == null || prezzoParam.trim().isEmpty()) {
@@ -62,6 +66,7 @@ public class AggiungiArticolo extends HttpServlet {
                 return;
             }
 
+            //Recupero utente da sessione
             HttpSession session = request.getSession(false);
             Utente utente = (session != null) ? (Utente) session.getAttribute("utente") : null;
             if (utente == null) {
@@ -70,13 +75,11 @@ public class AggiungiArticolo extends HttpServlet {
                 return;
             }
 
-            // Gestione immagine
+            //Gestione immagine
             Part filePart = request.getPart("immagine");
-            String fileName = "default.png"; // default
+            String fileName = "default.png"; // default se nessun file caricato
 
             if (filePart != null && filePart.getSize() > 0) {
-                // Qui salvi il file sul filesystem o in DB
-                // Ad esempio in una cartella "uploads"
                 String uploadPath = getServletContext().getRealPath("") + File.separator + "uploads";
                 File uploadDir = new File(uploadPath);
                 if (!uploadDir.exists()) uploadDir.mkdir();
@@ -85,12 +88,26 @@ public class AggiungiArticolo extends HttpServlet {
                 filePart.write(uploadPath + File.separator + fileName);
             }
 
-            // Inserimento nel DB (salvando il nome file immagine o path relativo)
+            //Inserimento tramite DAO
             ArticoloDAO articoloDAO = new ArticoloDAO(connection);
-            articoloDAO.addArticolo(nome, descrizione, utente.getUsername(), prezzo, fileName);
+            Articolo articolo = articoloDAO.addArticolo(nome, descrizione, fileName, prezzo, utente.getUsername());
 
-            response.setStatus(HttpServletResponse.SC_OK);
-            response.getWriter().write("{\"success\":true}");
+            if (articolo != null) {
+                JSONObject json = new JSONObject();
+                json.put("success", true);
+                json.put("codice", articolo.getCodice());
+                json.put("nome", articolo.getNome());
+                json.put("descrizione", articolo.getDescrizione());
+                json.put("prezzo", articolo.getPrezzo());
+                json.put("immagine", articolo.getImmagine());
+
+                response.setStatus(HttpServletResponse.SC_OK);
+                response.getWriter().write(json.toString());
+            } else {
+                response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+                response.getWriter().write("{\"success\":false, \"error\":\"Inserimento fallito\"}");
+            }
+
         } catch (Exception e) {
             e.printStackTrace();
             response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
