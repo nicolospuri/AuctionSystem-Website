@@ -9,7 +9,9 @@ import it.polimi.progettotiw2025ria.dao.ArticoloDAO;
 import it.polimi.progettotiw2025ria.dao.AstaDAO;
 import it.polimi.progettotiw2025ria.dao.OffertaDAO;
 import it.polimi.progettotiw2025ria.utils.ConnectionHandler;
+import it.polimi.progettotiw2025ria.utils.LocalDateTimeAdapter;
 import jakarta.servlet.UnavailableException;
+import jakarta.servlet.annotation.MultipartConfig;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.*;
 
@@ -19,9 +21,13 @@ import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
+@MultipartConfig
 @WebServlet("/AcquistoServlet")
 public class AcquistoServlet extends HttpServlet {
     private static final long serialVersionUID = 1L;
@@ -69,8 +75,11 @@ public class AcquistoServlet extends HttpServlet {
         }
 
         try {
-            JsonObject jsonObject = new JsonObject();
-            Gson gson = new Gson();
+            Gson gson = new GsonBuilder()
+                    .registerTypeAdapter(LocalDateTime.class, new LocalDateTimeAdapter())
+                    .create();
+
+            Map<String, Object> result = new HashMap<>();
 
             AstaDAO astaDAO = new AstaDAO(connection);
             ArticoloDAO articoloDAO = new ArticoloDAO(connection);
@@ -106,8 +115,8 @@ public class AcquistoServlet extends HttpServlet {
                 if (!asteVisitate.isEmpty()) {
                     rimuoviAsteChiuse(request, response, asteVisitate, username);
 
-                    JsonArray asteVisitateJsonArray = gson.toJsonTree(asteVisitate).getAsJsonArray();
-                    jsonObject.add("asteVisitate", asteVisitateJsonArray);
+                    // Aggiungo le aste visitate al result
+                    result.put("asteVisitate", asteVisitate);
                 }
             }
 
@@ -126,13 +135,11 @@ public class AcquistoServlet extends HttpServlet {
                     articoli = articoloDAO.getArticoliByIdAsta(a.getId());
                     a.setArticoli(articoli);
                 }
-
-                // todo: problema con LocalDateTime, non riesco a serializzarlo correttamente
-                JsonArray asteVinteJsonArray = gson.toJsonTree(asteVinte).getAsJsonArray();
-                jsonObject.add("asteVinte", asteVinteJsonArray);
+                // Aggiungo le aste vinte al result
+                result.put("asteVinte", asteVinte);
             }
 
-            String jsonResponse = gson.toJson(jsonObject);
+            String jsonResponse = gson.toJson(result);
 
             response.setContentType("application/json");
             response.setCharacterEncoding("UTF-8");
@@ -186,7 +193,9 @@ public class AcquistoServlet extends HttpServlet {
                 }
             }
 
-            Gson gson = new Gson();
+            Gson gson = new GsonBuilder()
+                    .registerTypeAdapter(LocalDateTime.class, new LocalDateTimeAdapter())
+                    .create();
             String jsonResponse = gson.toJson(asteTrovate);
 
             response.setContentType("application/json");
@@ -209,7 +218,9 @@ public class AcquistoServlet extends HttpServlet {
             newAsteVisitateJsonArray.add(a.getId());
         }
 
-        Gson gson = new Gson();
+        Gson gson = new GsonBuilder()
+                .registerTypeAdapter(LocalDateTime.class, new LocalDateTimeAdapter())
+                .create();
 
         String encodedAsteVisionate = URLEncoder.encode(gson.toJson(newAsteVisitateJsonArray), StandardCharsets.UTF_8);
 

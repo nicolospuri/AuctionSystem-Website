@@ -48,18 +48,12 @@ public class HomeServlet extends HttpServlet {
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
-        String path = "home";
-
         if(request.getSession() == null) {
             response.sendRedirect(request.getContextPath() + "/index.html");
             return;
         }
 
-        ServletContext servletContext = getServletContext();
-        JakartaServletWebApplication webApplication = JakartaServletWebApplication.buildApplication(servletContext);
-        WebContext ctx = new WebContext(webApplication.buildExchange(request, response), request.getLocale());
-
-        templateEngine.process(path, ctx, response.getWriter());
+        response.sendRedirect(request.getContextPath() + "/home.html");
     }
 
     @Override

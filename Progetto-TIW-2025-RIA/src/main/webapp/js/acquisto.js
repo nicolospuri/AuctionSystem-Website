@@ -1,7 +1,7 @@
-// import { renderOffertePage } from "./offerte.js";
+import { renderOffertaPage } from "./offerta.js";
 
 export function renderAcquistoPage(){
-    document.getElementById("acquistoPage").removeAttribute("hidden");
+    document.getElementById("acquistoPage").hidden = false;
 
     document.getElementById("cercaPerParolaChiave").addEventListener("click", () => {
         searchAstaByKeyword();
@@ -40,19 +40,22 @@ function showAsteByKeyword(request){
     if(request.readyState === 4){
         if(request.status === 200){
             document.getElementById("asteTrovateBody").innerHTML = "";		// Svuoto la tabella delle aste con la parola chiave precedentemente ricercata
+            document.getElementById("asteTrovateMsg").innerHTML = '';
 
             const aste = JSON.parse(request.responseText);
 
             if(aste.length > 0){
-                document.getElementById("asteTrovate").removeAttribute("hidden");
+                document.getElementById("asteTrovate").hidden = false;
                 aste.forEach((asta) => {
                     addAstaTrovataInTable(asta, "asteTrovateBody");
                 });
             } else{
                 document.getElementById("asteTrovateMsg").textContent = "Nessuna asta trovata";
+                document.getElementById("asteTrovate").hidden = true;
             }
         } else{
             document.getElementById("asteTrovateMsg").textContent = "Errore interno al server";
+            document.getElementById("asteTrovate").hidden = true;
         }
     }
 }
@@ -60,54 +63,46 @@ function showAsteByKeyword(request){
 function addAstaTrovataInTable(asta, tableBodyId){
     const tbody = document.getElementById(tableBodyId);
 
-    const template = document.getElementById("asteTrovateTemplate");
-    const newRow = template.content.cloneNode(true);
+    const newRow = document.createElement("tr");
+    newRow.style.textAlign = "center";
 
-    let idAstaElement = document.createElement("td");
-    idAstaElement.textContent = asta.id;
-    /*
-    idAstaElement.addEventListener("click", () => {
-        renderOffertePage(asta.id);
+    const idAstaTd = document.createElement("td");
+    idAstaTd.textContent = asta.id;
+    idAstaTd.style.cursor = "pointer";
+    idAstaTd.addEventListener("click", (e) => {
+        e.preventDefault();
+        renderOffertaPage(asta.id);
     });
-     */
-    newRow.appendChild(idAstaElement);
+    newRow.appendChild(idAstaTd);
 
-    let prezzoInizialeElement = document.createElement("td");
-    prezzoInizialeElement.textContent = asta.prezzoIniziale;
-    newRow.appendChild(prezzoInizialeElement);
+    const prezzoInizialeTd = document.createElement("td");
+    prezzoInizialeTd.textContent = asta.prezzoIniziale + " €";
+    newRow.appendChild(prezzoInizialeTd);
 
-    let rialzoMinimoElement = document.createElement("td");
-    rialzoMinimoElement.textContent = asta.rialzoMinimo;
-    newRow.appendChild(rialzoMinimoElement);
+    const rialzoMinimoTd = document.createElement("td");
+    rialzoMinimoTd.textContent = asta.rialzoMinimo + ".00 €";
+    newRow.appendChild(rialzoMinimoTd);
 
-    let dataScadenzaElement = document.createElement("td");
-    dataScadenzaElement.textContent = asta.scadenza;
-    newRow.appendChild(dataScadenzaElement);
+    const dataScadenzaTd = document.createElement("td");
+    dataScadenzaTd.textContent = asta.scadenza;
+    newRow.appendChild(dataScadenzaTd);
 
-    let proprietarioElement = document.createElement("td");
-    proprietarioElement.textContent = asta.proprietario;
-    newRow.appendChild(proprietarioElement);
+    const proprietarioTd = document.createElement("td");
+    proprietarioTd.textContent = asta.proprietario;
+    newRow.appendChild(proprietarioTd);
 
     // Creazione tabella articoli
-    let articlesTable = document.createElement("table");
+    const articlesList = document.createElement("ul");
 
     asta.articoli.forEach((articolo) => {
-        let tr = document.createElement("tr");
-
-        let codiceTd = document.createElement("td");
-        codiceTd.textContent = articolo.codice;
-        tr.appendChild(codiceTd);
-
-        let nomeTd = document.createElement("td");
-        nomeTd.textContent = articolo.nome;
-        tr.appendChild(nomeTd);
-
-        articlesTable.appendChild(tr);
+        const articoloLi = document.createElement("li");
+        articoloLi.textContent = articolo.codice + " - " + articolo.nome;
+        articlesList.appendChild(articoloLi);
     });
 
-    let articlesTableTd = document.createElement("td");
-    articlesTableTd.appendChild(articlesTable);
-    newRow.appendChild(articlesTableTd);
+    const articlesListTd = document.createElement("td");
+    articlesListTd.appendChild(articlesList);
+    newRow.appendChild(articlesListTd);
 
     // Inserisco la nuova riga nella tabella delle aste aperte
     tbody.appendChild(newRow);
@@ -115,7 +110,7 @@ function addAstaTrovataInTable(asta, tableBodyId){
 
 function renderAsteVisionateEAggiudicate(){
     // Richiedi al server le aste visionate (la servlet analizzerà la lista di cookie e restituirà la lista delle rispettive aste)
-    let request = new XMLHttpRequest();
+    const request = new XMLHttpRequest();
     request.open("GET", "AcquistoServlet");
 
     request.onreadystatechange = () => {
@@ -123,37 +118,42 @@ function renderAsteVisionateEAggiudicate(){
             if (request.status === 200) {
                 // Se è presente del contenuto nella risposta => sono le aste visitate da mostrare
                 document.getElementById("asteVisitateBody").innerHTML = '';	// Svuoto la tabella precedente per far spazio ai dati aggiornati
+                document.getElementById("asteVisitateMsg").innerHTML = '';
                 document.getElementById("asteVinteBody").innerHTML = '';
+                document.getElementById("asteVinteMsg").innerHTML = '';
 
                 const jsonResponse = JSON.parse(request.responseText);
 
-                // Mostro le aste visionate
+                // Mostro le aste visitate
                 const asteVisitate = jsonResponse.asteVisitate;
 
                 if (asteVisitate != null && asteVisitate.length > 0) {
-                    document.getElementById("asteVisitate").removeAttribute("hidden");
-                    document.getElementById("asteVisitateMsg").innerHTML = '';
+                    document.getElementById("asteVisitate").hidden = false;
 
                     for (const asta of asteVisitate) {
                         addAstaTrovataInTable(asta, "asteVisitateBody");
                     }
                 } else {
                     document.getElementById("asteVisitateMsg").textContent = "Nessuna asta visitata";
+                    document.getElementById("asteVisitate").hidden = true;
                 }
 
                 const asteVinte = jsonResponse.asteVinte;
                 if (asteVinte != null && asteVinte.length > 0) {
-                    document.getElementById("asteVinte").removeAttribute("hidden");
-                    document.getElementById("asteVinteMsg").innerHTML = '';
+                    document.getElementById("asteVinte").hidden = false;
 
-                    for (const astaVinta of asteVinte) {
-                        addAstaVintaInTable(astaCustom);
+                    for (const asta of asteVinte) {
+                        addAstaVintaInTable(asta);
                     }
                 } else {
                     document.getElementById("asteVinteMsg").textContent = "Nessuna asta vinta";
+                    document.getElementById("asteVinte").hidden = true;
                 }
             } else {
                 document.getElementById("asteVisitateMsg").textContent = "Errore interno al server";
+                document.getElementById("asteVisitate").hidden = true;
+                document.getElementById("asteVinteMsg").textContent = "Errore interno al server";
+                document.getElementById("asteVinte").hidden = true;
             }
         }
     }
@@ -165,34 +165,27 @@ function addAstaVintaInTable(asta){
     const tbody = document.getElementById("asteVinteBody");
 
     const newRow = document.createElement("tr");
+    newRow.style.textAlign = "center";
 
-    let idAstaElement = document.createElement("td");
-    idAstaElement.textContent = asta.id;
-    newRow.appendChild(idAstaElement);
+    const idAstaTd = document.createElement("td");
+    idAstaTd.textContent = asta.id;
+    newRow.appendChild(idAstaTd);
 
-    let prezzoFinaleElement = document.createElement("td");
-    prezzoFinaleElement.textContent = asta.prezzoOffertaMassima;
-    newRow.appendChild(prezzoFinaleElement);
+    const prezzoFinaleTd = document.createElement("td");
+    prezzoFinaleTd.textContent = asta.prezzoOffertaMassima + " €";
+    newRow.appendChild(prezzoFinaleTd);
 
-    // Creazione tabella articoli
-    let articlesTable = document.createElement("table");
+    // Creazione lista articoli
+    const articlesList = document.createElement("ul");
 
     asta.articoli.forEach((articolo) => {
-        let tr = document.createElement("tr");
-
-        let codiceTd = document.createElement("td");
-        codiceTd.textContent = articolo.codice;
-        tr.appendChild(codiceTd);
-
-        let nomeTd = document.createElement("td");
-        nomeTd.textContent = articolo.nome;
-        tr.appendChild(nomeTd);
-
-        articlesTable.appendChild(tr);
+        const articoloLi = document.createElement("li");
+        articoloLi.textContent = articolo.codice + " - " + articolo.nome;
+        articlesList.appendChild(articoloLi);
     });
-    let articlesTableElement = document.createElement("td");
-    articlesTableElement.appendChild(articlesTable);
-    newRow.appendChild(articlesTableElement);
+    const articlesListElement = document.createElement("td");
+    articlesListElement.appendChild(articlesList);
+    newRow.appendChild(articlesListElement);
 
     tbody.appendChild(newRow);
 }

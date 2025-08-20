@@ -3,13 +3,13 @@ import {renderAcquistoPage} from "./acquisto.js";
 
 
 document.addEventListener("DOMContentLoaded", () => {
-    const moveToVendo = document.getElementById("moveToVendo");
-    const moveToAcquisto = document.getElementById("moveToAcquisto");
-
-    moveToVendo.addEventListener('click', () => {
+    // Associa gli eventi ai pulsanti per spostarsi tra le pagine
+    document.getElementById("moveToVendo").addEventListener('click', (e) => {
+        e.preventDefault();
         showVendo();
     });
-    moveToAcquisto.addEventListener('click', () => {
+    document.getElementById("moveToAcquisto").addEventListener('click', (e) => {
+        e.preventDefault();
         showAcquisto();
     });
 
@@ -17,15 +17,15 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 export function showVendo() {
-    moveToAcquisto.removeAttribute("hidden");
-    moveToVendo.setAttribute("hidden", true);  // Mostra solo il pulsante "Acquisto"
+    document.getElementById("moveToAcquisto").hidden = false; // Mostra solo il pulsante "Acquisto"
+    document.getElementById("moveToVendo").hidden = true;
     hideAllPages();
     // renderVendoPage();
 }
 
 export function showAcquisto() {
-    moveToVendo.removeAttribute("hidden");
-    moveToAcquisto.setAttribute("hidden", true); // Mostra solo il pulsante "Acquisto"
+    document.getElementById("moveToAcquisto").hidden = true;
+    document.getElementById("moveToVendo").hidden = false; // Mostra solo il pulsante "Vendo"
     hideAllPages();
     renderAcquistoPage();
 }
@@ -34,10 +34,8 @@ export function showAcquisto() {
 export function hideAllPages() {
     document.getElementById("vendoPage").hidden = true;
     document.getElementById("acquistoPage").hidden = true;
-    /*
-    document.getElementById("dettaglioAstaPage").hidden = true;
+    // document.getElementById("dettaglioAstaPage").hidden = true;
     document.getElementById("offertaPage").hidden = true;
-     */
 }
 
 function renderPageByLastAction() {
