@@ -25,7 +25,7 @@
                     <th>Articoli</th>
                 </tr>
                 </thead>
-                <tbody id="bodyTabellaAsteAperte">
+                <tbody id="bodyTabellaAsteAperte" align="center">
                 <!-- qui vengono aggiunte tutte le aste aperte, secondo il template "astaApertaRow" -->
                 </tbody>
 
@@ -56,24 +56,31 @@
               <table border="1" id="tabelleAsteChiuse">
                 <thead>
                 <tr>
-                  <th>IdAsta</th>
-                  <th>Tempo Mancante</th>
-                  <th>Offerta Massima</th>
+                    <th>ID Asta</th>
+                    <th>Prezzo</th>
+                    <th>Aggiudicatario</th>
                     <th>Articoli</th>
                 </tr>
                 </thead>
-                <tbody id="bodyTabellaAsteChiuse">
+                <tbody id="bodyTabellaAsteChiuse" align="center">
                 <!-- qui vengono aggiunte tutte le aste chiuse, seguendo il template "astaChiusaRow" -->
                 </tbody>
               </table>
 
               <template id="astaChiusaRow">
                 <tr>
-                  <!-- td con text = id asta -->
-                  <!-- td con text = prezzo iniziale asta -->
-                  <!-- td con text = offerta massima asta -->
-                  <!-- td con text = data scadenza asta -->
-                  <!-- td con text = ora scadenza asta -->
+                    <!-- td con text = id asta -->
+                    <!-- td con text = offerta massima asta -->
+                    <!-- td con text = aggiudicatario -->
+                    <!-- td  -->
+                    <!-- table -->
+                    <!-- tr -->
+                    <!-- td con text = codice articolo -->
+                    <!-- td con text = nome articolo -->
+                    <!-- td con text = prezzo articolo -->
+                    <!-- tr -->
+                    <!-- /table -->
+                    <!-- /td -->
                   <!-- <td><button class="dettaglioAstaChiusaButton">Dettaglio asta</button></td> va aggiunto value = id asta -->
                 </tr>
               </template>

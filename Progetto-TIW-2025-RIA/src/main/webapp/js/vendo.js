@@ -2,6 +2,7 @@
 //todo:quando è tutto finito creare una funzione che azzera tutti i messaggi all'utente
 document.addEventListener('DOMContentLoaded', () => {
     // inizializzo la tabella articoli
+    caricaListeAperte();
     aggiornaArticoliDisponibili();
 
     const newArticoloForm = document.getElementById("submitNewArticolo");
@@ -151,6 +152,7 @@ async function creaAsta(event) {
 
         // 4. Aggiorno lista articoli disponibili
         await aggiornaArticoliDisponibili();
+        await caricaListeAperte();
 
         messageBox.textContent = "Asta creata con successo!";
         messageBox.style.color = "green";
@@ -246,3 +248,110 @@ function emptyAstaInputs() {
     // append in tabella
     tbody.appendChild(tr);
 }*/
+
+// ===== POPOLA "Le tue aste aperte" =====
+async function caricaListeAperte() {
+    const tbody = document.getElementById("bodyTabellaAsteAperte");
+    const tpl   = document.getElementById("astaApertaRow");
+    if (!tbody) { console.error("bodyTabellaAsteAperte non trovato"); return; }
+
+    tbody.innerHTML = "";
+
+    try {
+        const resp = await fetch("CaricaListeAperte", {
+            method: "GET",
+            headers: { "Accept": "application/json" },
+            credentials: "same-origin",
+            cache: "no-store"
+        });
+
+        if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+
+        const data = await resp.json();
+        if (!data.success) {
+            tbody.innerHTML = `<tr><td colspan="4" style="color:#b00">Errore: ${data.error || 'richiesta fallita'}</td></tr>`;
+            return;
+        }
+
+        const liste = Array.isArray(data.asteAperte) ? data.asteAperte : [];
+
+        if (liste.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="4">Nessuna asta aperta</td></tr>`;
+            return;
+        }
+
+        const frag = document.createDocumentFragment();
+
+        liste.forEach(a => {
+            const tr       = tpl ? tpl.content.firstElementChild.cloneNode(true) : document.createElement("tr");
+            const tdId     = document.createElement("td");
+            const tdTempo  = document.createElement("td");
+            const tdOffMax = document.createElement("td");
+            const tdArt    = document.createElement("td");
+
+            tdId.textContent = a.id ?? "";
+
+            tdTempo.textContent = a.tempoMancante
+                ? a.tempoMancante
+                : calcolaTempoMancante(a.scadenza);
+
+            const offMax = (a.prezzoOffertaMassima != null)
+                ? a.prezzoOffertaMassima
+                : (a.offertaMassima && a.offertaMassima.prezzo) ? a.offertaMassima.prezzo : 0;
+            tdOffMax.textContent = formatEuro(offMax);
+
+            // elenco puntato: Nome — Prezzo
+            const ul = buildArticoliList(a.articoli || []);
+            tdArt.appendChild(ul);
+
+            tr.append(tdId, tdTempo, tdOffMax, tdArt);
+            frag.appendChild(tr);
+        });
+
+        tbody.appendChild(frag);
+
+    } catch (err) {
+        console.error("caricaListeAperte error:", err);
+        tbody.innerHTML = `<tr><td colspan="4" style="color:#b00">Errore nel caricamento</td></tr>`;
+    }
+}
+
+function formatEuro(n) {
+    const num = Number(n);
+    if (Number.isFinite(num)) return num.toLocaleString(undefined, { style: "currency", currency: "EUR", minimumFractionDigits: 2 });
+    return `${n} €`;
+}
+function safe(v){ return v ?? ""; }
+function escapeHTML(v){
+    return String(v).replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;")
+        .replaceAll('"',"&quot;").replaceAll("'","&#039;");
+}
+function calcolaTempoMancante(iso){
+    if (!iso) return "";
+    const end = new Date(iso), now = new Date();
+    if (isNaN(end)) return "";
+    const diff = end - now;
+    if (diff <= 0) return "scaduta";
+    const giorni = Math.floor(diff / (1000*60*60*24));
+    const ore    = Math.floor((diff % (1000*60*60*24)) / (1000*60*60));
+    return `${giorni} giorni e ${ore} ore`;
+}
+
+function buildArticoliList(articoli) {
+    const ul = document.createElement("ul");
+    ul.className = "articoli-list";
+    if (!Array.isArray(articoli) || articoli.length === 0) {
+        const li = document.createElement("li");
+        li.textContent = "Nessun articolo";
+        ul.appendChild(li);
+        return ul;
+    }
+    articoli.forEach(ar => {
+        const li = document.createElement("li");
+        // Richiesto: nome + prezzo (senza tabella, senza codice)
+        li.innerHTML = `${escapeHTML(safe(ar.nome))} — <strong>${formatEuro(ar.prezzo)}</strong>`;
+        ul.appendChild(li);
+    });
+    return ul;
+}
+
