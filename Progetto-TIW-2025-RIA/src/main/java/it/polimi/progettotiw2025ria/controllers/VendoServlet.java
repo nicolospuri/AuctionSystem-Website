@@ -20,8 +20,8 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.List;
 
-@WebServlet("/VendoHome")
-public class VendoHomeServlet extends HttpServlet {
+@WebServlet("/Vendo")
+public class VendoServlet extends HttpServlet {
     private static final long serialVersionUID = 1L;
     private Connection connection;
     private Gson gson = new Gson();
@@ -114,5 +114,16 @@ public class VendoHomeServlet extends HttpServlet {
             }
         }
         return null;
+    }
+
+    @Override
+    public void destroy() {
+        try {
+            if (connection != null) {
+                connection.close();
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
     }
 }

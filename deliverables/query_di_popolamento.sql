@@ -40,7 +40,7 @@ INSERT INTO asta (Id, Prezzo, RialzoMinimo, Scadenza,            Proprietario, C
 
 -- Edge: asta da chiudere (aggiudicatario NULL)
 INSERT INTO asta (Id, Prezzo, RialzoMinimo, Scadenza,            Proprietario, Chiusa, Aggiudicatario) VALUES
-    (1005,  14.50,  1, '2025-04-01 12:00:00', 'dave',  0, NULL);
+    (1005,  33.00,  1, '2025-04-01 12:00:00', 'dave',  0, NULL);
 
 -- =========================
 -- ARTICOLI

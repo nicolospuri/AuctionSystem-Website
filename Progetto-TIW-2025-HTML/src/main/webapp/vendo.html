@@ -74,7 +74,7 @@
     </div>
     <br><br>
 
-    <form th:action="@{/AggiungiArticolo}" method="POST">
+    <form th:action="@{/AggiungiArticolo}" method="POST" enctype="multipart/form-data">
         <h2>Aggiungi un articolo</h2>
         <input type="text" name="nome" placeholder="Nome" required><br><br>
         <textarea name="descrizione" placeholder="Descrizione" required></textarea><br><br>
@@ -101,7 +101,6 @@
                     <th>Codice</th>
                     <th>Nome</th>
                     <th>Descrizione</th>
-                    <!--<th>Immagine</th>-->
                     <th>Prezzo</th>
                     <th>Proprietario</th>
                 </tr>
@@ -114,7 +113,6 @@
                     <td th:text="${articolo.codice}"></td>
                     <td th:text="${articolo.nome}"></td>
                     <td th:text="${articolo.descrizione}"></td>
-                    <!--<td><img th:src="@{${articolo.immagine}}" alt="Immagine articolo" width="100"></td>-->
                     <td th:text="${articolo.prezzo} + ' €'"></td>
                     <td th:text="${articolo.proprietario}"></td>
                 </tr>
