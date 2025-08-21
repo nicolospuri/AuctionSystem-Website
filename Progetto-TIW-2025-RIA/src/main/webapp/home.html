@@ -1,15 +1,17 @@
 <!DOCTYPE html>
-<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<html lang="en">
     <head>
         <meta charset="UTF-8">
         <title>Aste Online</title>
-        <script type="module" th:src="@{/js/home.js}" defer></script>
-        <script type="module" th:src="@{/js/vendo.js}" defer></script>
+        <script type="module" src="js/home.js" defer></script>
+        <script type="module" src="js/vendo.js" defer></script>
+        <script type="module" src="js/acquisto.js" defer></script>
+        <script type="module" src="js/offerta.js" defer></script>
     </head>
     <body>
         <h5>Menu:</h5>
-        <a th:href="@{/Logout}"><button type="submit">Logout</button></a><br><br>
-        <button id="moveToVendo" hidden>Vendo</button><br>
+        <a href="Logout"><button type="submit">Logout</button></a><br><br>
+        <button id="moveToVendo" hidden>Vendo</button><br><br>
         <button id="moveToAcquisto" hidden>Acquisto</button><br><br>
 
         <!--inserire hidden appena funzionano vendo-->
@@ -128,6 +130,127 @@
 
               <button id="submitNewAsta">Crea Asta</button>
 
+            </div>
+        </div>
+
+        <div id="acquistoPage" hidden>
+            <h2>Ricerca Aste</h2>
+            <div>
+                <label for="keyword">Parola chiave:</label>
+                <input type="text" id="keyword" name="keyword" placeholder="Parola chiave" required>
+
+                <button id="cercaPerParolaChiave">Cerca</button>
+            </div>
+            <br><br>
+
+            <div id="asteTrovateMsg"></div>
+            <div id="asteTrovate" hidden>
+                <h2>Aste Trovate</h2>
+                <table border="1">
+                    <thead>
+                        <tr align="center">
+                            <th>ID Asta</th>
+                            <th>Prezzo Iniziale</th>
+                            <th>Rialzo Minimo</th>
+                            <th>Scadenza</th>
+                            <th>Proprietario</th>
+                            <th>Articoli</th>
+                        </tr>
+                    </thead>
+                    <tbody id="asteTrovateBody">
+                        <!-- qui vengono aggiunte tutte le aste legate a quella parola chiave -->
+                    </tbody>
+                </table>
+            </div>
+            <br><br>
+
+            <div id="asteVisitateMsg"></div>
+            <div id="asteVisitate" hidden>
+                <h2>Aste viste in precedenza</h2>
+                <table border="1">
+                    <thead>
+                    <tr align="center">
+                        <th>ID Asta</th>
+                        <th>Prezzo Iniziale</th>
+                        <th>Rialzo Minimo</th>
+                        <th>Scadenza</th>
+                        <th>Proprietario</th>
+                        <th>Articoli</th>
+                    </tr>
+                    </thead>
+                    <tbody id="asteVisitateBody">
+                        <!-- qui vengono aggiunte tutte le aste visitate in precedenza -->
+                    </tbody>
+                </table>
+            </div>
+            <br><br>
+
+            <div id="asteVinteMsg"></div>
+            <div id="asteVinte" hidden>
+                <h2>Aste vinte</h2>
+                <table border="1">
+                    <thead>
+                    <tr align="center">
+                        <th>ID Asta</th>
+                        <th>Prezzo</th>
+                        <th>Articoli</th>
+                    </tr>
+                    </thead>
+                    <tbody id="asteVinteBody">
+                        <!-- qui vengono aggiunte tutte le aste vinte -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <div id="offertaPage" hidden>
+            <div id="articoliAsta" hidden>
+                <h2>Articoli nell'asta</h2>
+                <table border="1">
+                    <thead>
+                    <tr align="center">
+                        <th>Codice</th>
+                        <th>Nome</th>
+                        <th>Descrizione</th>
+                        <!--<th>Immagine</th>-->
+                        <th>Prezzo</th>
+                    </tr>
+                    </thead>
+                    <tbody id="articoliAstaBody">
+                        <!-- qui vengono aggiunti tutti gli articoli dell'asta -->
+
+                    </tbody>
+                </table>
+            </div>
+            <br><br>
+
+            <div id="offerteMsg"></div>
+            <div id="offerteAsta" hidden>
+                <h2>Offerte</h2>
+                <table border="1">
+                    <thead>
+                        <tr align="center">
+                            <th>Offerente</th>
+                            <th>Prezzo Offerto</th>
+                            <th>Data Offerta</th>
+                        </tr>
+                    </thead>
+                    <tbody id="offerteAstaBody">
+                        <!-- qui vengono aggiunte tutte le offerte fatte per l'asta -->
+                    </tbody>
+                </table>
+            </div>
+            <br><br>
+
+            <div id="canOffer" hidden>
+                <h2>Fai un'offerta</h2>
+                <h3>Rialzo minimo: <span id="showRialzoMinimo"></span></h3>
+                <div id="offertaSuccessMsg"></div>
+                <div id="offertaErrorMsg"></div>
+                <div>
+                    <label for="prezzoOfferto"></label>
+                    <input type="double" id="prezzoOfferto" name="prezzoOfferto" placeholder="Prezzo Offerto" required><br><br>
+                    <button id="faiOfferta">Fai offerta</button>
+                </div>
             </div>
         </div>
     </body>

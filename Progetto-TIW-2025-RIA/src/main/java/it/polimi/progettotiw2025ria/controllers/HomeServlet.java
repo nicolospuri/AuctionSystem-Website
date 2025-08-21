@@ -20,7 +20,6 @@ import java.sql.SQLException;
 @WebServlet("/HomeServlet")
 public class HomeServlet extends HttpServlet {
     private static final long serialVersionUID = 1L;
-    private TemplateEngine templateEngine;
     private Connection connection;
 
     public HomeServlet() {
@@ -29,16 +28,6 @@ public class HomeServlet extends HttpServlet {
 
     @Override
     public void init() throws UnavailableException {
-        ServletContext servletContext = getServletContext();
-
-        JakartaServletWebApplication webApplication = JakartaServletWebApplication.buildApplication(servletContext);
-        WebApplicationTemplateResolver templateResolver = new WebApplicationTemplateResolver(webApplication);
-
-        templateResolver.setTemplateMode(TemplateMode.HTML);
-        this.templateEngine = new TemplateEngine();
-        this.templateEngine.setTemplateResolver(templateResolver);
-        templateResolver.setSuffix(".html");
-
         try {
             connection = ConnectionHandler.getConnection();
         } catch (UnavailableException e) {
@@ -48,18 +37,12 @@ public class HomeServlet extends HttpServlet {
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
-        String path = "home";
-
         if(request.getSession() == null) {
             response.sendRedirect(request.getContextPath() + "/index.html");
             return;
         }
 
-        ServletContext servletContext = getServletContext();
-        JakartaServletWebApplication webApplication = JakartaServletWebApplication.buildApplication(servletContext);
-        WebContext ctx = new WebContext(webApplication.buildExchange(request, response), request.getLocale());
-
-        templateEngine.process(path, ctx, response.getWriter());
+        response.sendRedirect(request.getContextPath() + "/home.html");
     }
 
     @Override
@@ -127,10 +110,9 @@ public class HomeServlet extends HttpServlet {
         JsonObject jsonObject = new JsonObject();
         jsonObject.addProperty("userLastActionWasAddedAsta", userLastActionWasAddedAsta);
 
-        // scrittura JSON nella response
         response.setContentType("application/json");
         response.setCharacterEncoding("UTF-8");
-        response.getWriter().print(jsonObject.toString());
+        response.getWriter().print(jsonObject);
     }
 
     @Override
