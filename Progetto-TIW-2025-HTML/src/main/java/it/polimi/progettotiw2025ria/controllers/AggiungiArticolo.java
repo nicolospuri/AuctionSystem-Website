@@ -105,15 +105,20 @@ public class AggiungiArticolo extends HttpServlet{
 
         if (filePart != null && filePart.getSize() > 0) {
             String fileName = Paths.get(filePart.getSubmittedFileName()).getFileName().toString(); // nome file originale
+
+            // Per salvarlo sotto /webapp/uploads
             // Ottieni la root del progetto a partire dalla cartella di deploy
             String projectRoot = new File(getServletContext().getRealPath("")).getParentFile().getParent();
-
             // Costruisci il path corretto a src/main/webapp/uploads
             String uploadPath = projectRoot + File.separator + "src"
                     + File.separator + "main"
                     + File.separator + "webapp"
                     + File.separator + "uploads";
 
+            // Per salvarlo sotto /target/Progetto.../uploads nel war esploso
+            // String uploadPath = getServletContext().getRealPath("") + File.separator + "uploads";
+
+            // Meglio usare direttamente una cartella esterna, ma essendo un progetto condiviso ci sarebbero problemi
 
             File uploadDir = new File(uploadPath);
             if (!uploadDir.exists()) uploadDir.mkdir();
