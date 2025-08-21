@@ -93,20 +93,6 @@ function addArticoloInTable(articolo) {
     descrizioneTd.textContent = articolo.descrizione;
     newRow.appendChild(descrizioneTd);
 
-    const immagineTd = document.createElement("td");
-    if (articolo.immagine) {
-        const img = document.createElement("img");
-        img.src = articolo.immagine;
-        img.alt = articolo.nome;
-        img.style.maxWidth = "100px";
-        img.style.maxHeight = "100px";
-        img.style.objectFit = "cover"; // Per non deformare
-        immagineTd.appendChild(img);
-    } else {
-        immagineTd.textContent = "Nessuna immagine";
-    }
-    newRow.appendChild(immagineTd);
-
     const prezzoTd = document.createElement("td");
     prezzoTd.textContent = articolo.prezzo + " €";
     newRow.appendChild(prezzoTd);

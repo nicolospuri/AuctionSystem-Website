@@ -5,7 +5,9 @@ import it.polimi.progettotiw2025ria.dao.ArticoloDAO;
 import it.polimi.progettotiw2025ria.dao.UtenteDAO;
 import it.polimi.progettotiw2025ria.utils.ConnectionHandler;
 import jakarta.servlet.ServletContext;
+import jakarta.servlet.ServletException;
 import jakarta.servlet.UnavailableException;
+import jakarta.servlet.annotation.MultipartConfig;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.*;
 import org.thymeleaf.TemplateEngine;
@@ -14,10 +16,16 @@ import org.thymeleaf.templatemode.TemplateMode;
 import org.thymeleaf.templateresolver.WebApplicationTemplateResolver;
 import org.thymeleaf.web.servlet.JakartaServletWebApplication;
 
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.nio.file.Paths;
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.UUID;
 
+@MultipartConfig
 @WebServlet("/AggiungiArticolo")
 public class AggiungiArticolo extends HttpServlet{
     private static final long serialVersionUID = 1L;
@@ -49,7 +57,7 @@ public class AggiungiArticolo extends HttpServlet{
     }
 
     @Override
-    public void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
+    public void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
         ServletContext servletContext = getServletContext();
         JakartaServletWebApplication webApplication = JakartaServletWebApplication.buildApplication(servletContext);
         WebContext ctx = new WebContext(webApplication.buildExchange(request, response), request.getLocale());
@@ -91,32 +99,31 @@ public class AggiungiArticolo extends HttpServlet{
             return;
         }
 
-        /*
         // Gestione file immagine
         String immaginePath = null;
-        try {
-            Part filePart = request.getPart("immagine"); // nome del campo file
-            if (filePart != null && filePart.getSize() > 0) {
-                // crea cartella uploads se non esiste
-                String uploadDir = getServletContext().getRealPath("") + File.separator + "uploads";
-                File dir = new File(uploadDir);
-                if (!dir.exists()) dir.mkdir();
+        Part filePart = request.getPart("immagine"); // nome del campo file
 
-                // genera nome univoco per evitare conflitti
-                String fileName = UUID.randomUUID() + "_" + Paths.get(filePart.getSubmittedFileName()).getFileName().toString();
+        if (filePart != null && filePart.getSize() > 0) {
+            String fileName = Paths.get(filePart.getSubmittedFileName()).getFileName().toString(); // nome file originale
+            // Salvo il file nella cartella "uploads" sotto webapp
+            String uploadPath = getServletContext().getRealPath("") + "uploads";
 
-                // salva il file fisicamente
-                filePart.write(uploadDir + File.separator + fileName);
+            File uploadDir = new File(uploadPath);
+            if (!uploadDir.exists()) uploadDir.mkdir();
 
-                // memorizza percorso relativo
-                immaginePath = "uploads/" + fileName;
+            File file = new File(uploadDir, fileName);
+            try (InputStream fileContent = filePart.getInputStream();
+                 FileOutputStream fos = new FileOutputStream(file)) {
+                byte[] buffer = new byte[1024];
+                int bytesRead;
+                while ((bytesRead = fileContent.read(buffer)) != -1) {
+                    fos.write(buffer, 0, bytesRead);
+                }
             }
-        } catch (Exception e) {
-            e.printStackTrace();
-            response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Errore nel caricamento dell'immagine");
-            return;
+
+            // memorizza percorso relativo
+            immaginePath = "uploads/" + fileName;
         }
-        */
 
         try {
             UtenteDAO utenteDAO = new UtenteDAO(connection);
@@ -131,10 +138,13 @@ public class AggiungiArticolo extends HttpServlet{
                 return;
             }
 
+            // Aggiunta dell'articolo in base alla presenza dell'immagine
             ArticoloDAO articoloDAO = new ArticoloDAO(connection);
-            articoloDAO.addArticolo(nome, descrizione, utente.getUsername(), prezzo);
-
-            // todo: gestire l'immagine se necessario
+            if (immaginePath == null) {
+                articoloDAO.addArticolo(nome, descrizione, utente.getUsername(), prezzo);
+            } else {
+                articoloDAO.addArticolo(nome, descrizione, utente.getUsername(), prezzo, immaginePath);
+            }
 
             response.sendRedirect(path);
         } catch (SQLException e) {
