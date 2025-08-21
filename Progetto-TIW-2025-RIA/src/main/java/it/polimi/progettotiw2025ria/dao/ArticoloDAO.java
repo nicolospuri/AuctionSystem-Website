@@ -53,7 +53,6 @@ public class ArticoloDAO {
     }
 
 
-
     public List<Articolo> getArticoliDisponibili(String proprietario) throws SQLException {
         String sql = "SELECT * FROM articolo WHERE idAsta IS NULL AND Proprietario = ?";
         List<Articolo> articoli = new ArrayList<>();
@@ -117,19 +116,19 @@ public class ArticoloDAO {
 
     public boolean areAllArticlesFree(ArrayList<Integer> idArticoliToInsertInAsta) throws SQLException {
         String query = "SELECT count(*) AS notFreeArticles FROM articolo WHERE IdAsta IS NOT NULL AND Codice IN (";
-        for(int i = 0; i < idArticoliToInsertInAsta.size(); i++) {		// i dati presenti in idArticoliToInsertInAsta sono sanificati e non si rischia SQL injection
+        for (int i = 0; i < idArticoliToInsertInAsta.size(); i++) {        // i dati presenti in idArticoliToInsertInAsta sono sanificati e non si rischia SQL injection
             query += idArticoliToInsertInAsta.get(i);
-            if(i < idArticoliToInsertInAsta.size() - 1) {
+            if (i < idArticoliToInsertInAsta.size() - 1) {
                 query += ", ";
             }
         }
         query += ")";
 
-        try(
+        try (
                 PreparedStatement ps = connection.prepareStatement(query);
                 ResultSet resultSet = ps.executeQuery()
-        ){
-            if (resultSet.next() && resultSet.getInt("notFreeArticles") > 0) {	// false se almeno un articolo non è libero
+        ) {
+            if (resultSet.next() && resultSet.getInt("notFreeArticles") > 0) {    // false se almeno un articolo non è libero
                 return false;
             }
             return true;
@@ -217,5 +216,4 @@ public class ArticoloDAO {
 
         return articoli;
     }
-
 }

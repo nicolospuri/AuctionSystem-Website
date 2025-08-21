@@ -9,7 +9,7 @@
     <body>
         <h5>Menu:</h5>
         <a th:href="@{/Logout}"><button type="submit">Logout</button></a><br><br>
-        <button id="moveToVendo" hidden>Vendo</button><br>
+        <button id="moveToVendo" hidden>Vendo</button><br><br>
         <button id="moveToAcquisto" hidden>Acquisto</button><br><br>
 
         <!--inserire hidden appena funzionano vendo-->
@@ -110,7 +110,7 @@
 
               <template id="articoliSelezionabiliRow">
                 <tr>
-                  <td><input type="checkbox" name="codiceArticolo"></td>	<!-- value = codice articolo -->
+                  <td><input type="checkbox" name="codiceArticolo" value="codice"></td>	<!-- value = codice articolo -->
                   <!-- td con text = codice articolo -->
                   <!-- td con text = nome articolo -->
                   <!-- td con text = descrizione articolo -->
