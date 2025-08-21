@@ -3,6 +3,7 @@
 document.addEventListener('DOMContentLoaded', () => {
     // inizializzo la tabella articoli
     caricaListeAperte();
+    caricaListeChiuse();
     aggiornaArticoliDisponibili();
 
     const newArticoloForm = document.getElementById("submitNewArticolo");
@@ -355,3 +356,71 @@ function buildArticoliList(articoli) {
     return ul;
 }
 
+async function caricaListeChiuse() {
+    const tbody = document.getElementById("bodyTabellaAsteChiuse");
+    const tpl   = document.getElementById("astaChiusaRow");
+    if (!tbody) { console.error("bodyTabellaAsteChiuse non trovato"); return; }
+
+    tbody.innerHTML = "";
+
+    try {
+        const resp = await fetch("CaricaListeChiuse", {
+            method: "GET",
+            headers: { "Accept": "application/json" },
+            credentials: "same-origin",
+            cache: "no-store"
+        });
+
+        if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+
+        const data = await resp.json();
+        if (!data.success) {
+            tbody.innerHTML = `<tr><td colspan="4" style="color:#b00">Errore: ${data.error || 'richiesta fallita'}</td></tr>`;
+            return;
+        }
+
+        const liste = Array.isArray(data.asteChiuse) ? data.asteChiuse : [];
+
+        if (liste.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="4">Nessuna asta chiusa</td></tr>`;
+            return;
+        }
+
+        const frag = document.createDocumentFragment();
+
+        liste.forEach(a => {
+            const tr= tpl ? tpl.content.firstElementChild.cloneNode(true) : document.createElement("tr");
+            const tdId     = document.createElement("td");
+            const tdPrezzo = document.createElement("td");
+            const tdAgg    = document.createElement("td");
+            const tdArt    = document.createElement("td");
+
+            // ID
+            tdId.textContent = a.id ?? "";
+
+            // Prezzo finale: offerta vincente se presente, altrimenti prezzo iniziale
+            const prezzoFinale = (a.prezzoOffertaMassima != null)
+                ? a.prezzoOffertaMassima
+                : (a.offertaMassima && a.offertaMassima.prezzo)
+                    ? a.offertaMassima.prezzo
+                    : (a.prezzoIniziale ?? 0);
+            tdPrezzo.textContent = formatEuro(prezzoFinale);
+
+            // Aggiudicatario
+            tdAgg.textContent = a.aggiudicatario ? a.aggiudicatario : "—";
+
+            // Articoli → elenco puntato (Nome — Prezzo)
+            const ul = buildArticoliList(a.articoli || []);
+            tdArt.appendChild(ul);
+
+            tr.append(tdId, tdPrezzo, tdAgg, tdArt);
+            frag.appendChild(tr);
+        });
+
+        tbody.appendChild(frag);
+
+    } catch (err) {
+        console.error("caricaListeChiuse error:", err);
+        tbody.innerHTML = `<tr><td colspan="4" style="color:#b00">Errore nel caricamento</td></tr>`;
+    }
+}
