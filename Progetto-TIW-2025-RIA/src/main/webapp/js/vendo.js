@@ -79,3 +79,65 @@ document.addEventListener('DOMContentLoaded', () => {
         tbody.appendChild(tr);
     }
 
+    function aggiungiArticolo(){ // callback del click su "Inserisci articolo"
+        const nome = document.getElementById("nomeNewArticolo").value.trim();
+        const descrizione = document.getElementById("descrizioneNewArticolo").value.trim();
+        const prezzo = document.getElementById("prezzoNewArticolo").value.trim();
+        const immagine = document.getElementById("immagineNewArticolo").files[0];
+
+        const msg = document.getElementById("newArticoloMessage");
+        msg.textContent= ""; // reset messaggio
+        msg.style.color = "black"; // reset colore
+        if (!nome || !descrizione || !prezzo) {
+            msg.style.color = "red";
+            msg.style.fontWeight = "bold";
+            msg.innerText = "Tutti i campi obbligatori";
+            return;
+    }
+
+        let formData = new FormData();
+        formData.append("nome", nome);
+        formData.append("descrizione", descrizione);
+        formData.append("prezzo", prezzo);
+        if (immagine) formData.append("immagine", immagine); // se non selezionata, la servlet userà default.png
+
+        fetch("AggiungiArticolo", {
+            method: "POST",
+            body: formData })
+        .then(response => response.json())
+        .then(data => {
+        if (data.success) {
+        emptyArticoloInputs(); // pulisco i campi
+        msg.style.color = "green";
+        msg.style.fontWeight = "bold";
+        msg.innerText = "Articolo aggiunto!";
+
+        // aggiungo la riga alla tabella con l'articolo appena inserito
+        aggiungiArticoloAllaTabella({
+        codice: data.codice,
+        nome: data.nome,
+        descrizione: data.descrizione,
+        prezzo: data.prezzo
+    });
+    } else {
+        msg.style.color = "red";
+        msg.style.fontWeight = "bold";
+        msg.innerText = "Errore: " + data.error;
+    }
+    })
+        .catch(error => {
+        console.error("Errore fetch:", error);
+        msg.style.color = "red";
+        msg.style.fontWeight = "bold";
+        msg.innerText = "Errore di rete";
+    });
+    }
+
+    // --- util: articoli selezionati dalla tabella ---
+function toIsoLocalDateTime(value) {
+    // <input type="datetime-local"> spesso fornisce "YYYY-MM-DDTHH:mm"
+    // L'adapter usa ISO_LOCAL_DATE_TIME -> aggiungo ":00" se mancano i secondi
+    if (!value) return value;
+    return value.length === 16 ? value + ":00" : value;
+}
+
