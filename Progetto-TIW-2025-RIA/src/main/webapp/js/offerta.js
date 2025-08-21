@@ -13,7 +13,8 @@ export function renderOffertaPage(idAsta) {
             if (request.status === 200) {
                 document.getElementById('articoliAstaBody').innerHTML = '';
                 document.getElementById('offerteAstaBody').innerHTML = '';
-                document.getElementById('offerteMsg').innerHTML = '';
+                document.getElementById('offerteMsg').textContent = '';
+                document.getElementById("offertaErrorMsg").textContent = '';
 
                 const jsonResponse = JSON.parse(request.responseText);
 
@@ -33,7 +34,7 @@ export function renderOffertaPage(idAsta) {
                 if (offerteAsta != null && offerteAsta.length > 0) {
                     document.getElementById('offerteAsta').hidden = false;
                     for (const offerta of offerteAsta) {
-                        addOffertaInTable(offerta);
+                        addOffertaInTable(offerta, false);
                     }
                 } else {
                     document.getElementById('offerteMsg').textContent = 'Nessuna offerta presente per questa asta';
@@ -91,7 +92,7 @@ function addArticoloInTable(articolo) {
     tbody.appendChild(newRow);
 }
 
-function addOffertaInTable(offerta) {
+function addOffertaInTable(offerta, nuova) {
     const tbody = document.getElementById("offerteAstaBody");
 
     const newRow = document.createElement("tr");
@@ -109,12 +110,16 @@ function addOffertaInTable(offerta) {
     dataTd.textContent = offerta.data;
     newRow.appendChild(dataTd);
 
-    tbody.appendChild(newRow);
+    if (nuova) { // Se l'offerta è nuova, la inserisco in cima alla tabella
+        tbody.insertBefore(newRow, tbody.firstChild);
+    } else {
+        tbody.appendChild(newRow);
+    }
 }
 
 function faiOfferta(prezzoOffertaMassima, rialzoMinimo) {
-    document.getElementById("offertaSuccessMsg").innerHTML = "";
-    document.getElementById("offertaErrorMsg").innerHTML = "";
+    document.getElementById("offertaSuccessMsg").textContent = "";
+    document.getElementById("offertaErrorMsg").textContent = "";
 
     const input = document.getElementById("prezzoOfferto");
     if (input == null) {
@@ -154,7 +159,7 @@ function faiOfferta(prezzoOffertaMassima, rialzoMinimo) {
 
                 // Manda il messaggio di successo e inserisci l'offerta nella tabella
                 document.getElementById("offertaSuccessMsg").textContent = response.offertaSuccessMsg;
-                addOffertaInTable(response.offerta);
+                addOffertaInTable(response.offerta, true);
 
                 // Ripulisco input
                 document.getElementById("prezzoOfferto").value = '';

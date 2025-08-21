@@ -2,6 +2,8 @@ import { renderOffertaPage } from "./offerta.js";
 
 export function renderAcquistoPage(){
     document.getElementById("acquistoPage").hidden = false;
+    document.getElementById("asteTrovate").hidden = true;
+    document.getElementById("keyword").value = "";
 
     document.getElementById("cercaPerParolaChiave").addEventListener("click", () => {
         searchAstaByKeyword();
@@ -11,15 +13,15 @@ export function renderAcquistoPage(){
 }
 
 function searchAstaByKeyword(){
+    document.getElementById("asteTrovateMsg").textContent = "";
+    document.getElementById("asteTrovate").hidden = true;
+
     const keyword = document.getElementById("keyword").value;
 
     if(!keyword){
         document.getElementById("asteTrovateMsg").textContent = "Parola chiave mancante";
         return;
     }
-
-    document.getElementById("asteTrovateMsg").textContent = "";
-    document.getElementById("asteTrovate").hidden = true;
 
     // Creazione parametri da passare con la richiesta
     const formData = new FormData();

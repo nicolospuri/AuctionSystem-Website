@@ -20,7 +20,6 @@ import java.sql.SQLException;
 @WebServlet("/HomeServlet")
 public class HomeServlet extends HttpServlet {
     private static final long serialVersionUID = 1L;
-    private TemplateEngine templateEngine;
     private Connection connection;
 
     public HomeServlet() {
@@ -29,16 +28,6 @@ public class HomeServlet extends HttpServlet {
 
     @Override
     public void init() throws UnavailableException {
-        ServletContext servletContext = getServletContext();
-
-        JakartaServletWebApplication webApplication = JakartaServletWebApplication.buildApplication(servletContext);
-        WebApplicationTemplateResolver templateResolver = new WebApplicationTemplateResolver(webApplication);
-
-        templateResolver.setTemplateMode(TemplateMode.HTML);
-        this.templateEngine = new TemplateEngine();
-        this.templateEngine.setTemplateResolver(templateResolver);
-        templateResolver.setSuffix(".html");
-
         try {
             connection = ConnectionHandler.getConnection();
         } catch (UnavailableException e) {

@@ -170,7 +170,7 @@ public class FaiOfferta extends HttpServlet {
                 response.addCookie(lastAction);
             }
 
-            result.put("offertaSuccessMsg", "Asta scaduta, non è possibile fare offerte");
+            result.put("offertaSuccessMsg", "Offerta effettuata con successo");
             result.put("offerta", offertaDAO.getMaxOffertaByIdAsta(idAsta));
 
             jsonResponse = gson.toJson(result);
