@@ -1,6 +1,9 @@
 package it.polimi.progettotiw2025ria.controllers;
 
 import it.polimi.progettotiw2025ria.beans.Utente;
+import it.polimi.progettotiw2025ria.dao.ArticoloDAO;
+import it.polimi.progettotiw2025ria.dao.AstaDAO;
+import it.polimi.progettotiw2025ria.utils.ConnectionHandler;
 import jakarta.servlet.ServletContext;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.UnavailableException;
@@ -8,18 +11,13 @@ import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-
-import it.polimi.progettotiw2025ria.dao.ArticoloDAO;
-import it.polimi.progettotiw2025ria.dao.AstaDAO;
-import it.polimi.progettotiw2025ria.utils.ConnectionHandler;
-import org.thymeleaf.TemplateEngine;
-import org.thymeleaf.context.WebContext;
-import org.thymeleaf.templatemode.TemplateMode;
-import org.thymeleaf.templateresolver.WebApplicationTemplateResolver;
-import org.thymeleaf.web.servlet.JakartaServletWebApplication;
+import org.json.JSONArray;
+import org.json.JSONObject;
 
 import java.io.IOException;
-import java.sql.*;
+import java.sql.Connection;
+import java.sql.SQLException;
+import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
@@ -28,70 +26,113 @@ import java.util.ArrayList;
 public class CreaAsta extends HttpServlet {
 
     private static final long serialVersionUID = 1L;
-    private TemplateEngine templateEngine;
     private Connection connection;
 
-    public  CreaAsta() { super(); }
+    public CreaAsta() { super(); }
 
     @Override
     public void init() throws UnavailableException {
-        ServletContext servletContext = getServletContext();
-
-        JakartaServletWebApplication webApplication = JakartaServletWebApplication.buildApplication(servletContext);
-        WebApplicationTemplateResolver templateResolver = new WebApplicationTemplateResolver(webApplication);
-
-        templateResolver.setTemplateMode(TemplateMode.HTML);
-        this.templateEngine = new TemplateEngine();
-        this.templateEngine.setTemplateResolver(templateResolver);
-        templateResolver.setSuffix(".html");
-
         try {
             connection = ConnectionHandler.getConnection();
         } catch (UnavailableException e) {
             throw new UnavailableException("Database connection unavailable");
         }
     }
+
     @Override
-    protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        ServletContext servletContext = getServletContext();
-        JakartaServletWebApplication webApplication = JakartaServletWebApplication.buildApplication(servletContext);
-        WebContext ctx = new WebContext(webApplication.buildExchange(request, response), request.getLocale());
-        String path = request.getContextPath() + "/VendoServlet";
+    protected void doPost(HttpServletRequest request, HttpServletResponse response)
+            throws IOException {
 
-        // Controllo login
-        if (request.getSession() == null) {
-            response.sendRedirect(request.getContextPath() + "/index.html");
-            return;
-        }
-        if (request.getSession().getAttribute("utente") == null) {
-            response.sendRedirect(request.getContextPath() + "/index.html");
-            return;
-        }
-        Utente utente = (Utente) request.getSession().getAttribute("utente");
-        if (utente == null) {
-            ctx.setVariable("errorMsg", "Utente non trovato");
-            templateEngine.process("index", ctx, response.getWriter());
-            return;
-        }
+        response.setContentType("application/json");
+        response.setCharacterEncoding("UTF-8");
 
+        // --- Controllo login ---
+        if (request.getSession(false) == null ||
+                request.getSession(false).getAttribute("utente") == null) {
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            response.getWriter().write(new JSONObject()
+                    .put("success", false)
+                    .put("error", "Sessione scaduta o non valida").toString());
+            return;
+        }
+        Utente utente = (Utente) request.getSession(false).getAttribute("utente");
         String username = utente.getUsername();
-        String[] articoliSelezionati = request.getParameterValues("articoliSelezionati");
 
-        // Nessun articolo selezionato
+        // --- Parametri ---
+        String[] articoliSelezionati = request.getParameterValues("articoliSelezionati");
+        String rialzoMinimoParam = request.getParameter("rialzoMinimo");
+        String scadenzaParam = request.getParameter("scadenza");
+
+        // Articoli
         if (articoliSelezionati == null || articoliSelezionati.length == 0) {
-            path += "?nessunArticoloMsg=Nessun articolo selezionato";
-            response.sendRedirect(path);
+            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+            response.getWriter().write(new JSONObject()
+                    .put("success", false)
+                    .put("error", "Nessun articolo selezionato").toString());
             return;
         }
-
-        // Conversione a lista di interi
         ArrayList<Integer> articoliIds = new ArrayList<>();
         try {
             for (String idStr : articoliSelezionati) {
                 articoliIds.add(Integer.parseInt(idStr));
             }
         } catch (NumberFormatException e) {
-            response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Codici articoli non validi");
+            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+            response.getWriter().write(new JSONObject()
+                    .put("success", false)
+                    .put("error", "Codici articoli non validi").toString());
+            return;
+        }
+
+        // Rialzo minimo
+        int rialzoMinimo;
+        if (rialzoMinimoParam == null || rialzoMinimoParam.trim().isEmpty()) {
+            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+            response.getWriter().write(new JSONObject()
+                    .put("success", false)
+                    .put("error", "Il rialzo minimo è obbligatorio").toString());
+            return;
+        }
+        try {
+            rialzoMinimo = Integer.parseInt(rialzoMinimoParam.trim());
+            if (rialzoMinimo <= 0) {
+                response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+                response.getWriter().write(new JSONObject()
+                        .put("success", false)
+                        .put("error", "Il rialzo minimo deve essere > 0").toString());
+                return;
+            }
+        } catch (NumberFormatException ex) {
+            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+            response.getWriter().write(new JSONObject()
+                    .put("success", false)
+                    .put("error", "Rialzo minimo non valido").toString());
+            return;
+        }
+
+        // Scadenza (ISO_LOCAL_DATE_TIME es. 2025-08-26T16:03)
+        LocalDateTime scadenza;
+        if (scadenzaParam == null || scadenzaParam.trim().isEmpty()) {
+            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+            response.getWriter().write(new JSONObject()
+                    .put("success", false)
+                    .put("error", "La scadenza è obbligatoria").toString());
+            return;
+        }
+        try {
+            scadenza = LocalDateTime.parse(scadenzaParam);
+            if (scadenza.isBefore(LocalDateTime.now())) {
+                response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+                response.getWriter().write(new JSONObject()
+                        .put("success", false)
+                        .put("error", "La scadenza deve essere nel futuro").toString());
+                return;
+            }
+        } catch (DateTimeParseException ex) {
+            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+            response.getWriter().write(new JSONObject()
+                    .put("success", false)
+                    .put("error", "Formato scadenza non valido").toString());
             return;
         }
 
@@ -99,84 +140,72 @@ public class CreaAsta extends HttpServlet {
         AstaDAO astaDAO = new AstaDAO(connection);
 
         try {
-            // Controlla che gli articoli appartengano all'utente
+            // Validazioni dominio
             if (!articoloDAO.areAllArticlesOfUser(username, articoliIds)) {
-                response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Puoi selezionare solo i tuoi articoli");
+                response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+                response.getWriter().write(new JSONObject()
+                        .put("success", false)
+                        .put("error", "Puoi selezionare solo i tuoi articoli").toString());
                 return;
             }
-
-            // Controlla che siano liberi
             if (!articoloDAO.areAllArticlesFree(articoliIds)) {
-                response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Alcuni articoli sono già in un'asta");
+                response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+                response.getWriter().write(new JSONObject()
+                        .put("success", false)
+                        .put("error", "Alcuni articoli sono già in un'asta").toString());
                 return;
             }
 
-            // Prezzo iniziale = somma dei prezzi articoli
+            // Prezzo iniziale = somma prezzi articoli
             double prezzoIniziale = articoloDAO.getSumOfPrice(articoliIds);
 
-            // Parametri asta
-            String rialzoMinimoParam = request.getParameter("rialzoMinimo");
-            int rialzoMinimo;
-
-            if (rialzoMinimoParam == null || rialzoMinimoParam.trim().isEmpty()) {
-                path += "?rialzoMsg=Il rialzo minimo deve essere maggiore di 0";
-                response.sendRedirect(path);
-                return;
-            }
-
-            try {
-                rialzoMinimo = Integer.parseInt(rialzoMinimoParam.trim());
-                if (rialzoMinimo <= 0) {
-                    path += "?rialzoMsg=Il rialzo minimo deve essere maggiore di 0";
-                    response.sendRedirect(path);
-                    return;
-                }
-            } catch (NumberFormatException e) {
-                path += "?rialzoMsg=Rialzo minimo non valido";
-                response.sendRedirect(path);
-                return;
-            }
-
-            String scadenzaParam = request.getParameter("scadenza");
-            LocalDateTime scadenza;
-
-            if (scadenzaParam == null || scadenzaParam.trim().isEmpty()) {
-                path += "?scadenzaMsg=La scadenza è obbligatoria";
-                response.sendRedirect(path);
-                return;
-            }
-
-            try {
-                scadenza = LocalDateTime.parse(scadenzaParam); // richiede formato ISO: yyyy-MM-ddTHH:mm
-                if (scadenza.isBefore(LocalDateTime.now())) {
-                    path += "?scadenzaMsg=La scadenza deve essere nel futuro";
-                    response.sendRedirect(path);
-                    return;
-                }
-            } catch (DateTimeParseException e) {
-                path += "?scadenzaMsg=Formato scadenza non valido";
-                response.sendRedirect(path);
-                return;
-            }
-
-            // Inserimento asta
+            // Creazione asta
             int idAsta = astaDAO.insertNewAsta(
                     username,
                     prezzoIniziale,
-                    rialzoMinimo,
+                    (float) rialzoMinimo,          // firma del DAO accetta float
                     Timestamp.valueOf(scadenza)
             );
 
-            // Aggiornamento articoli con id_asta
+            // Collego gli articoli all'asta
             articoloDAO.updateIdAstaInArticles(articoliIds, idAsta);
 
-            response.sendRedirect(path);
+            // Risposta JSON
+            JSONObject json = new JSONObject()
+                    .put("success", true)
+                    .put("idAsta", idAsta)
+                    .put("proprietario", username)
+                    .put("prezzoIniziale", prezzoIniziale)
+                    .put("rialzoMinimo", rialzoMinimo)
+                    .put("scadenza", scadenza.toString())
+                    .put("articoli", new JSONArray(articoliIds));
+
+            response.setStatus(HttpServletResponse.SC_OK);
+            response.getWriter().write(json.toString());
+
         } catch (SQLException e) {
-            throw new ServletException(e);
+            e.printStackTrace();
+            response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+            response.getWriter().write(new JSONObject()
+                    .put("success", false)
+                    .put("error", "Errore DB").toString());
         }
     }
 
-    public void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        doPost(req, resp);
+    @Override
+    protected void doGet(HttpServletRequest request, HttpServletResponse response)
+            throws IOException {
+        // opzionale: se vuoi supportare GET, delega al POST oppure rispondi 405
+        response.setStatus(HttpServletResponse.SC_METHOD_NOT_ALLOWED);
+        response.setContentType("application/json");
+        response.getWriter().write(new JSONObject()
+                .put("success", false)
+                .put("error", "Metodo non consentito").toString());
+    }
+
+    @Override
+    public void destroy() {
+        try { if (connection != null) connection.close(); }
+        catch (SQLException ignored) {}
     }
 }

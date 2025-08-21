@@ -1,40 +1,24 @@
 // js/vendo.js
-
+//todo:quando è tutto finito creare una funzione che azzera tutti i messaggi all'utente
 document.addEventListener('DOMContentLoaded', () => {
     // inizializzo la tabella articoli
-    fetch("GetArticoliServlet", { method: "GET" })
-        .then(r => r.json())
-        .then(data => {
-            if (!data.success) {
-                console.error("Errore caricamento articoli:", data.error);
-                return;
-            }
-            (data.articoli || []).forEach(a => aggiungiArticoloAllaTabella(a));
-        })
-        .catch(err => console.error("Errore fetch GetArticoliServlet:", err));
+    aggiornaArticoliDisponibili();
 
     const newArticoloForm = document.getElementById("submitNewArticolo");
     const newAstaForm = document.getElementById("submitNewAsta");
-    // aggiunta gestione eventi creazione articolo e asta
+
+    // gestione creazione articolo
     newArticoloForm.addEventListener("click", (e) => {
         e.preventDefault();
         aggiungiArticolo();
     });
 
-    //todo: levare commenti quando funziona creaAsta
+    // gestione creazione asta
     newAstaForm.addEventListener("click", (e) => {
         e.preventDefault();
-        creaAsta();
+        creaAsta(e);
     });
 });
-
-
-    // ========== HELPERS ==========
-    function formatPrezzo(val) {
-    const num = Number(val);
-    if (Number.isNaN(num)) return val;
-    return num.toFixed(2); // 2 decimali
-}
 
     // Crea e ritorna un <td> con textContent
     function td(text) {
@@ -53,30 +37,6 @@ document.addEventListener('DOMContentLoaded', () => {
         if (descrizione) descrizione.value = "";
         if (prezzo) prezzo.value = "";
         if (immagine) immagine.value = "";
-    }
-
-    // ========== RENDER: UNA RIGA IN TABELLA ==========
-    function aggiungiArticoloAllaTabella(articolo) {
-        // articolo deve avere: codice, nome, descrizione, prezzo (e opzionale immagine)
-        const tbody = document.getElementById("bodyTabellaArticoliNewAsta");
-        const template = document.getElementById("articoliSelezionabiliRow");
-
-        // clono il template
-        const fragment = template.content.cloneNode(true);
-        const tr = fragment.querySelector("tr");
-
-        // 1) checkbox nella prima colonna
-        const checkbox = tr.querySelector('input[type="checkbox"][name="codiceArticolo"]');
-        checkbox.value = articolo.codice;   // VERY IMPORTANT: value = id articolo
-
-        // 2) resto delle colonne: id | nome | descrizione | prezzo
-        tr.appendChild(td(articolo.codice));
-        tr.appendChild(td(articolo.nome));
-        tr.appendChild(td(articolo.descrizione));
-        tr.appendChild(td(formatPrezzo(articolo.prezzo)));
-
-        // append in tabella
-        tbody.appendChild(tr);
     }
 
     function aggiungiArticolo(){ // callback del click su "Inserisci articolo"
@@ -141,3 +101,148 @@ function toIsoLocalDateTime(value) {
     return value.length === 16 ? value + ":00" : value;
 }
 
+async function creaAsta(event) {
+    event.preventDefault(); // evita submit standard del form
+
+    const messageBox = document.getElementById("newAstaMessage");
+    messageBox.textContent = "";
+    messageBox.style.fontWeight = "bold";
+
+    // 1. Recupero articoli selezionati
+    const selectedCheckboxes = document.querySelectorAll("input[name='codiceArticolo']:checked");
+    if (selectedCheckboxes.length === 0) {
+        messageBox.textContent = "Seleziona almeno un articolo!";
+        messageBox.style.color = "red";
+        return;
+    }
+    const articoliSelezionati = Array.from(selectedCheckboxes).map(cb => cb.value);
+
+    // 2. Recupero rialzo minimo e scadenza
+    const rialzoMinimo = document.getElementById("rialzoMinimo").value;
+    const scadenza = document.getElementById("scadenza").value; // yyyy-MM-ddTHH:mm
+
+    if (!rialzoMinimo || rialzoMinimo <= 0) {
+        messageBox.textContent = "Inserisci un rialzo minimo valido!";
+        messageBox.style.color = "red";
+        return;
+    }
+    if (!scadenza) {
+        messageBox.textContent = "Inserisci una data di scadenza!";
+        messageBox.style.color = "red";
+        return;
+    }
+
+    try {
+        // 3. Invio dati a /CreaAsta
+        const formData = new URLSearchParams();
+        articoliSelezionati.forEach(id => formData.append("articoliSelezionati", id));
+        formData.append("rialzoMinimo", rialzoMinimo);
+        formData.append("scadenza", scadenza);
+
+        const response = await fetch("CreaAsta", {
+            method: "POST",
+            headers: { "Content-Type": "application/x-www-form-urlencoded" },
+            body: formData.toString()
+        });
+
+        if (!response.ok) {
+            throw new Error("Creazione dell'asta");
+        }
+
+        // 4. Aggiorno lista articoli disponibili
+        await aggiornaArticoliDisponibili();
+
+        messageBox.textContent = "Asta creata con successo!";
+        messageBox.style.color = "green";
+        emptyAstaInputs();
+
+
+    } catch (err) {
+        console.error(err);
+        messageBox.textContent = "Errore: " + err.message;
+        messageBox.style.color = "red";
+    }
+}
+
+// === Funzione per aggiornare la tabella articoli disponibili ===
+async function aggiornaArticoliDisponibili() {
+    try {
+        const response = await fetch("GetArticoliServlet", { method: "GET" });
+        const data = await response.json();
+
+        if (!data.success) {
+            throw new Error(data.error || "Errore nel recupero articoli");
+        }
+
+        const tbody = document.getElementById("bodyTabellaArticoliNewAsta");
+        tbody.innerHTML = ""; // svuoto tabella
+
+        (data.articoli || []).forEach(a => aggiungiArticoloAllaTabella(a));
+
+    } catch (err) {
+        console.error("Errore aggiornamento articoli:", err);
+    }
+}
+
+// === Funzione per aggiungere una riga di articolo alla tabella ===
+function aggiungiArticoloAllaTabella(articolo) {
+    const tbody = document.getElementById("bodyTabellaArticoliNewAsta");
+    const template = document.getElementById("articoliSelezionabiliRow");
+
+    // Clono il template
+    const row = template.content.cloneNode(true);
+
+    // setto il valore della checkbox
+    const checkbox = row.querySelector("input[type='checkbox']");
+    checkbox.value = articolo.codice;
+
+    // creo le celle dinamiche
+    const tdCodice = document.createElement("td");
+    tdCodice.textContent = articolo.codice;
+
+    const tdNome = document.createElement("td");
+    tdNome.textContent = articolo.nome;
+
+    const tdDescrizione = document.createElement("td");
+    tdDescrizione.textContent = articolo.descrizione;
+
+    const tdPrezzo = document.createElement("td");
+    tdPrezzo.textContent = articolo.prezzo.toFixed(2) + " €";
+
+    // aggiungo le celle alla riga
+    row.querySelector("tr").append(tdCodice, tdNome, tdDescrizione, tdPrezzo);
+
+    // appendo la riga alla tabella
+    tbody.appendChild(row);
+}
+
+function emptyAstaInputs() {
+    const rialzo=document.getElementById("rialzoMinimo");
+    const scadenza=document.getElementById("scadenza");
+    if(rialzo) rialzo.value="";
+    if(scadenza) scadenza.value="";
+}
+
+// todo:nel caso in cui serva in futuro
+/*function aggiungiArticoloAllaTabella(articolo) {
+    // articolo deve avere: codice, nome, descrizione, prezzo (e opzionale immagine)
+    const tbody = document.getElementById("bodyTabellaArticoliNewAsta");
+    const template = document.getElementById("articoliSelezionabiliRow");
+
+    // clono il template
+    const fragment = template.content.cloneNode(true);
+    const tr = fragment.querySelector("tr");
+
+    // 1) checkbox nella prima colonna
+    const checkbox = tr.querySelector('input[type="checkbox"][name="codiceArticolo"]');
+    checkbox.value = articolo.codice;   // VERY IMPORTANT: value = id articolo
+
+    // 2) resto delle colonne: id | nome | descrizione | prezzo
+    tr.appendChild(td(articolo.codice));
+    tr.appendChild(td(articolo.nome));
+    tr.appendChild(td(articolo.descrizione));
+    tr.appendChild(td(formatPrezzo(articolo.prezzo)));
+
+    // append in tabella
+    tbody.appendChild(tr);
+}*/
