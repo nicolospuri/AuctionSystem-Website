@@ -138,14 +138,18 @@ public class OfferteServlet extends HttpServlet {
             AstaDAO astaDAO = new AstaDAO(connection);
             Asta asta = astaDAO.getAstaById(idAsta);
             int rialzoMinimo = asta.getRialzoMinimo();
-            // Aggiungo il rialzo minimo al result
+            double prezzoIniziale = asta.getPrezzoIniziale();
+            // Aggiungo il rialzo minimo e il prezzo iniziale al result
             result.put("rialzoMinimo", rialzoMinimo);
+            result.put("prezzoIniziale", prezzoIniziale);
 
             OffertaDAO offertaDAO = new OffertaDAO(connection);
             List<Offerta> offerte = offertaDAO.getOfferteByIdAsta(idAsta);
             if (offerte != null && !offerte.isEmpty()) {
                 // Aggiungo le offerte al result
                 result.put("offerteAsta", offerte);
+                Offerta maxOfferta = offertaDAO.getMaxOffertaByIdAsta(idAsta);
+                result.put("prezzoOffertaMassima", maxOfferta.getPrezzo());
             }
 
             if (utente != null && !utente.getUsername().equals(asta.getProprietario())

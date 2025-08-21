@@ -122,11 +122,21 @@ public class FaiOfferta extends HttpServlet {
                 return;
             }
 
+            // Offerta troppo bassa
+            if (prezzoOfferto < asta.getPrezzoIniziale()) {
+                result.put("offertaErrorMsg", "L'offerta deve essere almeno pari al prezzo iniziale");
+                jsonResponse = gson.toJson(result);
+
+                response.setContentType("application/json");
+                response.setCharacterEncoding("UTF-8");
+                response.getWriter().write(jsonResponse);
+                return;
+            }
+
             if (offerte != null && !offerte.isEmpty()) {
                 Offerta maxOfferta = offertaDAO.getMaxOffertaByIdAsta(idAsta);
                 // Offerta troppo bassa
-                if (asta.getRialzoMinimo() > prezzoOfferto - asta.getPrezzoIniziale() ||
-                        (maxOfferta != null && asta.getRialzoMinimo() > prezzoOfferto - maxOfferta.getPrezzo())) {
+                if (maxOfferta != null && prezzoOfferto < maxOfferta.getPrezzo() + asta.getRialzoMinimo()) {
                     result.put("offertaErrorMsg", "L'offerta deve rialzare il prezzo almeno quanto il rialzo minimo");
                     jsonResponse = gson.toJson(result);
 

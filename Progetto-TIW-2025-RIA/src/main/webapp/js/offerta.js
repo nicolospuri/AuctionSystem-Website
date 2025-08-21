@@ -15,12 +15,14 @@ export function renderOffertaPage(idAsta) {
                 document.getElementById('offerteAstaBody').innerHTML = '';
                 document.getElementById('offerteMsg').textContent = '';
                 document.getElementById("offertaErrorMsg").textContent = '';
+                document.getElementById('offertaSuccessMsg').textContent = '';
 
                 const jsonResponse = JSON.parse(request.responseText);
 
                 const articoliAsta = jsonResponse.articoliAsta;
                 const offerteAsta = jsonResponse.offerteAsta;
                 const rialzoMinimo = jsonResponse.rialzoMinimo;
+                const prezzoIniziale = jsonResponse.prezzoIniziale;
                 const prezzoOffertaMassima = jsonResponse.prezzoOffertaMassima;
                 const canOffer = jsonResponse.canOffer;
 
@@ -45,10 +47,16 @@ export function renderOffertaPage(idAsta) {
                     document.getElementById('canOffer').hidden = false;
                     document.getElementById("showRialzoMinimo").textContent = rialzoMinimo + ".00 €";
 
-                    document.getElementById("faiOfferta").addEventListener("click", (e) => {
+                    // Sostituisco il bottone faiOfferta con un nuovo clone per poter aggiungere l'event listener
+                    // altrimenti aggiungerei un altro event listener oltre a quello già presente
+                    const oldBtn = document.getElementById("faiOfferta");
+                    const newBtn = oldBtn.cloneNode(true);
+                    oldBtn.replaceWith(newBtn);
+
+                    newBtn.addEventListener("click", (e) => {
                         e.preventDefault();
-                        faiOfferta(prezzoOffertaMassima, rialzoMinimo);
-                    })
+                        faiOfferta(prezzoIniziale, prezzoOffertaMassima, rialzoMinimo);
+                    });
                 } else {
                     document.getElementById('canOffer').hidden = true;
                 }
@@ -110,14 +118,18 @@ function addOffertaInTable(offerta, nuova) {
     dataTd.textContent = offerta.data;
     newRow.appendChild(dataTd);
 
-    if (nuova) { // Se l'offerta è nuova, la inserisco in cima alla tabella
+    if (nuova && tbody.rows.length > 0) { // Se viene fatta una nuova offerta e ci sono già offerte nella tabella, la inserisco in cima
         tbody.insertBefore(newRow, tbody.firstChild);
     } else {
         tbody.appendChild(newRow);
+        if (nuova) {
+            document.getElementById('offerteAsta').hidden = false;
+            document.getElementById('offerteMsg').textContent = "";
+        }
     }
 }
 
-function faiOfferta(prezzoOffertaMassima, rialzoMinimo) {
+function faiOfferta(prezzoIniziale, prezzoOffertaMassima, rialzoMinimo) {
     document.getElementById("offertaSuccessMsg").textContent = "";
     document.getElementById("offertaErrorMsg").textContent = "";
 
@@ -135,7 +147,11 @@ function faiOfferta(prezzoOffertaMassima, rialzoMinimo) {
         document.getElementById("offertaErrorMsg").textContent = "Il prezzo deve essere maggiore di zero";
         return;
     }
-    if (prezzoOfferto < prezzoOffertaMassima + rialzoMinimo) {
+    if (prezzoOfferto < prezzoIniziale) {
+        document.getElementById("offertaErrorMsg").textContent = "L'offerta deve essere almeno pari al prezzo iniziale";
+        return;
+    }
+    if (prezzoOffertaMassima !== null && prezzoOfferto < prezzoOffertaMassima + rialzoMinimo) {
         document.getElementById("offertaErrorMsg").textContent = "L'offerta deve rialzare il prezzo almeno quanto il rialzo minimo";
         return;
     }
