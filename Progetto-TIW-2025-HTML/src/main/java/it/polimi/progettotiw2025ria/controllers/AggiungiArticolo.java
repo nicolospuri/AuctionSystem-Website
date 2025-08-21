@@ -105,21 +105,20 @@ public class AggiungiArticolo extends HttpServlet{
 
         if (filePart != null && filePart.getSize() > 0) {
             String fileName = Paths.get(filePart.getSubmittedFileName()).getFileName().toString(); // nome file originale
-            // Salvo il file nella cartella "uploads" sotto webapp
-            String uploadPath = getServletContext().getRealPath("") + "uploads";
+            // Ottieni la root del progetto a partire dalla cartella di deploy
+            String projectRoot = new File(getServletContext().getRealPath("")).getParentFile().getParent();
+
+            // Costruisci il path corretto a src/main/webapp/uploads
+            String uploadPath = projectRoot + File.separator + "src"
+                    + File.separator + "main"
+                    + File.separator + "webapp"
+                    + File.separator + "uploads";
+
 
             File uploadDir = new File(uploadPath);
             if (!uploadDir.exists()) uploadDir.mkdir();
 
-            File file = new File(uploadDir, fileName);
-            try (InputStream fileContent = filePart.getInputStream();
-                 FileOutputStream fos = new FileOutputStream(file)) {
-                byte[] buffer = new byte[1024];
-                int bytesRead;
-                while ((bytesRead = fileContent.read(buffer)) != -1) {
-                    fos.write(buffer, 0, bytesRead);
-                }
-            }
+            filePart.write(uploadPath + File.separator + fileName);
 
             // memorizza percorso relativo
             immaginePath = "uploads/" + fileName;

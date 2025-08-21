@@ -101,7 +101,6 @@
                     <th>Codice</th>
                     <th>Nome</th>
                     <th>Descrizione</th>
-                    <!--<th>Immagine</th>-->
                     <th>Prezzo</th>
                     <th>Proprietario</th>
                 </tr>
@@ -114,7 +113,6 @@
                     <td th:text="${articolo.codice}"></td>
                     <td th:text="${articolo.nome}"></td>
                     <td th:text="${articolo.descrizione}"></td>
-                    <!--<td><img th:src="${articolo.immagine}" th:alt="${articolo.nome}" width="100" height="100" style="object-fit:cover" /></td>-->
                     <td th:text="${articolo.prezzo} + ' €'"></td>
                     <td th:text="${articolo.proprietario}"></td>
                 </tr>
