@@ -1,10 +1,28 @@
 // js/vendo.js
 //todo:quando è tutto finito creare una funzione che azzera tutti i messaggi all'utente
+import { mostraDettaglioAstaAperta } from './DettaglioAsta.js';
+import { mostraDettaglioAstaChiusa } from './DettaglioAsta.js';
+
 document.addEventListener('DOMContentLoaded', () => {
     // inizializzo la tabella articoli
     caricaListeAperte();
     caricaListeChiuse();
     aggiornaArticoliDisponibili();
+    inizializzaClickDettaglioAstaAperta();
+    inizializzaClickDettaglioAsteChiuse()
+
+    document.getElementById("moveToVendo").addEventListener("click", () => {
+        // Torna alla home venditore
+        document.getElementById("DettaglioAstaApertaPage").hidden = true;
+        document.getElementById("vendoPage").hidden = false;
+        document.getElementById("moveToVendo").hidden = true;
+
+        //Ripulisce il contenuto della pagina dettaglio
+        document.getElementById("ArticoliAstaAperta").innerHTML = "";
+        document.getElementById("listaOfferte").querySelector("#bodyListaOfferte").innerHTML = "";
+    });
+
+
 
     const newArticoloForm = document.getElementById("submitNewArticolo");
     const newAstaForm = document.getElementById("submitNewAsta");
@@ -251,10 +269,13 @@ function emptyAstaInputs() {
 }*/
 
 // ===== POPOLA "Le tue aste aperte" =====
-async function caricaListeAperte() {
+export async function caricaListeAperte() {
     const tbody = document.getElementById("bodyTabellaAsteAperte");
     const tpl   = document.getElementById("astaApertaRow");
-    if (!tbody) { console.error("bodyTabellaAsteAperte non trovato"); return; }
+    if (!tbody || !tpl) {
+        console.error("bodyTabellaAsteAperte o template non trovato");
+        return;
+    }
 
     tbody.innerHTML = "";
 
@@ -284,29 +305,43 @@ async function caricaListeAperte() {
         const frag = document.createDocumentFragment();
 
         liste.forEach(a => {
-            const tr       = tpl ? tpl.content.firstElementChild.cloneNode(true) : document.createElement("tr");
-            const tdId     = document.createElement("td");
-            const tdTempo  = document.createElement("td");
-            const tdOffMax = document.createElement("td");
-            const tdArt    = document.createElement("td");
+            const row = tpl.content.firstElementChild.cloneNode(true);
 
-            tdId.textContent = a.id ?? "";
+            // Popola il link nell'ID Asta
+            const link = row.querySelector(".id-asta-link");
+            if (link) {
+                link.textContent = a.id;
+                link.dataset.id = a.id;
+            }
 
-            tdTempo.textContent = a.tempoMancante
-                ? a.tempoMancante
-                : calcolaTempoMancante(a.scadenza);
+            // Tempo mancante
+            const tempoCell = row.querySelector(".tempo-mancante");
+            if (tempoCell) {
+                tempoCell.textContent = a.tempoMancante
+                    ? a.tempoMancante
+                    : calcolaTempoMancante(a.scadenza);
+            }
 
-            const offMax = (a.prezzoOffertaMassima != null)
-                ? a.prezzoOffertaMassima
-                : (a.offertaMassima && a.offertaMassima.prezzo) ? a.offertaMassima.prezzo : 0;
-            tdOffMax.textContent = formatEuro(offMax);
+            // Offerta massima
+            const offertaCell = row.querySelector(".offerta-massima");
+            if (offertaCell) {
+                const offMax = (a.prezzoOffertaMassima != null)
+                    ? a.prezzoOffertaMassima
+                    : (a.offertaMassima && a.offertaMassima.prezzo)
+                        ? a.offertaMassima.prezzo
+                        : 0;
+                offertaCell.textContent = formatEuro(offMax);
+            }
 
-            // elenco puntato: Nome — Prezzo
-            const ul = buildArticoliList(a.articoli || []);
-            tdArt.appendChild(ul);
+            // Articoli
+            const articoliCell = row.querySelector(".articoli");
+            if (articoliCell) {
+                articoliCell.innerHTML = "";
+                const ul = buildArticoliList(a.articoli || []);
+                articoliCell.appendChild(ul);
+            }
 
-            tr.append(tdId, tdTempo, tdOffMax, tdArt);
-            frag.appendChild(tr);
+            frag.appendChild(row);
         });
 
         tbody.appendChild(frag);
@@ -316,6 +351,7 @@ async function caricaListeAperte() {
         tbody.innerHTML = `<tr><td colspan="4" style="color:#b00">Errore nel caricamento</td></tr>`;
     }
 }
+
 
 function formatEuro(n) {
     const num = Number(n);
@@ -356,10 +392,13 @@ function buildArticoliList(articoli) {
     return ul;
 }
 
-async function caricaListeChiuse() {
+export async function caricaListeChiuse() {
     const tbody = document.getElementById("bodyTabellaAsteChiuse");
     const tpl   = document.getElementById("astaChiusaRow");
-    if (!tbody) { console.error("bodyTabellaAsteChiuse non trovato"); return; }
+    if (!tbody || !tpl) {
+        console.error("bodyTabellaAsteChiuse o template non trovato");
+        return;
+    }
 
     tbody.innerHTML = "";
 
@@ -372,15 +411,14 @@ async function caricaListeChiuse() {
         });
 
         if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
-
         const data = await resp.json();
+
         if (!data.success) {
             tbody.innerHTML = `<tr><td colspan="4" style="color:#b00">Errore: ${data.error || 'richiesta fallita'}</td></tr>`;
             return;
         }
 
         const liste = Array.isArray(data.asteChiuse) ? data.asteChiuse : [];
-
         if (liste.length === 0) {
             tbody.innerHTML = `<tr><td colspan="4">Nessuna asta chiusa</td></tr>`;
             return;
@@ -389,32 +427,37 @@ async function caricaListeChiuse() {
         const frag = document.createDocumentFragment();
 
         liste.forEach(a => {
-            const tr= tpl ? tpl.content.firstElementChild.cloneNode(true) : document.createElement("tr");
-            const tdId     = document.createElement("td");
-            const tdPrezzo = document.createElement("td");
-            const tdAgg    = document.createElement("td");
-            const tdArt    = document.createElement("td");
+            const row = tpl.content.firstElementChild.cloneNode(true);
 
-            // ID
-            tdId.textContent = a.id ?? "";
+            // ID come link cliccabile
+            const link = row.querySelector(".id-asta-chiusa-link");
+            if (link) {
+                link.textContent = a.id;
+                link.dataset.id = a.id;
+            }
 
-            // Prezzo finale: offerta vincente se presente, altrimenti prezzo iniziale
-            const prezzoFinale = (a.prezzoOffertaMassima != null)
-                ? a.prezzoOffertaMassima
-                : (a.offertaMassima && a.offertaMassima.prezzo)
-                    ? a.offertaMassima.prezzo
+            // Prezzo finale
+            const tdPrezzo = row.querySelector(".prezzo-finale");
+            if (tdPrezzo) {
+                const prezzoFinale = (a.prezzoOffertaMassima != null)
+                    ? a.prezzoOffertaMassima
                     : (a.prezzoIniziale ?? 0);
-            tdPrezzo.textContent = formatEuro(prezzoFinale);
+                tdPrezzo.textContent = formatEuro(prezzoFinale);
+            }
 
             // Aggiudicatario
-            tdAgg.textContent = a.aggiudicatario ? a.aggiudicatario : "—";
+            const tdAgg = row.querySelector(".aggiudicatario");
+            if (tdAgg) tdAgg.textContent = a.aggiudicatario || "—";
 
-            // Articoli → elenco puntato (Nome — Prezzo)
-            const ul = buildArticoliList(a.articoli || []);
-            tdArt.appendChild(ul);
+            // Articoli
+            const tdArt = row.querySelector(".articoli");
+            if (tdArt) {
+                tdArt.innerHTML = "";
+                const ul = buildArticoliList(a.articoli || []);
+                tdArt.appendChild(ul);
+            }
 
-            tr.append(tdId, tdPrezzo, tdAgg, tdArt);
-            frag.appendChild(tr);
+            frag.appendChild(row);
         });
 
         tbody.appendChild(frag);
@@ -423,4 +466,60 @@ async function caricaListeChiuse() {
         console.error("caricaListeChiuse error:", err);
         tbody.innerHTML = `<tr><td colspan="4" style="color:#b00">Errore nel caricamento</td></tr>`;
     }
+}
+
+
+function inizializzaClickDettaglioAstaAperta() {
+    const tbody = document.getElementById("bodyTabellaAsteAperte");
+
+    tbody.addEventListener("click", async (e) => {
+        const td = e.target.closest("td");
+        if (!td || td.cellIndex !== 0) return; // Solo prima colonna (ID Asta)
+
+        const idAsta = td.textContent.trim();
+        if (!idAsta) return;
+
+        try {
+            const resp = await fetch(`DettaglioAstaServlet?idAsta=${idAsta}`, {
+                headers: { "X-Requested-With": "XMLHttpRequest" }
+            });
+
+            if (!resp.ok) throw new Error(`Errore HTTP ${resp.status}`);
+            const data = await resp.json();
+
+            mostraDettaglioAstaAperta(data);
+
+        } catch (err) {
+            console.error("Errore caricamento dettaglio asta:", err);
+            alert("Errore nel caricamento del dettaglio asta.");
+        }
+    });
+}
+
+function inizializzaClickDettaglioAsteChiuse() {
+    const tbody = document.getElementById("bodyTabellaAsteChiuse");
+    if (!tbody) return;
+
+    tbody.addEventListener("click", async (e) => {
+        const link = e.target.closest(".id-asta-chiusa-link");
+        if (!link) return;
+
+        e.preventDefault();
+        const idAsta = link.dataset.id;
+        if (!idAsta) return;
+
+        try {
+            const resp = await fetch(`DettaglioAstaServlet?idAsta=${idAsta}`, {
+                headers: { "X-Requested-With": "XMLHttpRequest" }
+            });
+            if (!resp.ok) throw new Error(`Errore HTTP ${resp.status}`);
+
+            const data = await resp.json();
+            mostraDettaglioAstaChiusa(data); // <-- importata da ./DettaglioAsta.js
+
+        } catch (err) {
+            console.error("Errore caricamento dettaglio asta chiusa:", err);
+            alert("Errore nel caricamento del dettaglio dell'asta chiusa.");
+        }
+    });
 }

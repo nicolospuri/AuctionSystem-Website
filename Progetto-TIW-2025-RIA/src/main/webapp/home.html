@@ -4,7 +4,9 @@
         <meta charset="UTF-8">
         <title>Aste Online</title>
         <script type="module" th:src="@{/js/home.js}" defer></script>
+        <script type="module" th:src="@{/js.DettaglioAsta}" defer></script>
         <script type="module" th:src="@{/js/vendo.js}" defer></script>
+
     </head>
     <body>
         <a th:href="@{/Logout}"><button type="submit">Logout</button></a><br><br>
@@ -30,23 +32,15 @@
 
               </table>
 
-              <template id="astaApertaRow">
-                <tr>
-                  <!-- td con text = id asta -->
-                    <!-- td con text = tempo mancante -->
-                  <!-- td con text = offerta massima asta -->
-                  <!-- td  -->
-                  <!-- table -->
-                  <!-- tr -->
-                  <!-- td con text = codice articolo -->
-                  <!-- td con text = nome articolo -->
-                  <!-- td con text = prezzo articolo -->
-                  <!-- tr -->
-                  <!-- /table -->
-                  <!-- /td -->
-                  <!-- <td><button class="dettaglioAstaApertaButton">Dettaglio asta</button></td> va aggiunto value = id asta -->
-                </tr>
-              </template>
+                <template id="astaApertaRow">
+                    <tr>
+                        <td><a href="#" class="id-asta-link" data-id=""></a></td>
+                        <td class="tempo-mancante"></td>
+                        <td class="offerta-massima"></td>
+                        <td class="articoli"></td>
+                    </tr>
+                </template>
+
             </div>
 
             <br>
@@ -66,23 +60,15 @@
                 </tbody>
               </table>
 
-              <template id="astaChiusaRow">
-                <tr>
-                    <!-- td con text = id asta -->
-                    <!-- td con text = offerta massima asta -->
-                    <!-- td con text = aggiudicatario -->
-                    <!-- td  -->
-                    <!-- table -->
-                    <!-- tr -->
-                    <!-- td con text = codice articolo -->
-                    <!-- td con text = nome articolo -->
-                    <!-- td con text = prezzo articolo -->
-                    <!-- tr -->
-                    <!-- /table -->
-                    <!-- /td -->
-                  <!-- <td><button class="dettaglioAstaChiusaButton">Dettaglio asta</button></td> va aggiunto value = id asta -->
-                </tr>
-              </template>
+                <template id="astaChiusaRow">
+                    <tr>
+                        <td><a href="#" class="id-asta-chiusa-link" data-id=""></a></td>
+                        <td class="prezzo-finale"></td>
+                        <td class="aggiudicatario"></td>
+                        <td class="articoli"></td>
+                    </tr>
+                </template>
+
             </div>
 
             <br>
@@ -134,8 +120,8 @@
                 <div id="newAstaMessage"></div>
             </form>
         </div>
-    <div id="DettaglioAstaPage" hidden>
-        <ul id="ArticoliAsta"></ul>
+    <div id="DettaglioAstaApertaPage" hidden>
+        <ul id="ArticoliAstaAperta"></ul>
         <!-- idAsta -->
         <!-- prezzo iniziale -->
         <!-- rialzo minimo -->
@@ -147,10 +133,9 @@
             <table border="1" id="tabelleOfferte">
                 <thead>
                 <tr>
-                    <th>ID Asta</th>
-                    <th>Prezzo</th>
-                    <th>Aggiudicatario</th>
-                    <th>Articoli</th>
+                    <th>Offerente</th>
+                    <th>Prezzo offerente</th>
+                    <th>Data Offerta</th>
                 </tr>
                 </thead>
                 <tbody id="bodyListaOfferte" align="center">
@@ -172,12 +157,25 @@
                     <!-- tr -->
                     <!-- /table -->
                     <!-- /td -->
-                    <!-- <td><button class="dettaglioAstaChiusaButton">Dettaglio asta</button></td> va aggiunto value = id asta -->
                 </tr>
             </template>
-        </div>
+        </div><br><br>
         <!--mostrabile solo se asta scaduta-->
         <button id="chiudiAsta" hidden>Chiudi</button>
+        <div id="MsgChiudiAsta"></div>
     </div>
+        <!-- dettaglio asta chiusa -->
+    <div id="DettaglioAstaChiusaPage" hidden>
+        <ul id="ArticoliAstaChiusa"></ul>
+        <!-- idAsta -->
+        <!-- prezzo iniziale -->
+        <!-- rialzo minimo -->
+        <!-- scadenza -->
+        <!-- aggiudicatario -->
+        <!-- prezzo finale -->
+        <!-- indirizzo aggiudicatario -->
+        <!-- articoli -->
+         <!-- ul lista prezzi+articoli -->
+        </div>
     </body>
 </html>
