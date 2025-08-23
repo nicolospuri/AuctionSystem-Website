@@ -9,16 +9,10 @@ import it.polimi.progettotiw2025ria.dao.AstaDAO;
 import it.polimi.progettotiw2025ria.dao.OffertaDAO;
 import it.polimi.progettotiw2025ria.utils.ConnectionHandler;
 import it.polimi.progettotiw2025ria.utils.LocalDateTimeAdapter;
-import jakarta.servlet.ServletContext;
 import jakarta.servlet.UnavailableException;
 import jakarta.servlet.annotation.MultipartConfig;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.*;
-import org.thymeleaf.TemplateEngine;
-import org.thymeleaf.context.WebContext;
-import org.thymeleaf.templatemode.TemplateMode;
-import org.thymeleaf.templateresolver.WebApplicationTemplateResolver;
-import org.thymeleaf.web.servlet.JakartaServletWebApplication;
 
 import java.io.IOException;
 import java.sql.Connection;

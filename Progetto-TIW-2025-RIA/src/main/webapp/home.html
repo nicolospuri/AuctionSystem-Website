@@ -7,130 +7,180 @@
         <script type="module" src="js/vendo.js" defer></script>
         <script type="module" src="js/acquisto.js" defer></script>
         <script type="module" src="js/offerta.js" defer></script>
+        <script type="module" src="js/dettaglioAsta.js" defer></script>
     </head>
     <body>
-        <h5>Menu:</h5>
         <a href="Logout"><button type="submit">Logout</button></a><br><br>
         <button id="moveToVendo" hidden>Vendo</button><br><br>
         <button id="moveToAcquisto" hidden>Acquisto</button><br><br>
 
         <!--inserire hidden appena funzionano vendo-->
-        <div id="vendoPage">
+        <div id="vendoPage" hidden>
             <h2>Le tue aste aperte</h2>
+            <!-- mettere un messaggio se non ci sono aste aperte e settare a hidden-->
             <div id="listaAsteAperte">
-              <table border="1">
-                <thead>
-                <tr align="center">
-                    <th>ID Asta</th>
-                    <th>Tempo Mancante</th>
-                    <th>Offerta Massima</th>
-                    <th>Articoli</th>
-                </tr>
-                </thead>
-                <tbody id="bodyTabellaAsteAperte">
-                <!-- qui vengono aggiunte tutte le aste aperte, secondo il template "astaApertaRow" -->
-                </tbody>
+                <table border="1">
+                    <thead>
+                    <tr align="center">
+                        <th>ID Asta</th>
+                        <th>Tempo Mancante</th>
+                        <th>Offerta Massima</th>
+                        <th>Articoli</th>
+                    </tr>
+                    </thead>
+                    <tbody id="bodyTabellaAsteAperte" align="center">
+                    <!-- qui vengono aggiunte tutte le aste aperte, secondo il template "astaApertaRow" -->
+                    </tbody>
 
-              </table>
+                </table>
 
-              <template id="astaApertaRow">
-                <tr>
-                  <!-- td con text = id asta -->
-                  <!-- td con text = tempo mancante -->
-                  <!-- td con text = offerta massima asta -->
-                  <!-- td  -->
-                  <!-- table -->
-                  <!-- tr -->
-                  <!-- td con text = codice articolo -->
-                  <!-- td con text = nome articolo -->
-                  <!-- td con text = prezzo articolo -->
-                  <!-- tr -->
-                  <!-- /table -->
-                  <!-- /td -->
-                  <!-- <td><button class="dettaglioAstaApertaButton">Dettaglio asta</button></td> va aggiunto value = id asta -->
-                </tr>
-              </template>
+                <template id="astaApertaRow">
+                    <tr>
+                        <td><a href="#" class="id-asta-link" data-id=""></a></td>
+                        <td class="tempo-mancante"></td>
+                        <td class="offerta-massima"></td>
+                        <td class="articoli"></td>
+                    </tr>
+                </template>
+
             </div>
 
             <br>
+            <!-- mettere un messaggio se non ci sono aste aperte e settare a hidden-->
             <h2>Le tue aste chiuse</h2>
             <div id="listaAsteChiuse">
-              <table border="1" id="tabelleAsteChiuse">
-                <thead>
-                <tr>
-                  <th>IdAsta</th>
-                  <th>Tempo Mancante</th>
-                  <th>Offerta Massima</th>
-                    <th>Articoli</th>
-                </tr>
-                </thead>
-                <tbody id="bodyTabellaAsteChiuse">
-                <!-- qui vengono aggiunte tutte le aste chiuse, seguendo il template "astaChiusaRow" -->
-                </tbody>
-              </table>
+                <table border="1" id="tabelleAsteChiuse">
+                    <thead>
+                    <tr>
+                        <th>ID Asta</th>
+                        <th>Prezzo</th>
+                        <th>Aggiudicatario</th>
+                        <th>Articoli</th>
+                    </tr>
+                    </thead>
+                    <tbody id="bodyTabellaAsteChiuse" align="center">
+                    <!-- qui vengono aggiunte tutte le aste chiuse, seguendo il template "astaChiusaRow" -->
+                    </tbody>
+                </table>
 
-              <template id="astaChiusaRow">
-                <tr>
-                  <!-- td con text = id asta -->
-                  <!-- td con text = prezzo iniziale asta -->
-                  <!-- td con text = offerta massima asta -->
-                  <!-- td con text = data scadenza asta -->
-                  <!-- td con text = ora scadenza asta -->
-                  <!-- <td><button class="dettaglioAstaChiusaButton">Dettaglio asta</button></td> va aggiunto value = id asta -->
-                </tr>
-              </template>
+                <template id="astaChiusaRow">
+                    <tr>
+                        <td><a href="#" class="id-asta-chiusa-link" data-id=""></a></td>
+                        <td class="prezzo-finale"></td>
+                        <td class="aggiudicatario"></td>
+                        <td class="articoli"></td>
+                    </tr>
+                </template>
+
             </div>
 
             <br>
             <h2>Inserisci un nuovo articolo:</h2>
-            <form id="formNuovoArticolo">
-              <input type="text" id="nomeNewArticolo" placeholder="Nome" required><br><br>
-              <textarea placeholder="Descrizione" id="descrizioneNewArticolo" required></textarea><br><br>
-              <input type="file" id="immagineNewArticolo" placeholder="Immagine" accept="image/*"><br><br>
-              <input type="number" id="prezzoNewArticolo" placeholder="Prezzo" min="0"><br><br>
+            <div id="formNuovoArticolo">
+                <input type="text" id="nomeNewArticolo" placeholder="Nome" required><br><br>
+                <textarea placeholder="Descrizione" id="descrizioneNewArticolo" required></textarea><br><br>
+                <input type="file" id="immagineNewArticolo" placeholder="Immagine" accept="image/*"><br><br>
+                <input type="number" id="prezzoNewArticolo" placeholder="Prezzo" step="0.01" min="0"><br><br>
 
-              <button id="submitNewArticolo">Inserisci articolo</button><br><br>
-              <div id="newArticoloMessage"></div>
-            </form>
+                <button id="submitNewArticolo">Inserisci articolo</button><br><br>
+                <div id="newArticoloMessage"></div>
+            </div>
 
             <h2>Crea asta:</h2>
-            <div id="newAstaMessage"></div>
-            <div id="formNewAsta">
-              <table border="1" id="tabellaArticoliNewAsta">
-                <thead>
-                <tr>
-                  <th>Seleziona</th>
-                  <th>Id articolo</th>
-                  <th>Nome articolo</th>
-                  <th>Descrizione</th>
-                  <th>Prezzo</th>
-                </tr>
-                </thead>
-                <tbody id="bodyTabellaArticoliNewAsta">
-                <!-- qui vengono aggiunti tutti gli articoli selezionabili per una nuova asta, secondo il template "articoliSelezionabiliRow" -->
-                </tbody>
-              </table>
+            <!-- mettere un messaggio se non ci sono articoli e settare a hidden-->
+            <form id="formNewAsta">
+                <table border="1" id="tabellaArticoliNewAsta">
+                    <thead>
+                    <tr>
+                        <th>Seleziona</th>
+                        <th>Id articolo</th>
+                        <th>Nome articolo</th>
+                        <th>Descrizione</th>
+                        <th>Prezzo</th>
+                    </tr>
+                    </thead>
+                    <tbody id="bodyTabellaArticoliNewAsta">
+                    <!-- qui vengono aggiunti tutti gli articoli selezionabili per una nuova asta, secondo il template "articoliSelezionabiliRow" -->
+                    </tbody>
+                </table>
 
-              <!-- template di una riga della tabella tabellaArticoliNewAsta -->
-              <template id="articoliSelezionabiliRow">
-                <tr>
-                  <td><input type="checkbox" name="codiceArticolo"></td>	<!-- value = codice articolo -->
-                  <!-- td con text = codice articolo -->
-                  <!-- td con text = nome articolo -->
-                  <!-- td con text = descrizione articolo -->
-                  <!-- td con text = prezzo articolo -->
-                </tr>
-              </template><br>
+                <template id="articoliSelezionabiliRow">
+                    <tr>
+                        <td><input type="checkbox" name="codiceArticolo" value="codice"></td>	<!-- value = codice articolo -->
+                        <!-- td con text = codice articolo -->
+                        <!-- td con text = nome articolo -->
+                        <!-- td con text = descrizione articolo -->
+                        <!-- td con text = prezzo articolo -->
+                    </tr>
+                </template><br>
 
-              <label for="rialzoMinimo">Rialzo minimo (in €):</label>
-              <input type="number" id="rialzoMinimo" min="1" step="1" required><br><br>
+                <label for="rialzoMinimo">Rialzo minimo (in €):</label>
+                <input type="number" id="rialzoMinimo" min="1" step="1" required><br><br>
 
-              <label for="scadenza">Data scadenza:</label>
-              <input type="datetime-local" id="scadenza" required><br><br>
+                <label for="scadenza">Data scadenza:</label>
+                <input type="datetime-local" id="scadenza" required><br><br>
 
-              <button id="submitNewAsta">Crea Asta</button>
+                <button id="submitNewAsta">Crea Asta</button><br><br>
+                <div id="newAstaMessage"></div>
+            </form>
+        </div>
 
-            </div>
+        <div id="DettaglioAstaApertaPage" hidden>
+            <ul id="ArticoliAstaAperta"></ul>
+            <!-- idAsta -->
+            <!-- prezzo iniziale -->
+            <!-- rialzo minimo -->
+            <!-- scadenza -->
+            <!-- articoli -->
+            <!-- ul lista prezzi+articoli -->
+            <h2>Offerte</h2>
+            <div id="listaOfferte">
+                <table border="1" id="tabelleOfferte">
+                    <thead>
+                    <tr>
+                        <th>Offerente</th>
+                        <th>Prezzo offerente</th>
+                        <th>Data Offerta</th>
+                    </tr>
+                    </thead>
+                    <tbody id="bodyListaOfferte" align="center">
+                    <!-- qui vengono aggiunte tutte le aste chiuse, seguendo il template "astaChiusaRow" -->
+                    </tbody>
+                </table>
+
+                <template id="offerteRow">
+                    <tr>
+                        <!-- td con text = offerente -->
+                        <!-- td con text = prezzo offerto -->
+                        <!-- td con text = data offerta -->
+                        <!-- td  -->
+                        <!-- table -->
+                        <!-- tr -->
+                        <!-- td con text = codice articolo -->
+                        <!-- td con text = nome articolo -->
+                        <!-- td con text = prezzo articolo -->
+                        <!-- tr -->
+                        <!-- /table -->
+                        <!-- /td -->
+                    </tr>
+                </template>
+            </div><br><br>
+            <!--mostrabile solo se asta scaduta-->
+            <button id="chiudiAsta" hidden>Chiudi</button>
+            <div id="MsgChiudiAsta"></div>
+        </div>
+        <!-- dettaglio asta chiusa -->
+        <div id="DettaglioAstaChiusaPage" hidden>
+            <ul id="ArticoliAstaChiusa"></ul>
+            <!-- idAsta -->
+            <!-- prezzo iniziale -->
+            <!-- rialzo minimo -->
+            <!-- scadenza -->
+            <!-- aggiudicatario -->
+            <!-- prezzo finale -->
+            <!-- indirizzo aggiudicatario -->
+            <!-- articoli -->
+            <!-- ul lista prezzi+articoli -->
         </div>
 
         <div id="acquistoPage" hidden>

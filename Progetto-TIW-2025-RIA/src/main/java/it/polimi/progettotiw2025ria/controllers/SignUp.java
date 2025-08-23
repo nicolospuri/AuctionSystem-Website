@@ -16,7 +16,6 @@ import org.thymeleaf.web.servlet.JakartaServletWebApplication;
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.util.List;
 
 @WebServlet("/SignUp")
 public class SignUp extends HttpServlet {

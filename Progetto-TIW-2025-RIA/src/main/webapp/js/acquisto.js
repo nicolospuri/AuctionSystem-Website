@@ -5,7 +5,14 @@ export function renderAcquistoPage(){
     document.getElementById("asteTrovate").hidden = true;
     document.getElementById("keyword").value = "";
 
-    document.getElementById("cercaPerParolaChiave").addEventListener("click", () => {
+    // Sostituisco il bottone faiOfferta con un nuovo clone per poter aggiungere l'event listener
+    // altrimenti aggiungerei un altro event listener oltre a quello già presente
+    const oldBtn = document.getElementById("cercaPerParolaChiave");
+    const newBtn = oldBtn.cloneNode(true);
+    oldBtn.replaceWith(newBtn);
+
+    newBtn.addEventListener("click", (e) => {
+        e.preventDefault();
         searchAstaByKeyword();
     });
 

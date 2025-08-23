@@ -1,5 +1,5 @@
 import {renderAcquistoPage} from "./acquisto.js";
-// import {renderVendoPage} from "./vendo.js";
+import {renderVendoPage} from "./vendo.js";
 
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -20,7 +20,7 @@ export function showVendo() {
     document.getElementById("moveToAcquisto").hidden = false; // Mostra solo il pulsante "Acquisto"
     document.getElementById("moveToVendo").hidden = true;
     hideAllPages();
-    // renderVendoPage();
+    renderVendoPage();
 }
 
 export function showAcquisto() {
@@ -34,7 +34,8 @@ export function showAcquisto() {
 export function hideAllPages() {
     document.getElementById("vendoPage").hidden = true;
     document.getElementById("acquistoPage").hidden = true;
-    // document.getElementById("dettaglioAstaPage").hidden = true;
+    document.getElementById("DettaglioAstaApertaPage").hidden = true;
+    document.getElementById("DettaglioAstaChiusaPage").hidden = true;
     document.getElementById("offertaPage").hidden = true;
 }
 

@@ -3,15 +3,9 @@ package it.polimi.progettotiw2025ria.controllers;
 import com.google.gson.JsonObject;
 import it.polimi.progettotiw2025ria.beans.Utente;
 import it.polimi.progettotiw2025ria.utils.ConnectionHandler;
-import jakarta.servlet.ServletContext;
 import jakarta.servlet.UnavailableException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.*;
-import org.thymeleaf.TemplateEngine;
-import org.thymeleaf.context.WebContext;
-import org.thymeleaf.templatemode.TemplateMode;
-import org.thymeleaf.templateresolver.WebApplicationTemplateResolver;
-import org.thymeleaf.web.servlet.JakartaServletWebApplication;
 
 import java.io.IOException;
 import java.sql.Connection;
@@ -94,18 +88,6 @@ public class HomeServlet extends HttpServlet {
             lastAction.setMaxAge(60*60*24*30);
             response.addCookie(lastAction);
         }
-
-        Cookie renderAllTablesAste = new Cookie("renderAllTablesAste"+username, "true");
-        renderAllTablesAste.setMaxAge(60*60*24*30);
-        response.addCookie(renderAllTablesAste);
-
-        Cookie renderTableAsteAperte = new Cookie("renderTableAsteAperte"+username, "true");
-        renderTableAsteAperte.setMaxAge(60*60*24*30);
-        response.addCookie(renderTableAsteAperte);
-
-        Cookie renderArticoli = new Cookie("renderArticoli"+username, "true");
-        renderArticoli.setMaxAge(60*60*24*30);
-        response.addCookie(renderArticoli);
 
         JsonObject jsonObject = new JsonObject();
         jsonObject.addProperty("userLastActionWasAddedAsta", userLastActionWasAddedAsta);
