@@ -9,8 +9,6 @@ import it.polimi.progettotiw2025ria.dao.AstaDAO;
 import it.polimi.progettotiw2025ria.dao.OffertaDAO;
 import it.polimi.progettotiw2025ria.dao.UtenteDAO;
 import it.polimi.progettotiw2025ria.utils.ConnectionHandler;
-import jakarta.servlet.ServletContext;
-import jakarta.servlet.ServletException;
 import jakarta.servlet.UnavailableException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
@@ -28,10 +26,6 @@ import java.util.List;
 public class DettaglioAstaServlet extends HttpServlet {
     private static final long serialVersionUID = 1L;
     private Connection connection;
-
-    public DettaglioAstaServlet() {
-        super();
-    }
 
     @Override
     public void init() throws UnavailableException {
@@ -83,6 +77,16 @@ public class DettaglioAstaServlet extends HttpServlet {
 
             List<Offerta> offerte = offertaDAO.getOfferteByIdAsta(idAsta);
 
+            // Recupero aggiudicatario e indirizzo
+            String aggiudicatario = asta.getAggiudicatario();
+            String indirizzoAgg = null;
+            if (aggiudicatario != null) {
+                Utente utenteAgg = utenteDAO.getUtenteByUsername(aggiudicatario);
+                if (utenteAgg != null) {
+                    indirizzoAgg = utenteAgg.getIndirizzo();
+                }
+            }
+
             // Risposta JSON
             response.setContentType("application/json");
             response.setCharacterEncoding("UTF-8");
@@ -95,6 +99,10 @@ public class DettaglioAstaServlet extends HttpServlet {
             json.append("\"rialzoMinimo\":").append(asta.getRialzoMinimo()).append(",");
             json.append("\"scadenza\":\"").append(asta.getScadenza()).append("\",");
             json.append("\"chiusa\":").append(asta.isChiusa()).append(",");
+
+            // aggiudicatario + indirizzo
+            json.append("\"aggiudicatario\":\"").append(escape(aggiudicatario)).append("\",");
+            json.append("\"indirizzoAggiudicatario\":\"").append(escape(indirizzoAgg)).append("\",");
 
             // Articoli
             json.append("\"articoli\":[");

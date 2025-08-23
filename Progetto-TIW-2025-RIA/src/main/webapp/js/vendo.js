@@ -10,6 +10,7 @@ export function renderVendoPage() {
     aggiornaArticoliDisponibili();
     inizializzaClickDettaglioAstaAperta();
     inizializzaClickDettaglioAsteChiuse();
+    resetMSG();
 
     // Torna alla home venditore
     document.getElementById("DettaglioAstaApertaPage").hidden = true;
@@ -43,12 +44,6 @@ export function renderVendoPage() {
     });
 }
 
-// Crea e ritorna un <td> con textContent
-function td(text) {
-    const cell = document.createElement('td');
-    cell.textContent = text;
-    return cell;
-}
 
 // Pulisce gli input del form "nuovo articolo"
 function emptyArticoloInputs() {
@@ -69,60 +64,61 @@ function aggiungiArticolo(){ // callback del click su "Inserisci articolo"
     const immagine = document.getElementById("immagineNewArticolo").files[0];
 
     const msg = document.getElementById("newArticoloMessage");
-    msg.textContent= ""; // reset messaggio
-    msg.style.color = "black"; // reset colore
+    msg.textContent = "";            // reset messaggio
+    msg.style.color = "black";       // reset colore
+
     if (!nome || !descrizione || !prezzo) {
         msg.style.color = "red";
         msg.style.fontWeight = "bold";
         msg.innerText = "Tutti i campi obbligatori";
+        resetArticoloMSG();
         return;
     }
 
-    let formData = new FormData();
+    const formData = new FormData();
     formData.append("nome", nome);
     formData.append("descrizione", descrizione);
     formData.append("prezzo", prezzo);
-    if (immagine) formData.append("immagine", immagine); // se non selezionata, la servlet userà default.png
+    if (immagine) formData.append("immagine", immagine); // opzionale
 
     fetch("AggiungiArticolo", {
         method: "POST",
-        body: formData })
-        .then(response => response.json())
+        body: formData
+    })
+        .then(r => r.json())
         .then(data => {
             if (data.success) {
                 emptyArticoloInputs(); // pulisco i campi
+
+                // pulizia di altri messaggi eventuali
+                const msgAsta   = document.getElementById("newAstaMessage");
+                const msgChiudi = document.getElementById("MsgChiudiAsta");
+                if (msgAsta)   msgAsta.textContent = "";
+                if (msgChiudi) msgChiudi.textContent = "";
+
                 msg.style.color = "green";
                 msg.style.fontWeight = "bold";
                 msg.innerText = "Articolo aggiunto!";
+                resetArticoloMSG();
 
-                // aggiungo la riga alla tabella con l'articolo appena inserito
-                aggiungiArticoloAllaTabella({
-                    codice: data.codice,
-                    nome: data.nome,
-                    descrizione: data.descrizione,
-                    prezzo: data.prezzo
-                });
+                aggiornaArticoliDisponibili();
+
             } else {
                 msg.style.color = "red";
                 msg.style.fontWeight = "bold";
-                msg.innerText = "Errore: " + data.error;
+                msg.innerText = "Errore: " + (data.error || "operazione non riuscita");
+                resetArticoloMSG();
             }
         })
-        .catch(error => {
-            console.error("Errore fetch:", error);
+        .catch(err => {
+            console.error("Errore fetch:", err);
             msg.style.color = "red";
             msg.style.fontWeight = "bold";
             msg.innerText = "Errore di rete";
+            resetArticoloMSG();
         });
 }
 
-// --- util: articoli selezionati dalla tabella ---
-function toIsoLocalDateTime(value) {
-    // <input type="datetime-local"> spesso fornisce "YYYY-MM-DDTHH:mm"
-    // L'adapter usa ISO_LOCAL_DATE_TIME -> aggiungo ":00" se mancano i secondi
-    if (!value) return value;
-    return value.length === 16 ? value + ":00" : value;
-}
 
 async function creaAsta(event) {
     event.preventDefault(); // evita submit standard del form
@@ -136,6 +132,7 @@ async function creaAsta(event) {
     if (selectedCheckboxes.length === 0) {
         messageBox.textContent = "Seleziona almeno un articolo!";
         messageBox.style.color = "red";
+        resetAstaMSG();
         return;
     }
     const articoliSelezionati = Array.from(selectedCheckboxes).map(cb => cb.value);
@@ -147,11 +144,23 @@ async function creaAsta(event) {
     if (!rialzoMinimo || rialzoMinimo <= 0) {
         messageBox.textContent = "Inserisci un rialzo minimo valido!";
         messageBox.style.color = "red";
+        resetAstaMSG();
         return;
     }
-    if (!scadenza) {
+
+    if (!scadenza ) {
         messageBox.textContent = "Inserisci una data di scadenza!";
         messageBox.style.color = "red";
+        resetAstaMSG();
+        return;
+    }
+
+    const scadenzaDate = new Date(scadenza);
+    const now = new Date();
+    if (isNaN(scadenzaDate.getTime()) || scadenzaDate <= now) {
+        messageBox.textContent = "Inserisci una data di scadenza valida!";
+        messageBox.style.color = "red";
+        resetAstaMSG();
         return;
     }
 
@@ -179,19 +188,23 @@ async function creaAsta(event) {
         messageBox.textContent = "Asta creata con successo!";
         messageBox.style.color = "green";
         emptyAstaInputs();
+        resetAstaMSG();
 
 
     } catch (err) {
         console.error(err);
         messageBox.textContent = "Errore: " + err.message;
         messageBox.style.color = "red";
+        resetAstaMSG();
     }
 }
 
 // === Funzione per aggiornare la tabella articoli disponibili ===
 async function aggiornaArticoliDisponibili() {
     try {
-        const response = await fetch("GetArticoliServlet", { method: "GET" });
+        const response = await fetch("GetArticoliServlet", {
+            method: "GET",cache: "no-store"
+        });
         const data = await response.json();
 
         if (!data.success) {
@@ -199,14 +212,35 @@ async function aggiornaArticoliDisponibili() {
         }
 
         const tbody = document.getElementById("bodyTabellaArticoliNewAsta");
+        const form = document.getElementById("formNewAsta");
+        const msg = document.getElementById("MSGArticoliDisponibili");
+
         tbody.innerHTML = ""; // svuoto tabella
 
-        (data.articoli || []).forEach(a => aggiungiArticoloAllaTabella(a));
+        if (!data.articoli || data.articoli.length === 0) {
+            // Nessun articolo disponibile
+            form.hidden = true;
+            msg.textContent = "Nessun articolo disponibile";
+            msg.style.color = "black";
+            msg.style.fontStyle = "italic";
+        } else {
+            // Articoli trovati → mostro tabella
+            msg.textContent = "";
+            form.hidden = false;
+            (data.articoli || []).forEach(a => aggiungiArticoloAllaTabella(a));
+        }
 
     } catch (err) {
         console.error("Errore aggiornamento articoli:", err);
+        const msg = document.getElementById("MSGArticoliDisponibili");
+        if (msg) {
+            msg.textContent = "Errore nel caricamento degli articoli";
+            msg.style.color = "red";
+            msg.style.fontWeight = "bold";
+        }
     }
 }
+
 
 // === Funzione per aggiungere una riga di articolo alla tabella ===
 function aggiungiArticoloAllaTabella(articolo) {
@@ -246,30 +280,6 @@ function emptyAstaInputs() {
     if(rialzo) rialzo.value="";
     if(scadenza) scadenza.value="";
 }
-
-// todo:nel caso in cui serva in futuro
-/*function aggiungiArticoloAllaTabella(articolo) {
-    // articolo deve avere: codice, nome, descrizione, prezzo (e opzionale immagine)
-    const tbody = document.getElementById("bodyTabellaArticoliNewAsta");
-    const template = document.getElementById("articoliSelezionabiliRow");
-
-    // clono il template
-    const fragment = template.content.cloneNode(true);
-    const tr = fragment.querySelector("tr");
-
-    // 1) checkbox nella prima colonna
-    const checkbox = tr.querySelector('input[type="checkbox"][name="codiceArticolo"]');
-    checkbox.value = articolo.codice;   // VERY IMPORTANT: value = id articolo
-
-    // 2) resto delle colonne: id | nome | descrizione | prezzo
-    tr.appendChild(td(articolo.codice));
-    tr.appendChild(td(articolo.nome));
-    tr.appendChild(td(articolo.descrizione));
-    tr.appendChild(td(formatPrezzo(articolo.prezzo)));
-
-    // append in tabella
-    tbody.appendChild(tr);
-}*/
 
 // ===== POPOLA "Le tue aste aperte" =====
 export async function caricaListeAperte() {
@@ -525,4 +535,27 @@ function inizializzaClickDettaglioAsteChiuse() {
             alert("Errore nel caricamento del dettaglio dell'asta chiusa.");
         }
     });
+}
+
+export function resetMSG(){
+    const msgArt=document.getElementById("newArticoloMessage");
+    const msgAsta=document.getElementById("newAstaMessage");
+    const msgChiudi=document.getElementById("MsgChiudiAsta");
+    if(msgArt) msgArt.textContent="";
+    if(msgAsta) msgAsta.textContent="";
+    if(msgChiudi) msgChiudi.textContent="";
+}
+
+function resetAstaMSG(){
+    const msgArt=document.getElementById("newArticoloMessage");
+    const msgChiudi=document.getElementById("MsgChiudiAsta");
+    if(msgArt) msgArt.textContent="";
+    if(msgChiudi) msgChiudi.textContent="";
+}
+
+function resetArticoloMSG(){
+    const msgAsta=document.getElementById("newAstaMessage");
+    const msgChiudi=document.getElementById("MsgChiudiAsta");
+    if(msgAsta) msgAsta.textContent="";
+    if(msgChiudi) msgChiudi.textContent="";
 }

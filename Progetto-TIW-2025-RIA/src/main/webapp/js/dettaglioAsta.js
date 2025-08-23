@@ -33,6 +33,12 @@ function caricaChiudiAstaButton() {
             const msg = document.getElementById("MsgChiudiAsta");
             msg.textContent="Asta chiusa con successo";
             msg.style.color="green";
+            msg.style.fontWeight="bold";
+
+            const msgArt=document.getElementById("newArticoloMessage");
+            const msgAsta=document.getElementById("newAstaMessage");
+            if(msgArt) msgArt.textContent="";
+            if(msgAsta) msgAsta.textContent="";
 
             // Pulizia dettaglio & ritorno a Vendo
             document.getElementById("ArticoliAstaAperta").innerHTML = "";
@@ -70,17 +76,20 @@ export function mostraDettaglioAstaAperta(data) {
     document.getElementById("vendoPage").hidden = true;
     document.getElementById("DettaglioAstaApertaPage").hidden = false;
     document.getElementById("moveToVendo").hidden = false;
-    const msg = document.getElementById("MsgChiudiAsta");
-    msg.textContent = "";
+
+    // reset messaggi
+    const msgChiudi = document.getElementById("MsgChiudiAsta");
+    if (msgChiudi) msgChiudi.textContent = "";
+    const msgAste = document.getElementById("MSGAsteAperte");
+    if (msgAste) msgAste.textContent = "";
 
     // Lista dettagli + articoli
     const ul = document.getElementById("ArticoliAstaAperta");
     ul.innerHTML = "";
 
-    // Dettagli principali (come nello screenshot)
     const dettagli = [
         `ID Asta: ${data.id}`,
-        `Prezzo Iniziale: ${data.prezzo}`,                     // come nel tuo esempio "81.0"
+        `Prezzo Iniziale: ${data.prezzo}`,
         `Rialzo Minimo: ${Number(data.rialzoMinimo).toFixed(2)} €`,
         `Scadenza: ${data.scadenza}`
     ];
@@ -105,38 +114,40 @@ export function mostraDettaglioAstaAperta(data) {
     ul.appendChild(innerUl);
 
     // Tabella offerte
+    const listaOfferteDiv = document.getElementById("listaOfferte");
     const tbody = document.getElementById("bodyListaOfferte");
     tbody.innerHTML = "";
 
     if (!data.offerte || data.offerte.length === 0) {
-        const row = document.createElement("tr");
-        const td = document.createElement("td");
-        td.colSpan = 3;
-        td.textContent = "Nessuna offerta";
-        td.style.textAlign = "center";
-        td.style.fontStyle = "italic";
-        row.appendChild(td);
-        tbody.appendChild(row);
+        // nascondo la tabella
+        listaOfferteDiv.hidden = true;
+        // messaggio
+        if (msgAste) {
+            msgAste.textContent = "Nessuna offerta";
+            msgAste.style.color = "black";
+            msgAste.style.fontStyle = "italic";
+        }
     } else {
-        (data.offerte || []).forEach(o => {
+        // mostro la tabella
+        listaOfferteDiv.hidden = false;
+        data.offerte.forEach(o => {
             const row = document.createElement("tr");
             row.innerHTML = `
-      <td>${o.offerente}</td>
-      <td>€${Number(o.prezzo).toFixed(2)}</td>
-      <td>${o.data}</td>
-    `;
+              <td>${o.offerente}</td>
+              <td>€${Number(o.prezzo).toFixed(2)}</td>
+              <td>${o.data}</td>
+            `;
             tbody.appendChild(row);
         });
     }
-
 
     // Bottone "Chiudi Asta" solo se scaduta
     const chiudiBtn = document.getElementById("chiudiAsta");
     const scadenza = new Date(data.scadenza);
     chiudiBtn.hidden = (new Date() < scadenza);
-    chiudiBtn.dataset.idAsta = data.id; // <-- necessario per il click handler
-
+    chiudiBtn.dataset.idAsta = data.id;
 }
+
 
 
 export function mostraDettaglioAstaChiusa(data) {

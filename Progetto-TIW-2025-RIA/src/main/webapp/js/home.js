@@ -35,6 +35,7 @@ export function hideAllPages() {
     document.getElementById("vendoPage").hidden = true;
     document.getElementById("acquistoPage").hidden = true;
     document.getElementById("DettaglioAstaApertaPage").hidden = true;
+    document.getElementById("listaOfferte").hidden = false;
     document.getElementById("DettaglioAstaChiusaPage").hidden = true;
     document.getElementById("offertaPage").hidden = true;
 }
