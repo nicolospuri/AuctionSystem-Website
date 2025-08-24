@@ -93,7 +93,7 @@ public class ChiudiAsta extends HttpServlet {
             if (utente != null) {
                 asta = astaDAO.getAstaById(idAsta);
                 if (asta == null) {
-                    path += "&errorMds=Nessuna asta trovata";
+                    path += "&errorMsg=Nessuna asta trovata";
                 } else if (asta.isChiusa()) {
                     path += "&errorMsg=Asta già chiusa";
                 } else if (!asta.getProprietario().equals(utente.getUsername())) {

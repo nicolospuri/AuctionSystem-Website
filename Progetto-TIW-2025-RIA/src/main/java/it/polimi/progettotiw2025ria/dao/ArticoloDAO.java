@@ -144,7 +144,7 @@ public class ArticoloDAO {
         }
     }
 
-    public void updateIdAstaInArticles(ArrayList<Integer> articles, int idAsta) throws SQLException {
+        public void updateIdAstaInArticles(ArrayList<Integer> articles, int idAsta) throws SQLException {
         if (articles == null || articles.isEmpty()) return;
 
         StringBuilder query = new StringBuilder("UPDATE Articolo SET IdAsta = ? WHERE codice IN (");
