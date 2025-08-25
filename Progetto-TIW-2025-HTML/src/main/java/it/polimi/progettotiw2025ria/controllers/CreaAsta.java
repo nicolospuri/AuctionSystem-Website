@@ -79,6 +79,8 @@ public class CreaAsta extends HttpServlet {
 
         // Nessun articolo selezionato
         if (articoliSelezionati == null || articoliSelezionati.length == 0) {
+            //Il messaggio non viene mostrato direttamente a schermo da questo servlet,
+            //ma viene passato alla pagina di destinazione, che dovrà occuparsi di leggerlo e mostrarlo all'utente.
             path += "?nessunArticoloMsg=Nessun articolo selezionato";
             response.sendRedirect(path);
             return;

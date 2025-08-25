@@ -104,7 +104,8 @@ public class AggiungiArticolo extends HttpServlet{
         Part filePart = request.getPart("immagine"); // nome del campo file
 
         if (filePart != null && filePart.getSize() > 0) {
-            String fileName = Paths.get(filePart.getSubmittedFileName()).getFileName().toString(); // nome file originale
+            String fileName = Paths.get(filePart.getSubmittedFileName()).getFileName().toString();
+            /* serve per evitare path completi tipo C:\User\desktop\foto.jpg */
 
             // Per salvarlo sotto /webapp/uploads
             // Ottieni la root del progetto a partire dalla cartella di deploy
