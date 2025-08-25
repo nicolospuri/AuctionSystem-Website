@@ -1,6 +1,7 @@
 import { renderAcquistoPage } from './acquisto.js';
 import { hideAllPages, showAcquisto } from './home.js';
 
+// Mostra la pagina Offerta
 export function renderOffertaPage(idAsta) {
     hideAllPages();
     document.getElementById("moveToAcquisto").hidden = false; // Mostra anche il pulsante "Acquisto"
@@ -75,6 +76,7 @@ export function renderOffertaPage(idAsta) {
     request.send();
 }
 
+// Aggiunge un articolo alla tabella degli articoli dell'asta
 function addArticoloInTable(articolo) {
     const tbody = document.getElementById("articoliAstaBody");
 
@@ -100,6 +102,7 @@ function addArticoloInTable(articolo) {
     tbody.appendChild(newRow);
 }
 
+// Aggiunge un'offerta alla tabella delle offerte dell'asta
 function addOffertaInTable(offerta, nuova) {
     const tbody = document.getElementById("offerteAstaBody");
 
@@ -129,6 +132,7 @@ function addOffertaInTable(offerta, nuova) {
     }
 }
 
+// Fa i controlli che può lato client e poi fa la richiesta per fare l'offerta al server
 function faiOfferta(prezzoIniziale, prezzoOffertaMassima, rialzoMinimo) {
     document.getElementById("offertaSuccessMsg").textContent = "";
     document.getElementById("offertaErrorMsg").textContent = "";

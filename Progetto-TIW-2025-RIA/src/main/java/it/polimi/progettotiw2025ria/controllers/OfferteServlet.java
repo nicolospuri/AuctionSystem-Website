@@ -63,6 +63,7 @@ public class OfferteServlet extends HttpServlet {
         }
         String username = utente.getUsername();
 
+        // Creo il GsonBuilder con l'adapter per la serializzazione di LocalDateTime
         Gson gson = new GsonBuilder()
                 .registerTypeAdapter(LocalDateTime.class, new LocalDateTimeAdapter())
                 .create();
@@ -87,6 +88,7 @@ public class OfferteServlet extends HttpServlet {
         // Cerco il cookie "asteVisitate" + username
         if (cookies != null) {
             for (Cookie c : cookies) {
+                // Se lo trovo, lo decodifico e lo converto in JsonArray
                 if (c.getName().equals("asteVisitate" + username)) {
                     String decodedAsteVisitateCookie = URLDecoder.decode(c.getValue(), StandardCharsets.UTF_8);
                     asteVisitateJsonArray = JsonParser.parseString(decodedAsteVisitateCookie).getAsJsonArray();
@@ -148,7 +150,7 @@ public class OfferteServlet extends HttpServlet {
 
             if (utente != null && !utente.getUsername().equals(asta.getProprietario())
                     && !asta.isChiusa() && asta.getScadenza().isAfter(LocalDateTime.now())) {
-                // Aggiungo il booleano canOffer al result
+                // Aggiungo il booleano canOffer al result per mostrare il form di offerta
                 result.put("canOffer", true);
             }
 

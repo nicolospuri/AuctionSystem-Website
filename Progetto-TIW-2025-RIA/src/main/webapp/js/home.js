@@ -1,7 +1,7 @@
 import {renderAcquistoPage} from "./acquisto.js";
 import {renderVendoPage} from "./vendo.js";
 
-
+// Associa gli eventi ai pulsanti per spostarsi tra le pagine una volta che il DOM è stato caricato
 document.addEventListener("DOMContentLoaded", () => {
     // Associa gli eventi ai pulsanti per spostarsi tra le pagine
     document.getElementById("moveToVendo").addEventListener('click', (e) => {
@@ -13,9 +13,11 @@ document.addEventListener("DOMContentLoaded", () => {
         showAcquisto();
     });
 
+    // Mostra la pagina in base all'ultima azione dell'utente
     renderPageByLastAction();
 });
 
+// Mostra la pagina Vendo e nasconde le altre
 export function showVendo() {
     document.getElementById("moveToAcquisto").hidden = false; // Mostra solo il pulsante "Acquisto"
     document.getElementById("moveToVendo").hidden = true;
@@ -23,6 +25,7 @@ export function showVendo() {
     renderVendoPage();
 }
 
+// Mostra la pagina Acquisto e nasconde le altre
 export function showAcquisto() {
     document.getElementById("moveToAcquisto").hidden = true;
     document.getElementById("moveToVendo").hidden = false; // Mostra solo il pulsante "Vendo"
@@ -40,6 +43,7 @@ export function hideAllPages() {
     document.getElementById("offertaPage").hidden = true;
 }
 
+// Mostra la pagina in base all'ultima azione dell'utente (creazione asta o ricerca asta)
 function renderPageByLastAction() {
     const request = new XMLHttpRequest();
     request.open("POST",  "HomeServlet");

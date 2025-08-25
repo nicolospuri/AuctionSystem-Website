@@ -53,6 +53,7 @@ public class SignUp extends HttpServlet {
             response.sendRedirect(request.getContextPath() + "/index.html");
             return;
         }
+        // Prendo i parametri
         String username = request.getParameter("username");
         String password = request.getParameter("password");
         String nome = request.getParameter("nome");
@@ -64,6 +65,7 @@ public class SignUp extends HttpServlet {
         WebContext ctx = new WebContext(webApplication.buildExchange(request, response), request.getLocale());
         String path = null;
 
+        // Check dei parametri
         if (username == null || password == null || cognome == null || indirizzo == null ||
                 username.isEmpty() || password.isEmpty() || nome.isEmpty() || cognome.isEmpty() || indirizzo.isEmpty()) {
             path = "index";
@@ -74,12 +76,16 @@ public class SignUp extends HttpServlet {
         try {
             UtenteDAO utenteDAO = new UtenteDAO(connection);
             Utente utente = new Utente(username, password, nome, cognome, indirizzo);
+            // Controllo se l'utente esiste già
             boolean valido = utenteDAO.checkRegistration(utente.getUsername());
             if(!valido){
+                // Se non esiste, lo registro
                 boolean isRegistered = utenteDAO.signUp(utente);
                 if (isRegistered) {
                     HttpSession session = request.getSession();
+                    // Associa l'utente alla sessione
                     session.setAttribute("utente", utente);
+                    // Imposto un attributo per segnalare che è il primo accesso
                     session.setAttribute("primoAccesso", true);
                     path = request.getContextPath() + "/HomeServlet";
                     response.sendRedirect(path);

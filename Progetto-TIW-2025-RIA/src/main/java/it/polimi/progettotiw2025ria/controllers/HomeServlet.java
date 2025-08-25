@@ -70,8 +70,10 @@ public class HomeServlet extends HttpServlet {
         if (!primoAccesso) {
             Cookie[] cookies = request.getCookies();
 
+            // Cerco il cookie lastActionCreaAsta+username
             if (cookies != null) {
                 for (Cookie c : cookies) {
+                    // Se lo trovo, leggo il suo valore e aggiorno la sua scadenza
                     if (c.getName().equals("lastActionCreaAsta"+username)) {
                         userLastActionWasAddedAsta = Boolean.parseBoolean(c.getValue());
                         c.setMaxAge(60*60*24*30);

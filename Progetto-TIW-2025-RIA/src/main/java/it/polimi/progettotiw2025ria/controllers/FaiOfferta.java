@@ -83,6 +83,7 @@ public class FaiOfferta extends HttpServlet {
             return;
         }
 
+        // Creo il GsonBuilder con l'adapter per la serializzazione di LocalDateTime
         Gson gson = new GsonBuilder()
                 .registerTypeAdapter(LocalDateTime.class, new LocalDateTimeAdapter())
                 .create();
@@ -141,6 +142,7 @@ public class FaiOfferta extends HttpServlet {
                 }
             }
 
+            // Se passano tutti i controlli, aggiungo l'offerta
             if (!offertaDAO.addOfferta(utente.getUsername(), prezzoOfferto, idAsta)) {
                 result.put("offertaErrorMsg", "Errore durante l'inserimento dell'offerta");
                 jsonResponse = gson.toJson(result);
@@ -154,9 +156,10 @@ public class FaiOfferta extends HttpServlet {
             boolean lastActionFound = false;
             Cookie[] cookies = request.getCookies();
 
-            // Cerco i cookie "lastAction"
+            // Cerco i cookie "lastActionCreaAsta+username"
             if (cookies != null) {
                 for (Cookie c : cookies) {
+                    // Se lo trovo, aggiorno il suo valore a false e la sua scadenza
                     if (c.getName().equals("lastActionCreaAsta" + username)) {
                         c.setValue("false");
                         c.setMaxAge(60*60*24*30);

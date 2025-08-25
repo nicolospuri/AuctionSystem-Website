@@ -1,5 +1,6 @@
 import { renderOffertaPage } from "./offerta.js";
 
+// Mostra la pagina Acquisto
 export function renderAcquistoPage(){
     document.getElementById("acquistoPage").hidden = false;
     document.getElementById("asteTrovate").hidden = true;
@@ -16,9 +17,11 @@ export function renderAcquistoPage(){
         searchAstaByKeyword();
     });
 
+    // Mostro le aste visionate e aggiudicate
     renderAsteVisionateEAggiudicate();
 }
 
+// Cerca le aste in base alla parola chiave inserita
 function searchAstaByKeyword(){
     document.getElementById("asteTrovateMsg").textContent = "";
     document.getElementById("asteTrovate").hidden = true;
@@ -38,6 +41,7 @@ function searchAstaByKeyword(){
     const request = new XMLHttpRequest();
     request.open("POST", "AcquistoServlet");
 
+    // Definizione callback
     request.onreadystatechange = () => {
         showAsteByKeyword(request);
     };
@@ -45,6 +49,7 @@ function searchAstaByKeyword(){
     request.send(formData);
 }
 
+// Mostra le aste trovate in base alla parola chiave
 function showAsteByKeyword(request){
     if(request.readyState === 4){
         if(request.status === 200){
@@ -69,6 +74,7 @@ function showAsteByKeyword(request){
     }
 }
 
+// Aggiunge una riga alla tabella delle aste trovate o alla tabella delle aste visitate in precedenza
 function addAstaTrovataInTable(asta, tableBodyId){
     const tbody = document.getElementById(tableBodyId);
 
@@ -117,6 +123,7 @@ function addAstaTrovataInTable(asta, tableBodyId){
     tbody.appendChild(newRow);
 }
 
+// Mostra le aste visionate e aggiudicate in precedenza
 function renderAsteVisionateEAggiudicate(){
     // Richiedi al server le aste visionate (la servlet analizzerà la lista di cookie e restituirà la lista delle rispettive aste)
     const request = new XMLHttpRequest();
@@ -170,6 +177,7 @@ function renderAsteVisionateEAggiudicate(){
     request.send();
 }
 
+// Aggiunge una riga alla tabella delle aste vinte
 function addAstaVintaInTable(asta){
     const tbody = document.getElementById("asteVinteBody");
 

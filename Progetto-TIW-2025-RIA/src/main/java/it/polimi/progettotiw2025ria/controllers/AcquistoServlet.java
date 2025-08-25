@@ -68,6 +68,7 @@ public class AcquistoServlet extends HttpServlet {
         String asteVisitateJsonCookie = null;
         Cookie[] cookies = request.getCookies();
 
+        // Cerco il cookie delle aste visitate
         for(Cookie cookie : cookies) {
             if(cookie.getName().equals("asteVisitate"+username)) {
                 asteVisitateJsonCookie = cookie.getValue();
@@ -75,6 +76,7 @@ public class AcquistoServlet extends HttpServlet {
         }
 
         try {
+            // Creo il Gson con l'adapter per il LocalDateTime
             Gson gson = new GsonBuilder()
                     .registerTypeAdapter(LocalDateTime.class, new LocalDateTimeAdapter())
                     .create();
@@ -104,15 +106,18 @@ public class AcquistoServlet extends HttpServlet {
                         response.getWriter().print("{\"error\":\"Formato o parametri non accettati\"}");
                         return;
                     }
+                    // Per ogni id, prendo l'asta e i relativi articoli
                     astaVisitata = astaDAO.getAstaById(idAstaVisitata);
                     if (astaVisitata != null) {
                         articoli = articoloDAO.getArticoliByIdAsta(idAstaVisitata);
                         astaVisitata.setArticoli(articoli);
                     }
+                    // Aggiungo l'asta alla lista delle aste visitate
                     asteVisitate.add(astaVisitata);
                 }
 
                 if (!asteVisitate.isEmpty()) {
+                    // Rimuovo le aste chiuse dalla lista delle aste visitate e aggiorno il cookie
                     rimuoviAsteChiuse(request, response, asteVisitate, username);
 
                     // Aggiungo le aste visitate al result
@@ -124,8 +129,10 @@ public class AcquistoServlet extends HttpServlet {
             Offerta offertaMax = null;
             List<Asta> asteVinte = null;
 
+            // Prendo le aste vinte dall'utente
             asteVinte = astaDAO.getAsteVinteByUsername(utente.getUsername());
             if (asteVinte != null && !asteVinte.isEmpty()) {
+                // Per ogni asta vinta, prendo l'offerta massima e gli articoli
                 for (Asta a : asteVinte) {
                     offertaMax = offertaDAO.getMaxOffertaByIdAsta(a.getId());
                     if (offertaMax != null) {
@@ -169,6 +176,7 @@ public class AcquistoServlet extends HttpServlet {
             return;
         }
 
+        // Prendo la keyword
         String keyword = request.getParameter("keyword");
         if (keyword == null) {
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
@@ -182,17 +190,20 @@ public class AcquistoServlet extends HttpServlet {
             List<Asta> asteTrovate = null;
             List<Articolo> articoli = null;
 
+            // Se la keyword non è, prendo tutte le aste aperte
             if (!keyword.isEmpty()) {
                 asteTrovate = astaDAO.getAsteAperteByKeyword(keyword);
             }
 
             if (asteTrovate != null && !asteTrovate.isEmpty()) {
+                // Per ogni asta trovata, prendo gli articoli
                 for (Asta a : asteTrovate) {
                     articoli = articoloDAO.getArticoliByIdAsta(a.getId());
                     a.setArticoli(articoli);
                 }
             }
 
+            // Creo il Gson con l'adapter per il LocalDateTime
             Gson gson = new GsonBuilder()
                     .registerTypeAdapter(LocalDateTime.class, new LocalDateTimeAdapter())
                     .create();
@@ -218,10 +229,12 @@ public class AcquistoServlet extends HttpServlet {
             newAsteVisitateJsonArray.add(a.getId());
         }
 
+        // Creo il Gson con l'adapter per il LocalDateTime
         Gson gson = new GsonBuilder()
                 .registerTypeAdapter(LocalDateTime.class, new LocalDateTimeAdapter())
                 .create();
 
+        // Codifico il json in modo che possa essere salvato nel cookie
         String encodedAsteVisionate = URLEncoder.encode(gson.toJson(newAsteVisitateJsonArray), StandardCharsets.UTF_8);
 
         String newAsteVisitateCookieJson = gson.toJson(encodedAsteVisionate);
