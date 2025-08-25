@@ -91,6 +91,7 @@ public class ChiudiAsta extends HttpServlet {
             AstaDAO astaDAO = new AstaDAO(connection);
             Asta asta = null;
             if (utente != null) {
+                // Prendo l'asta dall'id fornito nella request
                 asta = astaDAO.getAstaById(idAsta);
                 if (asta == null) {
                     path += "&errorMsg=Nessuna asta trovata";
@@ -102,7 +103,9 @@ public class ChiudiAsta extends HttpServlet {
                     path += "&errorMsg=Tempo rimanente maggiore di 0, impossibile chiudere l'asta";
                 } else {
                     OffertaDAO offertaDAO = new OffertaDAO(connection);
+                    // Prendo l'offerta massima relativa all'asta
                     Offerta offertaMax = offertaDAO.getMaxOffertaByIdAsta(idAsta);
+                    // Se è presente chiudo l'asta con l'offerente dell'offerta massima, altrimenti la chiudo senza offerente
                     if (offertaMax == null) {
                         if (astaDAO.chiudiAsta(idAsta)) {
                             path += "&successMsg=Asta chiusa con successo";
@@ -118,6 +121,7 @@ public class ChiudiAsta extends HttpServlet {
                     }
                 }
             }
+            // Reindirizzo alla pagina di dettaglio dell'asta con il messaggio di successo o errore nella request
             response.sendRedirect(path);
         } catch (SQLException e) {
             response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Errore interno del server");

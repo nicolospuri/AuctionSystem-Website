@@ -142,6 +142,7 @@ public class CreaAsta extends HttpServlet {
             String scadenzaParam = request.getParameter("scadenza");
             LocalDateTime scadenza;
 
+            // Controllo scadenza, in caso di errore metto il messaggio nella request e reindirizzo a VendoServlet
             if (scadenzaParam == null || scadenzaParam.trim().isEmpty()) {
                 path += "?scadenzaMsg=La scadenza è obbligatoria";
                 response.sendRedirect(path);
@@ -150,6 +151,7 @@ public class CreaAsta extends HttpServlet {
 
             try {
                 scadenza = LocalDateTime.parse(scadenzaParam); // richiede formato ISO: yyyy-MM-ddTHH:mm
+                // Controllo scadenza, in caso di errore metto il messaggio nella request e reindirizzo a VendoServlet
                 if (scadenza.isBefore(LocalDateTime.now())) {
                     path += "?scadenzaMsg=La scadenza deve essere nel futuro";
                     response.sendRedirect(path);
@@ -172,6 +174,7 @@ public class CreaAsta extends HttpServlet {
             // Aggiornamento articoli con id_asta
             articoloDAO.updateIdAstaInArticles(articoliIds, idAsta);
 
+            // Reindirizzo a VendoServlet
             response.sendRedirect(path);
         } catch (SQLException e) {
             throw new ServletException(e);

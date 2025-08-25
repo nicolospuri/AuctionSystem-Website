@@ -71,10 +71,13 @@ public class Login extends HttpServlet {
 
         try {
             UtenteDAO utenteDAO = new UtenteDAO(connection);
+            // Check delle credenziali
             Utente utente = utenteDAO.login(username, password);
             if (utente != null) {
                 HttpSession session = request.getSession();
+                // Imposto l'utente come attributo di sessione
                 session.setAttribute("utente", utente);      // Associa l'utente alla sessione
+                // Reindirizzamento alla home
                 path = request.getContextPath() + "/HomeServlet";
                 response.sendRedirect(path);
             } else {

@@ -87,6 +87,7 @@ public class VendoServlet extends HttpServlet {
             List<Articolo> articoli = null;
             Offerta offertaMax = null;
 
+            // Prendo le aste aperte e chiuse dell'utente
             if (utente != null) {
                 asteAperte = astaDAO.getAsteAperteByUsername(utente.getUsername());
                 asteChiuse = astaDAO.getAsteChiuseByUsername(utente.getUsername());
@@ -95,6 +96,7 @@ public class VendoServlet extends HttpServlet {
             if (asteAperte == null || asteAperte.isEmpty()) {
                 ctx.setVariable("asteAperteMsg", "Nessuna asta aperta");
             } else {
+                // Per ogni asta prendo gli articoli e l'offerta massima
                 for (Asta a : asteAperte) {
                     articoli = articoloDAO.getArticoliByIdAsta(a.getId());
                     a.setArticoli(articoli);
@@ -112,6 +114,7 @@ public class VendoServlet extends HttpServlet {
             if (asteChiuse == null || asteChiuse.isEmpty()) {
                 ctx.setVariable("asteChiuseMsg", "Nessuna asta chiusa");
             } else {
+                // Per ogni asta prendo gli articoli e l'offerta massima
                 for (Asta a : asteChiuse) {
                     articoli = articoloDAO.getArticoliByIdAsta(a.getId());
                     a.setArticoli(articoli);
@@ -125,6 +128,7 @@ public class VendoServlet extends HttpServlet {
                 ctx.setVariable("asteChiuse", asteChiuse);
             }
 
+            // Vari controlli e settaggio delle variabili di contesto
             if (utente != null) {
                 articoli = articoloDAO.getArticoliDisponibili(utente.getUsername());
             }
@@ -134,6 +138,8 @@ public class VendoServlet extends HttpServlet {
                 ctx.setVariable("listaArticoli", articoli); // nuova variabile per la lista
             }
 
+            // Qui controlo se nella request ci sono messaggi di errore o successo da mostrare mandati dalle servlet
+            // CreaAsta e AggiungiArticolo
             if (request.getParameter("prezzoMsg") != null) {
                 ctx.setVariable("prezzoMsg", request.getParameter("prezzoMsg"));
             }

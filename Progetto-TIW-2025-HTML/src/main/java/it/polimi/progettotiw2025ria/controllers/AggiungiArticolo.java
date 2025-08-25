@@ -104,6 +104,7 @@ public class AggiungiArticolo extends HttpServlet{
         Part filePart = request.getPart("immagine"); // nome del campo file
 
         if (filePart != null && filePart.getSize() > 0) {
+            // Ottieni il nome del file caricato
             String fileName = Paths.get(filePart.getSubmittedFileName()).getFileName().toString();
             /* serve per evitare path completi tipo C:\User\desktop\foto.jpg */
 
@@ -137,6 +138,7 @@ public class AggiungiArticolo extends HttpServlet{
                 return;
             }
 
+            // Controllo prezzo > 0 e in caso metto il messaggio di errore nella request da inviare a VendoServlet
             if (prezzo <= 0) {
                 path += "?prezzoMsg=Il prezzo deve essere maggiore di zero";
                 response.sendRedirect(path);
@@ -151,6 +153,7 @@ public class AggiungiArticolo extends HttpServlet{
                 articoloDAO.addArticolo(nome, descrizione, utente.getUsername(), prezzo, immaginePath);
             }
 
+            // Redirect a VendoServlet
             response.sendRedirect(path);
         } catch (SQLException e) {
             e.printStackTrace();

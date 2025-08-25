@@ -33,6 +33,7 @@ public class Logout extends HttpServlet {
             return;
         }
         HttpSession session = request.getSession(false);
+        // Se la sessione è valida viene invalidata  e l'utente viene reindirizzato alla pagina di login
         if (session != null) {
             session.invalidate();
         }

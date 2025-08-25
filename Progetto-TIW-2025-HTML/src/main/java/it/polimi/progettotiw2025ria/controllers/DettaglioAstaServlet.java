@@ -93,11 +93,13 @@ public class DettaglioAstaServlet extends HttpServlet {
             OffertaDAO offertaDAO = new OffertaDAO(connection);
             UtenteDAO utenteDAO = new UtenteDAO(connection);
             List<Articolo> articoli = null;
+            // Prendo l'asta dall'id fornito nella request
             Asta asta = astaDAO.getAstaById(idAsta);
             if (asta != null) {
+                // Prendo gli articoli relativi all'asta
                 articoli = articoloDAO.getArticoliByIdAsta(idAsta);
                 asta.setArticoli(articoli);
-
+                // Prendo l'offerta massima relativa all'asta
                 Offerta offertaMax = offertaDAO.getMaxOffertaByIdAsta(idAsta);
                 asta.setOffertaMassima(offertaMax);
                 if (offertaMax != null) {
@@ -105,6 +107,7 @@ public class DettaglioAstaServlet extends HttpServlet {
                 }
                 asta.setTempoMancante();
 
+                // Controllo se l'asta è chiusa o aperta e setto le variabili di conseguenza
                 if (asta.isChiusa()) {
                     if (asta.getAggiudicatario() != null) {
                         asta.setIndirizzoAggiudicatario(utenteDAO.getUtenteByUsername(asta.getAggiudicatario()).getIndirizzo());
@@ -118,19 +121,21 @@ public class DettaglioAstaServlet extends HttpServlet {
                 }
             }
 
+            // Prendo le offerte relative all'asta
             List<Offerta> offerte = offertaDAO.getOfferteByIdAsta(idAsta);
             if (offerte != null && !offerte.isEmpty()) {
                 ctx.setVariable("offerte", offerte);
             } else {
                 ctx.setVariable("offerteMsg", "Nessuna offerta trovata");
             }
+            // Se ci sono messaggi di errore o di successo nella request mandati da ChiudiAsta li mostro
             if (request.getParameter("errorMsg") != null) {
                 ctx.setVariable("errorMsg", request.getParameter("errorMsg"));
             }
             if (request.getParameter("successMsg") != null) {
                 ctx.setVariable("successMsg", request.getParameter("successMsg"));
             }
-
+            // Accesso alla pagina dettaglioAsta
             templateEngine.process(path, ctx, response.getWriter());
         } catch (SQLException e) {
             response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Errore interno del server");

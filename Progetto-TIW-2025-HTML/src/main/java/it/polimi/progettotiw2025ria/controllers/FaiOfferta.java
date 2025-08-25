@@ -98,6 +98,7 @@ public class FaiOfferta extends HttpServlet {
                 response.sendRedirect(path);
                 return;
             }
+            // Vari controlli sul prezzo e sull'asta
             if (prezzo <= 0) {
                 path += "&errorMsg=Il prezzo deve essere maggiore di zero";
                 response.sendRedirect(path);
@@ -133,12 +134,13 @@ public class FaiOfferta extends HttpServlet {
                     return;
                 }
             }
-
+            // Se vengono superati tutti i controlli, aggiungo l'offerta al database
             if (offertaDAO.addOfferta(utente.getUsername(), prezzo, idAsta)) {
                 path += "&successMsg=Offerta effettuata con successo";
             } else {
                 path += "&errorMsg=Errore durante l'inserimento dell'offerta";
             }
+            // Torna alla pagina delle offerte
             response.sendRedirect(path);
         } catch (SQLException e) {
             response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Errore interno del server");

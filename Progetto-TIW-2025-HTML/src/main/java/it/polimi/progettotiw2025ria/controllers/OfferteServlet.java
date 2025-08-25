@@ -89,13 +89,16 @@ public class OfferteServlet extends HttpServlet {
 
         try {
             ArticoloDAO articoloDAO = new ArticoloDAO(connection);
+            // Prendo gli articoli relativi all'asta
             List<Articolo> articoli = articoloDAO.getArticoliByIdAsta(idAsta);
             ctx.setVariable("articoli", articoli);
             AstaDAO astaDAO = new AstaDAO(connection);
             Asta asta = astaDAO.getAstaById(idAsta);
+            // Metto rialzoMinimo come variabile di contesto per mostrarlo nella pagina
             ctx.setVariable("rialzoMinimo", asta.getRialzoMinimo());
 
             OffertaDAO offertaDAO = new OffertaDAO(connection);
+            // Prendo le offerte relative all'asta
             List<Offerta> offerte = offertaDAO.getOfferteByIdAsta(idAsta);
             if (offerte != null && !offerte.isEmpty()) {
                 ctx.setVariable("offerte", offerte);
@@ -103,6 +106,7 @@ public class OfferteServlet extends HttpServlet {
                 ctx.setVariable("offerteMsg", "Nessuna offerta trovata");
             }
 
+            // Imposto la variabile canOffer a true se l'utente loggato può fare un'offerta così da mostrare il form
             if (utente != null && !utente.getUsername().equals(asta.getProprietario())
                     && !asta.isChiusa() && asta.getScadenza().isAfter(LocalDateTime.now())) {
                 ctx.setVariable("canOffer", true);

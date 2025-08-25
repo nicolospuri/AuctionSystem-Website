@@ -86,9 +86,11 @@ public class AcquistoServlet extends HttpServlet {
             List<Asta> asteTrovate = null;
             List<Articolo> articoli = null;
             Offerta offertaMax = null;
+            // Se è stata inserita una keyword, cerca le aste aperte che la contengono
             if (keyword != null && !keyword.isEmpty()) {
                 asteTrovate = astaDAO.getAsteAperteByKeyword(keyword);
             }
+            // Prendi le aste vinte dall'utente
             List<Asta> asteVinte = null;
             if (utente != null) {
                 asteVinte = astaDAO.getAsteVinteByUsername(utente.getUsername());
@@ -99,6 +101,7 @@ public class AcquistoServlet extends HttpServlet {
             if (asteTrovate == null || asteTrovate.isEmpty()) {
                 ctx.setVariable("asteTrovateMsg", "Nessuna asta trovata");
             } else {
+                // Per ogni asta trovata, prendi gli articoli associati
                 for (Asta a : asteTrovate) {
                     articoli = articoloDAO.getArticoliByIdAsta(a.getId());
                     a.setArticoli(articoli);
@@ -108,6 +111,7 @@ public class AcquistoServlet extends HttpServlet {
             if (asteVinte == null || asteVinte.isEmpty()) {
                 ctx.setVariable("asteVinteMsg", "Nessuna asta vinta");
             } else {
+                // Per ogni asta vinta, prendi l'offerta massima e gli articoli associati
                 for (Asta a : asteVinte) {
                     offertaMax = offertaDAO.getMaxOffertaByIdAsta(a.getId());
                     if (offertaMax != null) {
@@ -119,6 +123,7 @@ public class AcquistoServlet extends HttpServlet {
                 }
                 ctx.setVariable("asteVinte", asteVinte);
             }
+            // Vai alla pagina di acquisto
             templateEngine.process(path, ctx, response.getWriter());
         } catch (SQLException e) {
             response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Errore interno del server");

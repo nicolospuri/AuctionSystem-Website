@@ -44,6 +44,7 @@ public class HomeServlet extends HttpServlet {
         JakartaServletWebApplication webApplication = JakartaServletWebApplication.buildApplication(servletContext);
         WebContext ctx = new WebContext(webApplication.buildExchange(request, response), request.getLocale());
 
+        // Qualche controllo sulla sessione e sugli attributi e poi l'utente viene reindirizzato alla home
         if (request.getSession() == null) {
             response.sendRedirect(request.getContextPath() + "/index.html");
             return;
