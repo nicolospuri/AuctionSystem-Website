@@ -118,8 +118,8 @@ public class FaiOfferta extends HttpServlet {
             }
 
             // Offerta troppo bassa
-            if (prezzoOfferto < asta.getPrezzoIniziale()) {
-                result.put("offertaErrorMsg", "L'offerta deve essere almeno pari al prezzo iniziale");
+            if (prezzoOfferto < asta.getPrezzoIniziale() + asta.getRialzoMinimo()) {
+                result.put("offertaErrorMsg", "L'offerta deve rialzare il prezzo almeno quanto il rialzo minimo");
                 jsonResponse = gson.toJson(result);
 
                 response.setContentType("application/json");

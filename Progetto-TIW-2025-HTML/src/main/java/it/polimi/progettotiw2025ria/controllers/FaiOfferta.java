@@ -119,11 +119,12 @@ public class FaiOfferta extends HttpServlet {
             }
 
             // Offerta troppo bassa
-            if (prezzo < asta.getPrezzoIniziale()) {
-                path += "&errorMsg=L'offerta deve essere almeno pari al prezzo iniziale";
+            if (prezzo < asta.getPrezzoIniziale() + asta.getRialzoMinimo()) {
+                path += "&errorMsg=L'offerta deve rialzare il prezzo almeno quanto il rialzo minimo";
                 response.sendRedirect(path);
                 return;
             }
+
 
             if (offerte != null && !offerte.isEmpty()) {
                 Offerta maxOfferta = offertaDAO.getMaxOffertaByIdAsta(idAsta);
