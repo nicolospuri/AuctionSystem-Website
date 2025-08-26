@@ -94,6 +94,10 @@ public class OfferteServlet extends HttpServlet {
             ctx.setVariable("articoli", articoli);
             AstaDAO astaDAO = new AstaDAO(connection);
             Asta asta = astaDAO.getAstaById(idAsta);
+            if (asta.isChiusa()) {
+                response.sendRedirect(request.getContextPath() + "/index.html");
+                return;
+            }
             // Metto rialzoMinimo come variabile di contesto per mostrarlo nella pagina
             ctx.setVariable("rialzoMinimo", asta.getRialzoMinimo());
 

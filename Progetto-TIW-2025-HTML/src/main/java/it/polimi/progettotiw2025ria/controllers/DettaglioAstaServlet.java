@@ -96,6 +96,10 @@ public class DettaglioAstaServlet extends HttpServlet {
             // Prendo l'asta dall'id fornito nella request
             Asta asta = astaDAO.getAstaById(idAsta);
             if (asta != null) {
+                if (!utente.getUsername().equals(asta.getProprietario())) {
+                    response.sendRedirect(request.getContextPath() + "/index.html");
+                    return;
+                }
                 // Prendo gli articoli relativi all'asta
                 articoli = articoloDAO.getArticoliByIdAsta(idAsta);
                 asta.setArticoli(articoli);

@@ -47,15 +47,13 @@ public class AstaDAO {
 
         ResultSet rs = stmt.executeQuery();
         while (rs.next()) {
-            while (rs.next()) {
-                result.add(new Asta(rs.getInt("id"),
-                        rs.getDouble("Prezzo"),
-                        rs.getInt("RialzoMinimo"),
-                        rs.getTimestamp("Scadenza").toLocalDateTime(),
-                        rs.getString("Proprietario"),
-                        rs.getBoolean("Chiusa"),
-                        rs.getString("Aggiudicatario")));
-            }
+            result.add(new Asta(rs.getInt("id"),
+                    rs.getDouble("Prezzo"),
+                    rs.getInt("RialzoMinimo"),
+                    rs.getTimestamp("Scadenza").toLocalDateTime(),
+                    rs.getString("Proprietario"),
+                    rs.getBoolean("Chiusa"),
+                    rs.getString("Aggiudicatario")));
         }
         return result;
     }
