@@ -46,7 +46,7 @@
             </div>
 
             <br>
-            <!-- mettere un messaggio se non ci sono aste aperte e settare a hidden-->
+
             <h2>Le tue aste chiuse</h2>
             <div id="listaAsteChiuse">
                 <table border="1" id="tabelleAsteChiuse">
@@ -65,6 +65,9 @@
 
                 <template id="astaChiusaRow">
                     <tr>
+                        <!--L’attributo href="#" serve solo a renderlo cliccabile senza portare da nessuna parte-->
+                        <!--data-id contiene l’id dell’asta, che verrà usato per recuperare i dettagli dell’asta-->
+                        <!--Permette di associare un valore nascosto all’elemento, senza mostrarlo nell’interfaccia-->
                         <td><a href="#" class="id-asta-chiusa-link" data-id=""></a></td>
                         <td class="prezzo-finale"></td>
                         <td class="aggiudicatario"></td>
@@ -294,6 +297,7 @@
 
             <div id="canOffer" hidden>
                 <h2>Fai un'offerta</h2>
+                <!--Serve per mostrare testo dentro un altro elemento-->
                 <h3>Rialzo minimo: <span id="showRialzoMinimo"></span></h3>
                 <div id="offertaSuccessMsg"></div>
                 <div id="offertaErrorMsg"></div>

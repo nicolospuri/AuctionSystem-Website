@@ -76,7 +76,7 @@ public class AcquistoServlet extends HttpServlet {
         }
 
         try {
-            // Creo il Gson con l'adapter per il LocalDateTime
+            //Imposta il convertitore JSON (Gson) con supporto per LocalDateTime
             Gson gson = new GsonBuilder()
                     .registerTypeAdapter(LocalDateTime.class, new LocalDateTimeAdapter())
                     .create();
@@ -91,12 +91,13 @@ public class AcquistoServlet extends HttpServlet {
 
             // Se è presente il cookie, invio le aste visionate
             if(asteVisitateJsonCookie != null) {
-                // Estraggo gli id delle aste visionate dal json
+                // Estrae gli ID delle aste visitate dal cookie JSON
                 String decodedAsteVisitateJsonCookie = URLDecoder.decode(asteVisitateJsonCookie, StandardCharsets.UTF_8);
                 System.out.println(decodedAsteVisitateJsonCookie);
                 JsonArray idAsteVisitateJson = JsonParser.parseString(decodedAsteVisitateJsonCookie).getAsJsonArray();
                 int idAstaVisitata = 0;
 
+                //Per ogni ID, recupera l’oggetto Asta e i suoi articoli, poi lo aggiunge alla lista.
                 for (JsonElement id : idAsteVisitateJson) {
                     try {
                         idAstaVisitata = id.getAsInt();
@@ -146,6 +147,7 @@ public class AcquistoServlet extends HttpServlet {
                 result.put("asteVinte", asteVinte);
             }
 
+            //Converte la mappa dei risultati in JSON e la invia come risposta
             String jsonResponse = gson.toJson(result);
 
             response.setContentType("application/json");

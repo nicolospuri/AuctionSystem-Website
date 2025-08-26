@@ -118,13 +118,15 @@ public class AggiungiArticolo extends HttpServlet {
                 json.put("prezzo", articolo.getPrezzo());
                 json.put("immagine", articolo.getImmagine());
 
+                // Gestione cookie lastAction
                 boolean lastActionFound = false;
                 Cookie[] cookies = request.getCookies();
 
-                // Cerco i cookie "lastAction"
+                // Cerco il cookie "lastActionCreaAsta"
                 if (cookies != null) {
                     for (Cookie c : cookies) {
                         if (c.getName().equals("lastActionCreaAsta" + username)) {
+                            //setto il cookie a false
                             c.setValue("false");
                             c.setMaxAge(60*60*24*30);
                             lastActionFound = true;

@@ -59,6 +59,7 @@ public class ChiudiAstaServlet extends HttpServlet {
             AstaDAO astaDAO = new AstaDAO(connection);
             OffertaDAO offertaDAO = new OffertaDAO(connection);
 
+            //controllo se l'asta esiste e che non sia vuota
             Asta asta = astaDAO.getAstaById(idAsta);
             if (asta == null) {
                 response.setStatus(HttpServletResponse.SC_NOT_FOUND);
@@ -66,7 +67,7 @@ public class ChiudiAstaServlet extends HttpServlet {
                 return;
             }
 
-            // (Consigliato) consentire la chiusura solo al proprietario
+            //consentire la chiusura solo al proprietario
             if (asta.getProprietario() != null && !asta.getProprietario().equals(utente.getUsername())) {
                 response.setStatus(HttpServletResponse.SC_FORBIDDEN);
                 out.write("{\"success\":false,\"error\":\"Non sei il proprietario dell'asta\"}");

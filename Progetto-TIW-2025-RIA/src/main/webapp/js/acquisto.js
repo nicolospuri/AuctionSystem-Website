@@ -38,14 +38,16 @@ function searchAstaByKeyword(){
     formData.append("keyword", keyword);
 
     // Creazione richiesta
+    //Il metodo .open di XMLHttpRequest inizializza una richiesta specificando il metodo HTTP (es. "POST", "GET") e l’URL
     const request = new XMLHttpRequest();
     request.open("POST", "AcquistoServlet");
 
-    // Definizione callback
+    //Ogni volta che lo stato della richiesta cambia, viene chiamata la funzione showAsteByKeyword(request)
     request.onreadystatechange = () => {
         showAsteByKeyword(request);
     };
 
+    //invia la richiesta HTTP al server usando l'oggetto XMLHttpRequest
     request.send(formData);
 }
 
@@ -53,7 +55,8 @@ function searchAstaByKeyword(){
 function showAsteByKeyword(request){
     if(request.readyState === 4){
         if(request.status === 200){
-            document.getElementById("asteTrovateBody").innerHTML = "";		// Svuoto la tabella delle aste con la parola chiave precedentemente ricercata
+            //Svuoto la tabella delle aste con la parola chiave precedentemente ricercata
+            document.getElementById("asteTrovateBody").innerHTML = "";
             document.getElementById("asteTrovateMsg").innerHTML = '';
 
             const aste = JSON.parse(request.responseText);

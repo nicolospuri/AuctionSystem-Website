@@ -4,7 +4,7 @@ function caricaChiudiAstaButton() {
     // Handler CHIUDI ASTA
     const chiudiBtn = document.getElementById("chiudiAsta");
 
-    // Sostituisco il bottone submitNewArticolo con un nuovo clone per poter aggiungere l'event listener
+    // Sostituisco il bottone chiudiAsta con un nuovo clone per poter aggiungere l'event listener
     // altrimenti aggiungerei un altro event listener oltre a quello già presente
     const newChiudiBtn = chiudiBtn.cloneNode(true);
     chiudiBtn.replaceWith(newChiudiBtn);
@@ -18,7 +18,9 @@ function caricaChiudiAstaButton() {
         try {
             const resp = await fetch("ChiudiAsta", {
                 method: "POST",
+                // Indica che i dati nel body sono in formato application/x-www-form-urlencoded
                 headers: { "Content-Type": "application/x-www-form-urlencoded" },
+                // Costruisce il body con il parametro idAsta (es. "idAsta=3")
                 body: new URLSearchParams({ idAsta }).toString()
             });
 

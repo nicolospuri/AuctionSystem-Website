@@ -51,6 +51,7 @@ public class GetArticoliServlet extends HttpServlet {
             ArticoloDAO articoloDAO = new ArticoloDAO(connection);
             List<Articolo> articoli = articoloDAO.getArticoliDisponibili(utente.getUsername());
 
+            //array di articoli in formato JSON
             JSONArray arr = new JSONArray();
             for (Articolo a : articoli) {
                 JSONObject obj = new JSONObject();
@@ -65,6 +66,10 @@ public class GetArticoliServlet extends HttpServlet {
             json.put("success", true);
             json.put("articoli", arr);
 
+            /*-response.getWriter(): ottiene un oggetto PrintWriter associato alla risposta HTTP,
+                    che permette di scrivere dati nel corpo della risposta.
+              -json.toString(): converte l'oggetto JSONObject json in una stringa JSON.
+              -.write(...): scrive la stringa JSON nella risposta HTTP, inviandola al client che ha fatto la richiesta.*/
             response.getWriter().write(json.toString());
         } catch (SQLException e) {
             e.printStackTrace();

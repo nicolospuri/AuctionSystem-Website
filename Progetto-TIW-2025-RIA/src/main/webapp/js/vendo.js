@@ -1,10 +1,10 @@
 // js/vendo.js
-//todo:quando è tutto finito creare una funzione che azzera tutti i messaggi all'utente
+
 import { mostraDettaglioAstaAperta } from './dettaglioAsta.js';
 import { mostraDettaglioAstaChiusa } from './dettaglioAsta.js';
 
 export function renderVendoPage() {
-    // inizializzo la tabella articoli
+    //partono in parallelo
     caricaListeAperte();
     caricaListeChiuse();
     aggiornaArticoliDisponibili();
@@ -18,6 +18,7 @@ export function renderVendoPage() {
     document.getElementById("moveToVendo").hidden = true;
 
     //Ripulisce il contenuto della pagina dettaglio
+    document.getElementById("ArticoliAstaChiusa").innerHTML = "";
     document.getElementById("ArticoliAstaAperta").innerHTML = "";
     document.getElementById("listaOfferte").querySelector("#bodyListaOfferte").innerHTML = "";
 
@@ -75,17 +76,21 @@ function aggiungiArticolo(){ // callback del click su "Inserisci articolo"
         return;
     }
 
+    //Costruzione form data per invio multipart/form-data
     const formData = new FormData();
     formData.append("nome", nome);
     formData.append("descrizione", descrizione);
     formData.append("prezzo", prezzo);
     if (immagine) formData.append("immagine", immagine); // opzionale
 
+    // Invio dati a /AggiungiArticolo
     fetch("AggiungiArticolo", {
         method: "POST",
         body: formData
     })
+        //Quando il server risponde, trasforma il body JSON in un oggetto JavaScript
         .then(r => r.json())
+        //Se la risposta contiene success: true, l’invio è andato a buon fine
         .then(data => {
             if (data.success) {
                 emptyArticoloInputs(); // pulisco i campi
@@ -101,15 +106,18 @@ function aggiungiArticolo(){ // callback del click su "Inserisci articolo"
                 msg.innerText = "Articolo aggiunto!";
                 resetArticoloMSG();
 
+                // Ricarica la lista di articoli disponibili per l’inserimento in un’asta
                 aggiornaArticoliDisponibili();
 
             } else {
+                //Errore lato server
                 msg.style.color = "red";
                 msg.style.fontWeight = "bold";
                 msg.innerText = "Errore: " + (data.error || "operazione non riuscita");
                 resetArticoloMSG();
             }
         })
+        //Errore di rete o fetch
         .catch(err => {
             console.error("Errore fetch:", err);
             msg.style.color = "red";
@@ -202,9 +210,11 @@ async function creaAsta(event) {
 // === Funzione per aggiornare la tabella articoli disponibili ===
 async function aggiornaArticoliDisponibili() {
     try {
+        //disabilitando la cache per assicurarsi che i dati siano aggiornati.
         const response = await fetch("GetArticoliServlet", {
             method: "GET",cache: "no-store"
         });
+        // Recupera gli articoli disponibili dal server
         const data = await response.json();
 
         if (!data.success) {
@@ -227,6 +237,7 @@ async function aggiornaArticoliDisponibili() {
             // Articoli trovati → mostro tabella
             msg.textContent = "";
             form.hidden = false;
+            //Se data.articoli è null o undefined, viene usato un array vuoto [] per evitare errori.
             (data.articoli || []).forEach(a => aggiungiArticoloAllaTabella(a));
         }
 
@@ -247,10 +258,10 @@ function aggiungiArticoloAllaTabella(articolo) {
     const tbody = document.getElementById("bodyTabellaArticoliNewAsta");
     const template = document.getElementById("articoliSelezionabiliRow");
 
-    // Clono il template
+    //Clona il contenuto del <template>, creando una nuova riga DOM utilizzabile.
     const row = template.content.cloneNode(true);
 
-    // setto il valore della checkbox
+    //Imposta il valore della checkbox con il codice dell’articolo (serve per sapere quali articoli sono selezionati).
     const checkbox = row.querySelector("input[type='checkbox']");
     checkbox.value = articolo.codice;
 
@@ -295,7 +306,9 @@ export async function caricaListeAperte() {
     try {
         const resp = await fetch("CaricaListeAperte", {
             method: "GET",
+            // Richiede al server una risposta in formato JSON
             headers: { "Accept": "application/json" },
+            // Invia cookie/sessione solo se la richiesta è verso lo stesso dominio
             credentials: "same-origin",
             cache: "no-store"
         });
@@ -308,6 +321,9 @@ export async function caricaListeAperte() {
             return;
         }
 
+        //Verifica se data.asteAperte è un array.
+        //Se sì, assegna il suo valore a liste.
+        //Se no (ad esempio è undefined o non è un array), assegna un array vuoto [].
         const liste = Array.isArray(data.asteAperte) ? data.asteAperte : [];
 
         if (liste.length === 0) {
@@ -315,19 +331,22 @@ export async function caricaListeAperte() {
             return;
         }
 
+        // Usa DocumentFragment per costruire la tabella in memoria
         const frag = document.createDocumentFragment();
 
+        //Clona una riga del template per ogni asta.
         liste.forEach(a => {
             const row = tpl.content.firstElementChild.cloneNode(true);
 
-            // Popola il link nell'ID Asta
+            //Popola l’ID dell’asta e lo rende cliccabile tramite data-id.
             const link = row.querySelector(".id-asta-link");
             if (link) {
                 link.textContent = a.id;
                 link.dataset.id = a.id;
             }
 
-            // Tempo mancante
+            //Mostra quanto tempo manca alla scadenza dell’asta.
+            //Se il server ha già calcolato tempoMancante, usa quello, altrimenti lo calcola in JS.
             const tempoCell = row.querySelector(".tempo-mancante");
             if (tempoCell) {
                 tempoCell.textContent = a.tempoMancante
@@ -365,17 +384,23 @@ export async function caricaListeAperte() {
     }
 }
 
-
+// Formatta un numero come stringa in euro con 2 decimali (es. "1.234,00 €")
 function formatEuro(n) {
     const num = Number(n);
     if (Number.isFinite(num)) return num.toLocaleString(undefined, { style: "currency", currency: "EUR", minimumFractionDigits: 2 });
     return `${n} €`;
 }
+
+// Restituisce il valore se definito, altrimenti una stringa vuota
 function safe(v){ return v ?? ""; }
+
+// Sanifica stringhe HTML per prevenire attacchi XSS
 function escapeHTML(v){
     return String(v).replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;")
         .replaceAll('"',"&quot;").replaceAll("'","&#039;");
 }
+
+// Calcola il tempo mancante alla data di scadenza (ritorna "X giorni e Y ore" o "scaduta")
 function calcolaTempoMancante(iso){
     if (!iso) return "";
     const end = new Date(iso), now = new Date();
@@ -398,7 +423,7 @@ function buildArticoliList(articoli) {
     }
     articoli.forEach(ar => {
         const li = document.createElement("li");
-        // Richiesto: nome + prezzo (senza tabella, senza codice)
+        //Inserisce il nome (sanificato) e il prezzo in formato euro in grassetto
         li.innerHTML = `${escapeHTML(safe(ar.nome))} — <strong>${formatEuro(ar.prezzo)}</strong>`;
         ul.appendChild(li);
     });
@@ -485,15 +510,23 @@ export async function caricaListeChiuse() {
 function inizializzaClickDettaglioAstaAperta() {
     const tbody = document.getElementById("bodyTabellaAsteAperte");
 
+    // Gestisce il click su qualsiasi riga della tabella (event delegation)
     tbody.addEventListener("click", async (e) => {
+        //Usa closest("td") per risalire alla cella <td> cliccata, anche se si è cliccato su un elemento interno
         const td = e.target.closest("td");
-        if (!td || td.cellIndex !== 0) return; // Solo prima colonna (ID Asta)
+        //Se non è una cella o non è la prima colonna (ID), esce
+        if (!td || td.cellIndex !== 0) return;
 
+        //Estrae l'idAsta dal contenuto della cella cliccata. Se vuoto, esce
+        // Ottiene l'ID dell'asta cliccata
         const idAsta = td.textContent.trim();
         if (!idAsta) return;
 
         try {
+            //Passa il parametro idAsta nel URL usando template literal (es. DettaglioAstaServlet?idAsta=42
+            //L’uso di await fa sì che il codice aspetti il completamento della richiesta prima di proseguire
             const resp = await fetch(`DettaglioAstaServlet?idAsta=${idAsta}`, {
+                //indica al server che la richiesta è stata fatta via AJAX e non da un form o un link normale.
                 headers: { "X-Requested-With": "XMLHttpRequest" }
             });
 
