@@ -1,6 +1,6 @@
-package it.polimi.progettotiw2025ria.controllers;
+package it.polimi.progettotiw2025html.controllers;
 
-import it.polimi.progettotiw2025ria.beans.Utente;
+import it.polimi.progettotiw2025html.beans.Utente;
 import jakarta.servlet.ServletContext;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.UnavailableException;
@@ -9,9 +9,9 @@ import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
-import it.polimi.progettotiw2025ria.dao.ArticoloDAO;
-import it.polimi.progettotiw2025ria.dao.AstaDAO;
-import it.polimi.progettotiw2025ria.utils.ConnectionHandler;
+import it.polimi.progettotiw2025html.dao.ArticoloDAO;
+import it.polimi.progettotiw2025html.dao.AstaDAO;
+import it.polimi.progettotiw2025html.utils.ConnectionHandler;
 import org.thymeleaf.TemplateEngine;
 import org.thymeleaf.context.WebContext;
 import org.thymeleaf.templatemode.TemplateMode;
@@ -163,19 +163,28 @@ public class CreaAsta extends HttpServlet {
                 return;
             }
 
-            // Inserimento asta
-            int idAsta = astaDAO.insertNewAsta(
-                    username,
-                    prezzoIniziale,
-                    rialzoMinimo,
-                    Timestamp.valueOf(scadenza)
-            );
+            connection.setAutoCommit(false);
+            try {
+                // Inserimento asta
+                int idAsta = astaDAO.insertNewAsta(
+                        username,
+                        prezzoIniziale,
+                        rialzoMinimo,
+                        Timestamp.valueOf(scadenza)
+                );
 
-            // Aggiornamento articoli con id_asta
-            articoloDAO.updateIdAstaInArticles(articoliIds, idAsta);
+                // Aggiornamento articoli con id_asta
+                articoloDAO.updateIdAstaInArticles(articoliIds, idAsta);
 
-            // Reindirizzo a VendoServlet
-            response.sendRedirect(path);
+                // Reindirizzo a VendoServlet
+                connection.commit();
+                response.sendRedirect(path);
+            } catch (SQLException e) {
+                connection.rollback();
+                throw new ServletException(e);
+            } finally {
+                connection.setAutoCommit(true);
+            }
         } catch (SQLException e) {
             throw new ServletException(e);
         }

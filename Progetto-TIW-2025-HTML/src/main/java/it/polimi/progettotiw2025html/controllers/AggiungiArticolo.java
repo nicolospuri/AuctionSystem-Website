@@ -1,9 +1,9 @@
-package it.polimi.progettotiw2025ria.controllers;
+package it.polimi.progettotiw2025html.controllers;
 
-import it.polimi.progettotiw2025ria.beans.Utente;
-import it.polimi.progettotiw2025ria.dao.ArticoloDAO;
-import it.polimi.progettotiw2025ria.dao.UtenteDAO;
-import it.polimi.progettotiw2025ria.utils.ConnectionHandler;
+import it.polimi.progettotiw2025html.beans.Utente;
+import it.polimi.progettotiw2025html.dao.ArticoloDAO;
+import it.polimi.progettotiw2025html.dao.UtenteDAO;
+import it.polimi.progettotiw2025html.utils.ConnectionHandler;
 import jakarta.servlet.ServletContext;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.UnavailableException;
@@ -17,13 +17,10 @@ import org.thymeleaf.templateresolver.WebApplicationTemplateResolver;
 import org.thymeleaf.web.servlet.JakartaServletWebApplication;
 
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.nio.file.Paths;
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.util.UUID;
 
 @MultipartConfig
 @WebServlet("/AggiungiArticolo")

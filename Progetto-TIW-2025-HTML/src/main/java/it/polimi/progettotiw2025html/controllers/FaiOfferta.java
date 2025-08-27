@@ -1,13 +1,11 @@
-package it.polimi.progettotiw2025ria.controllers;
+package it.polimi.progettotiw2025html.controllers;
 
-import it.polimi.progettotiw2025ria.beans.Articolo;
-import it.polimi.progettotiw2025ria.beans.Asta;
-import it.polimi.progettotiw2025ria.beans.Offerta;
-import it.polimi.progettotiw2025ria.beans.Utente;
-import it.polimi.progettotiw2025ria.dao.ArticoloDAO;
-import it.polimi.progettotiw2025ria.dao.AstaDAO;
-import it.polimi.progettotiw2025ria.dao.OffertaDAO;
-import it.polimi.progettotiw2025ria.utils.ConnectionHandler;
+import it.polimi.progettotiw2025html.beans.Asta;
+import it.polimi.progettotiw2025html.beans.Offerta;
+import it.polimi.progettotiw2025html.beans.Utente;
+import it.polimi.progettotiw2025html.dao.AstaDAO;
+import it.polimi.progettotiw2025html.dao.OffertaDAO;
+import it.polimi.progettotiw2025html.utils.ConnectionHandler;
 import jakarta.servlet.ServletContext;
 import jakarta.servlet.UnavailableException;
 import jakarta.servlet.annotation.WebServlet;
@@ -27,13 +25,13 @@ import java.sql.SQLException;
 import java.time.LocalDateTime;
 import java.util.List;
 
-@WebServlet("/OfferteServlet")
-public class OfferteServlet extends HttpServlet {
+@WebServlet("/FaiOfferta")
+public class FaiOfferta extends HttpServlet {
     private static final long serialVersionUID = 1L;
     private TemplateEngine templateEngine;
     private Connection connection;
 
-    public OfferteServlet() {
+    public FaiOfferta() {
         super();
     }
 
@@ -57,11 +55,10 @@ public class OfferteServlet extends HttpServlet {
     }
 
     @Override
-    public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
+    public void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
         ServletContext servletContext = getServletContext();
         JakartaServletWebApplication webApplication = JakartaServletWebApplication.buildApplication(servletContext);
         WebContext ctx = new WebContext(webApplication.buildExchange(request, response), request.getLocale());
-        String path = "offerta";
 
         if (request.getSession() == null) {
             response.sendRedirect(request.getContextPath() + "/index.html");
@@ -81,55 +78,79 @@ public class OfferteServlet extends HttpServlet {
         Integer idAsta = 0;
         try {
             idAsta = Integer.parseInt(request.getParameter("idAsta"));
-            ctx.setVariable("idAsta", idAsta);
         } catch (NumberFormatException e) {
             response.sendError(HttpServletResponse.SC_BAD_REQUEST, "ID Asta non valido");
             return;
         }
 
+        String path = request.getContextPath() + "/OfferteServlet?idAsta=" + idAsta;
+
         try {
-            ArticoloDAO articoloDAO = new ArticoloDAO(connection);
-            // Prendo gli articoli relativi all'asta
-            List<Articolo> articoli = articoloDAO.getArticoliByIdAsta(idAsta);
-            ctx.setVariable("articoli", articoli);
             AstaDAO astaDAO = new AstaDAO(connection);
             Asta asta = astaDAO.getAstaById(idAsta);
-            if (asta.isChiusa()) {
-                response.sendRedirect(request.getContextPath() + "/index.html");
+            OffertaDAO offertaDAO = new OffertaDAO(connection);
+            List<Offerta> offerte = offertaDAO.getOfferteByIdAsta(idAsta);
+            double prezzo = 0.0;
+            try {
+                prezzo = Double.parseDouble(request.getParameter("prezzoOfferto"));
+            } catch (NumberFormatException e) {
+                path += "&errorMsg=Prezzo non valido";
+                response.sendRedirect(path);
                 return;
             }
-            // Metto rialzoMinimo come variabile di contesto per mostrarlo nella pagina
-            ctx.setVariable("rialzoMinimo", asta.getRialzoMinimo());
+            // Vari controlli sul prezzo e sull'asta
+            if (prezzo <= 0) {
+                path += "&errorMsg=Il prezzo deve essere maggiore di zero";
+                response.sendRedirect(path);
+                return;
+            }
 
-            OffertaDAO offertaDAO = new OffertaDAO(connection);
-            // Prendo le offerte relative all'asta
-            List<Offerta> offerte = offertaDAO.getOfferteByIdAsta(idAsta);
+            // Asta scaduta
+            if (asta.getScadenza().isBefore(LocalDateTime.now())) {
+                path += "&errorMsg=Asta scaduta, non è possibile fare offerte";
+                response.sendRedirect(path);
+                return;
+            }
+            // Asta propria
+            if (asta.getProprietario().equals(utente.getUsername())) {
+                path += "&errorMsg=Non puoi fare offerte su una tua asta";
+                response.sendRedirect(path);
+                return;
+            }
+
+            // Offerta troppo bassa
+            if (prezzo < asta.getPrezzoIniziale() + asta.getRialzoMinimo()) {
+                path += "&errorMsg=L'offerta deve rialzare il prezzo almeno quanto il rialzo minimo";
+                response.sendRedirect(path);
+                return;
+            }
+
+
             if (offerte != null && !offerte.isEmpty()) {
-                ctx.setVariable("offerte", offerte);
+                Offerta maxOfferta = offertaDAO.getMaxOffertaByIdAsta(idAsta);
+                // Offerta troppo bassa
+                if (maxOfferta != null && prezzo < maxOfferta.getPrezzo() + asta.getRialzoMinimo()) {
+                    path += "&errorMsg=L'offerta deve rialzare il prezzo almeno quanto il rialzo minimo";
+                    response.sendRedirect(path);
+                    return;
+                }
+            }
+            // Se vengono superati tutti i controlli, aggiungo l'offerta al database
+            if (offertaDAO.addOfferta(utente.getUsername(), prezzo, idAsta)) {
+                path += "&successMsg=Offerta effettuata con successo";
             } else {
-                ctx.setVariable("offerteMsg", "Nessuna offerta trovata");
+                path += "&errorMsg=Errore durante l'inserimento dell'offerta";
             }
-
-            // Imposto la variabile canOffer a true se l'utente loggato può fare un'offerta così da mostrare il form
-            if (utente != null && !utente.getUsername().equals(asta.getProprietario())
-                    && !asta.isChiusa() && asta.getScadenza().isAfter(LocalDateTime.now())) {
-                ctx.setVariable("canOffer", true);
-            }
-            if (request.getParameter("errorMsg") != null) {
-                ctx.setVariable("errorMsg", request.getParameter("errorMsg"));
-            }
-            if (request.getParameter("successMsg") != null) {
-                ctx.setVariable("successMsg", request.getParameter("successMsg"));
-            }
-            templateEngine.process(path, ctx, response.getWriter());
+            // Torna alla pagina delle offerte
+            response.sendRedirect(path);
         } catch (SQLException e) {
             response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Errore interno del server");
         }
     }
 
     @Override
-    public void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
-        doGet(request, response);
+    public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
+        doPost(request, response);
     }
 
     @Override

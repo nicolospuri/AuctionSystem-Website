@@ -1,13 +1,13 @@
-package it.polimi.progettotiw2025ria.controllers;
+package it.polimi.progettotiw2025html.controllers;
 
-import it.polimi.progettotiw2025ria.beans.Articolo;
-import it.polimi.progettotiw2025ria.beans.Asta;
-import it.polimi.progettotiw2025ria.beans.Offerta;
-import it.polimi.progettotiw2025ria.beans.Utente;
-import it.polimi.progettotiw2025ria.dao.ArticoloDAO;
-import it.polimi.progettotiw2025ria.dao.AstaDAO;
-import it.polimi.progettotiw2025ria.dao.OffertaDAO;
-import it.polimi.progettotiw2025ria.utils.ConnectionHandler;
+import it.polimi.progettotiw2025html.beans.Articolo;
+import it.polimi.progettotiw2025html.beans.Asta;
+import it.polimi.progettotiw2025html.beans.Offerta;
+import it.polimi.progettotiw2025html.beans.Utente;
+import it.polimi.progettotiw2025html.dao.ArticoloDAO;
+import it.polimi.progettotiw2025html.dao.AstaDAO;
+import it.polimi.progettotiw2025html.dao.OffertaDAO;
+import it.polimi.progettotiw2025html.utils.ConnectionHandler;
 import jakarta.servlet.ServletContext;
 import jakarta.servlet.UnavailableException;
 import jakarta.servlet.annotation.WebServlet;
@@ -26,13 +26,13 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.List;
 
-@WebServlet("/VendoServlet")
-public class VendoServlet extends HttpServlet {
+@WebServlet("/AcquistoServlet")
+public class AcquistoServlet extends HttpServlet {
     private static final long serialVersionUID = 1L;
     private TemplateEngine templateEngine;
     private Connection connection;
 
-    public VendoServlet() {
+    public AcquistoServlet() {
         super();
     }
 
@@ -60,8 +60,9 @@ public class VendoServlet extends HttpServlet {
         ServletContext servletContext = getServletContext();
         JakartaServletWebApplication webApplication = JakartaServletWebApplication.buildApplication(servletContext);
         WebContext ctx = new WebContext(webApplication.buildExchange(request, response), request.getLocale());
-        String path = "vendo";
+        String path = "acquisto";
 
+        String keyword = request.getParameter("keyword");
         if (request.getSession() == null) {
             response.sendRedirect(request.getContextPath() + "/index.html");
             return;
@@ -82,77 +83,47 @@ public class VendoServlet extends HttpServlet {
             AstaDAO astaDAO = new AstaDAO(connection);
             ArticoloDAO articoloDAO = new ArticoloDAO(connection);
             OffertaDAO offertaDAO = new OffertaDAO(connection);
-            List<Asta> asteAperte = null;
-            List<Asta> asteChiuse = null;
+            List<Asta> asteTrovate = null;
             List<Articolo> articoli = null;
             Offerta offertaMax = null;
-
-            // Prendo le aste aperte e chiuse dell'utente
+            // Se è stata inserita una keyword, cerca le aste aperte che la contengono
+            if (keyword != null && !keyword.isEmpty()) {
+                asteTrovate = astaDAO.getAsteAperteByKeyword(keyword);
+            }
+            // Prendi le aste vinte dall'utente
+            List<Asta> asteVinte = null;
             if (utente != null) {
-                asteAperte = astaDAO.getAsteAperteByUsername(utente.getUsername());
-                asteChiuse = astaDAO.getAsteChiuseByUsername(utente.getUsername());
+                asteVinte = astaDAO.getAsteVinteByUsername(utente.getUsername());
             }
 
-            if (asteAperte == null || asteAperte.isEmpty()) {
-                ctx.setVariable("asteAperteMsg", "Nessuna asta aperta");
+            ctx.setVariable("keyword", keyword);
+
+            if (asteTrovate == null || asteTrovate.isEmpty()) {
+                ctx.setVariable("asteTrovateMsg", "Nessuna asta trovata");
             } else {
-                // Per ogni asta prendo gli articoli e l'offerta massima
-                for (Asta a : asteAperte) {
+                // Per ogni asta trovata, prendi gli articoli associati
+                for (Asta a : asteTrovate) {
                     articoli = articoloDAO.getArticoliByIdAsta(a.getId());
                     a.setArticoli(articoli);
-
-                    a.setTempoMancante();
-
+                }
+                ctx.setVariable("asteTrovate", asteTrovate);
+            }
+            if (asteVinte == null || asteVinte.isEmpty()) {
+                ctx.setVariable("asteVinteMsg", "Nessuna asta vinta");
+            } else {
+                // Per ogni asta vinta, prendi l'offerta massima e gli articoli associati
+                for (Asta a : asteVinte) {
                     offertaMax = offertaDAO.getMaxOffertaByIdAsta(a.getId());
-                    a.setOffertaMassima(offertaMax);
                     if (offertaMax != null) {
+                        a.setOffertaMassima(offertaMax);
                         a.setPrezzoOffertaMassima(offertaMax.getPrezzo());
                     }
-                }
-                ctx.setVariable("asteAperte", asteAperte);
-            }
-            if (asteChiuse == null || asteChiuse.isEmpty()) {
-                ctx.setVariable("asteChiuseMsg", "Nessuna asta chiusa");
-            } else {
-                // Per ogni asta prendo gli articoli e l'offerta massima
-                for (Asta a : asteChiuse) {
                     articoli = articoloDAO.getArticoliByIdAsta(a.getId());
                     a.setArticoli(articoli);
-
-                    offertaMax = offertaDAO.getMaxOffertaByIdAsta(a.getId());
-                    a.setOffertaMassima(offertaMax);
-                    if (offertaMax != null) {
-                        a.setPrezzoOffertaMassima(offertaMax.getPrezzo());
-                    }
                 }
-                ctx.setVariable("asteChiuse", asteChiuse);
+                ctx.setVariable("asteVinte", asteVinte);
             }
-
-            // Vari controlli e settaggio delle variabili di contesto
-            if (utente != null) {
-                articoli = articoloDAO.getArticoliDisponibili(utente.getUsername());
-            }
-            if (articoli == null || articoli.isEmpty()) {
-                ctx.setVariable("articoliMsg", "Non ci sono articoli disponibili al momento.");
-            } else {
-                ctx.setVariable("listaArticoli", articoli); // nuova variabile per la lista
-            }
-
-            // Qui controlo se nella request ci sono messaggi di errore o successo da mostrare mandati dalle servlet
-            // CreaAsta e AggiungiArticolo
-            if (request.getParameter("prezzoMsg") != null) {
-                ctx.setVariable("prezzoMsg", request.getParameter("prezzoMsg"));
-            }
-            if (request.getParameter("rialzoMsg") != null) {
-                ctx.setVariable("rialzoMsg", request.getParameter("rialzoMsg"));
-            }
-            if (request.getParameter("scadenzaMsg") != null) {
-                ctx.setVariable("scadenzaMsg", request.getParameter("scadenzaMsg"));
-            }
-            if (request.getParameter("nessunArticoloMsg") != null) {
-                ctx.setVariable("nessunArticoloMsg", request.getParameter("nessunArticoloMsg"));
-            }
-
+            // Vai alla pagina di acquisto
             templateEngine.process(path, ctx, response.getWriter());
         } catch (SQLException e) {
             response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Errore interno del server");
@@ -166,9 +137,9 @@ public class VendoServlet extends HttpServlet {
 
     @Override
     public void destroy() {
-        try {
+        try{
             ConnectionHandler.closeConnection(connection);
-        } catch(SQLException e){
+        }catch(SQLException e){
             e.printStackTrace();
         }
     }

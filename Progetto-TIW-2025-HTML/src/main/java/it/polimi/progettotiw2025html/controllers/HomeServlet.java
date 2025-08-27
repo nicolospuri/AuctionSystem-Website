@@ -1,6 +1,6 @@
-package it.polimi.progettotiw2025ria.controllers;
+package it.polimi.progettotiw2025html.controllers;
 
-import it.polimi.progettotiw2025ria.beans.Utente;
+import it.polimi.progettotiw2025html.beans.Utente;
 import jakarta.servlet.ServletContext;
 import jakarta.servlet.UnavailableException;
 import jakarta.servlet.annotation.WebServlet;

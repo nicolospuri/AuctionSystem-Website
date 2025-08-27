@@ -1,4 +1,4 @@
-package it.polimi.progettotiw2025ria.beans;
+package it.polimi.progettotiw2025html.beans;
 
 public class Utente {
     private final String username;

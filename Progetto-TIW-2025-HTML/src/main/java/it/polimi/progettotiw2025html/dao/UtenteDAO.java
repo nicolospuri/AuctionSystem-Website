@@ -1,7 +1,7 @@
-package it.polimi.progettotiw2025ria.dao;
+package it.polimi.progettotiw2025html.dao;
 
 import java.sql.*;
-import it.polimi.progettotiw2025ria.beans.*;
+import it.polimi.progettotiw2025html.beans.*;
 
 public class UtenteDAO {
     private final Connection connection;

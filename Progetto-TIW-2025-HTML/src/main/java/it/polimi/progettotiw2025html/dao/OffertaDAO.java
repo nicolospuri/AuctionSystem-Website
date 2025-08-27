@@ -1,6 +1,6 @@
-package it.polimi.progettotiw2025ria.dao;
+package it.polimi.progettotiw2025html.dao;
 
-import it.polimi.progettotiw2025ria.beans.Offerta;
+import it.polimi.progettotiw2025html.beans.Offerta;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;

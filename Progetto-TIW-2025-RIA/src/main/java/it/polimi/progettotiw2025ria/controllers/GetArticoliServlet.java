@@ -1,12 +1,8 @@
 package it.polimi.progettotiw2025ria.controllers;
 
-import com.google.gson.Gson;
-import com.google.gson.JsonObject;
 import it.polimi.progettotiw2025ria.beans.Articolo;
-import it.polimi.progettotiw2025ria.beans.Asta;
 import it.polimi.progettotiw2025ria.beans.Utente;
 import it.polimi.progettotiw2025ria.dao.ArticoloDAO;
-import it.polimi.progettotiw2025ria.dao.AstaDAO;
 import it.polimi.progettotiw2025ria.utils.ConnectionHandler;
 import jakarta.servlet.UnavailableException;
 import jakarta.servlet.annotation.WebServlet;
@@ -15,7 +11,6 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.io.IOException;
-import java.io.PrintWriter;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.List;

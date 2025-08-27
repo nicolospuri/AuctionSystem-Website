@@ -1,8 +1,8 @@
-package it.polimi.progettotiw2025ria.controllers;
+package it.polimi.progettotiw2025html.controllers;
 
-import it.polimi.progettotiw2025ria.beans.Utente;
-import it.polimi.progettotiw2025ria.dao.UtenteDAO;
-import it.polimi.progettotiw2025ria.utils.ConnectionHandler;
+import it.polimi.progettotiw2025html.beans.Utente;
+import it.polimi.progettotiw2025html.dao.UtenteDAO;
+import it.polimi.progettotiw2025html.utils.ConnectionHandler;
 import jakarta.servlet.ServletContext;
 import jakarta.servlet.UnavailableException;
 import jakarta.servlet.annotation.WebServlet;
@@ -19,19 +19,18 @@ import java.io.IOException;
 import java.sql.Connection;
 import java.sql.SQLException;
 
-@WebServlet("/SignUp")
-public class SignUp extends HttpServlet {
+@WebServlet("/Login")
+public class Login extends HttpServlet {
     private static final long serialVersionUID = 1L;
     private TemplateEngine templateEngine;
     private Connection connection;
 
-    public SignUp() {
+    public Login() {
         super();
     }
 
     @Override
     public void init() throws UnavailableException {
-        System.out.println("Inizializzando SignUp");
         ServletContext servletContext = getServletContext();
 
         JakartaServletWebApplication webApplication = JakartaServletWebApplication.buildApplication(servletContext);
@@ -55,52 +54,39 @@ public class SignUp extends HttpServlet {
             response.sendRedirect(request.getContextPath() + "/index.html");
             return;
         }
-        // Prendo i parametri
         String username = request.getParameter("username");
         String password = request.getParameter("password");
-        String nome = request.getParameter("nome");
-        String cognome = request.getParameter("cognome");
-        String indirizzo = request.getParameter("indirizzo");
 
         ServletContext servletContext = getServletContext();
         JakartaServletWebApplication webApplication = JakartaServletWebApplication.buildApplication(servletContext);
         WebContext ctx = new WebContext(webApplication.buildExchange(request, response), request.getLocale());
-        String path = null;
+        String path;
 
-        // Check sui parametri
-        if (username == null || password == null || cognome == null || indirizzo == null ||
-                username.isEmpty() || password.isEmpty() || nome.isEmpty() || cognome.isEmpty() || indirizzo.isEmpty()) {
+        if(username == null || password == null || username.isEmpty() || password.isEmpty()){
             path = "index";
             ctx.setVariable("errorMsg", "Credenziali vuote o mancanti");
-            templateEngine.process(path, ctx, response.getWriter());
+            templateEngine.process(path, ctx, response.getWriter());            // In caso di credenziali vuote o mancanti, torna al login
             return;
         }
+
         try {
             UtenteDAO utenteDAO = new UtenteDAO(connection);
-            Utente utente = new Utente(username, password, nome, cognome, indirizzo);
-            // Controllo se l'username è già presente
-            boolean valido = utenteDAO.checkRegistration(utente.getUsername());
-            if(!valido){
-                // Se non è presente, procedo con la registrazione
-                boolean isRegistered = utenteDAO.signUp(utente);
-                if (isRegistered) {
-                    HttpSession session = request.getSession();
-                    // Imposto l'utente come attributo di sessione
-                    session.setAttribute("utente", utente);
-                    path = request.getContextPath() + "/HomeServlet";
-                    response.sendRedirect(path);
-                } else {
-                    path = "index";
-                    ctx.setVariable("errorMsg", "Registrazione fallita: errore durante l'inserimento");
-                    templateEngine.process(path, ctx, response.getWriter());
-                }
+            // Check delle credenziali
+            Utente utente = utenteDAO.login(username, password);
+            if (utente != null) {
+                HttpSession session = request.getSession();
+                // Imposto l'utente come attributo di sessione
+                session.setAttribute("utente", utente);      // Associa l'utente alla sessione
+                // Reindirizzamento alla home
+                path = request.getContextPath() + "/HomeServlet";
+                response.sendRedirect(path);
             } else {
                 path = "index";
-                ctx.setVariable("errorMsg", "Registrazione fallita: utente già esistente");
-                templateEngine.process(path, ctx, response.getWriter());
+                ctx.setVariable("errorMsg", "Username o password errati");
+                templateEngine.process(path, ctx, response.getWriter());         // Torna al login in caso di errore
             }
         } catch (SQLException e) {
-            response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "SQL error: impossibile registrare l'utente");
+            response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Errore interno");
         }
     }
 

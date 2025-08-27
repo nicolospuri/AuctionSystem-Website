@@ -1,6 +1,6 @@
-package it.polimi.progettotiw2025ria.dao;
+package it.polimi.progettotiw2025html.dao;
 
-import it.polimi.progettotiw2025ria.beans.Asta;
+import it.polimi.progettotiw2025html.beans.Asta;
 
 import java.sql.*;
 import java.util.ArrayList;

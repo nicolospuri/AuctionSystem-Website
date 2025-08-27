@@ -1,13 +1,11 @@
-package it.polimi.progettotiw2025ria.controllers;
+package it.polimi.progettotiw2025html.controllers;
 
-import it.polimi.progettotiw2025ria.beans.Articolo;
-import it.polimi.progettotiw2025ria.beans.Asta;
-import it.polimi.progettotiw2025ria.beans.Offerta;
-import it.polimi.progettotiw2025ria.beans.Utente;
-import it.polimi.progettotiw2025ria.dao.ArticoloDAO;
-import it.polimi.progettotiw2025ria.dao.AstaDAO;
-import it.polimi.progettotiw2025ria.dao.OffertaDAO;
-import it.polimi.progettotiw2025ria.utils.ConnectionHandler;
+import it.polimi.progettotiw2025html.beans.Asta;
+import it.polimi.progettotiw2025html.beans.Offerta;
+import it.polimi.progettotiw2025html.beans.Utente;
+import it.polimi.progettotiw2025html.dao.AstaDAO;
+import it.polimi.progettotiw2025html.dao.OffertaDAO;
+import it.polimi.progettotiw2025html.utils.ConnectionHandler;
 import jakarta.servlet.ServletContext;
 import jakarta.servlet.UnavailableException;
 import jakarta.servlet.annotation.WebServlet;
@@ -24,15 +22,14 @@ import org.thymeleaf.web.servlet.JakartaServletWebApplication;
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.util.List;
 
-@WebServlet("/AcquistoServlet")
-public class AcquistoServlet extends HttpServlet {
+@WebServlet("/ChiudiAsta")
+public class ChiudiAsta extends HttpServlet {
     private static final long serialVersionUID = 1L;
     private TemplateEngine templateEngine;
     private Connection connection;
 
-    public AcquistoServlet() {
+    public ChiudiAsta() {
         super();
     }
 
@@ -57,12 +54,15 @@ public class AcquistoServlet extends HttpServlet {
 
     @Override
     public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
+        doPost(request, response);
+    }
+
+    @Override
+    public void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
         ServletContext servletContext = getServletContext();
         JakartaServletWebApplication webApplication = JakartaServletWebApplication.buildApplication(servletContext);
         WebContext ctx = new WebContext(webApplication.buildExchange(request, response), request.getLocale());
-        String path = "acquisto";
 
-        String keyword = request.getParameter("keyword");
         if (request.getSession() == null) {
             response.sendRedirect(request.getContextPath() + "/index.html");
             return;
@@ -78,68 +78,61 @@ public class AcquistoServlet extends HttpServlet {
             templateEngine.process("index", ctx, response.getWriter());
             return;
         }
+        Integer idAsta = 0;
+        try {
+            idAsta = Integer.parseInt(request.getParameter("idAsta"));
+        } catch (NumberFormatException e) {
+            response.sendError(HttpServletResponse.SC_BAD_REQUEST, "ID Asta non valido");
+            return;
+        }
+        String path = request.getContextPath() + "/DettaglioAstaServlet?idAsta=" + idAsta;
 
         try {
             AstaDAO astaDAO = new AstaDAO(connection);
-            ArticoloDAO articoloDAO = new ArticoloDAO(connection);
-            OffertaDAO offertaDAO = new OffertaDAO(connection);
-            List<Asta> asteTrovate = null;
-            List<Articolo> articoli = null;
-            Offerta offertaMax = null;
-            // Se è stata inserita una keyword, cerca le aste aperte che la contengono
-            if (keyword != null && !keyword.isEmpty()) {
-                asteTrovate = astaDAO.getAsteAperteByKeyword(keyword);
-            }
-            // Prendi le aste vinte dall'utente
-            List<Asta> asteVinte = null;
+            Asta asta = null;
             if (utente != null) {
-                asteVinte = astaDAO.getAsteVinteByUsername(utente.getUsername());
-            }
-
-            ctx.setVariable("keyword", keyword);
-
-            if (asteTrovate == null || asteTrovate.isEmpty()) {
-                ctx.setVariable("asteTrovateMsg", "Nessuna asta trovata");
-            } else {
-                // Per ogni asta trovata, prendi gli articoli associati
-                for (Asta a : asteTrovate) {
-                    articoli = articoloDAO.getArticoliByIdAsta(a.getId());
-                    a.setArticoli(articoli);
-                }
-                ctx.setVariable("asteTrovate", asteTrovate);
-            }
-            if (asteVinte == null || asteVinte.isEmpty()) {
-                ctx.setVariable("asteVinteMsg", "Nessuna asta vinta");
-            } else {
-                // Per ogni asta vinta, prendi l'offerta massima e gli articoli associati
-                for (Asta a : asteVinte) {
-                    offertaMax = offertaDAO.getMaxOffertaByIdAsta(a.getId());
-                    if (offertaMax != null) {
-                        a.setOffertaMassima(offertaMax);
-                        a.setPrezzoOffertaMassima(offertaMax.getPrezzo());
+                // Prendo l'asta dall'id fornito nella request
+                asta = astaDAO.getAstaById(idAsta);
+                if (asta == null) {
+                    path += "&errorMsg=Nessuna asta trovata";
+                } else if (asta.isChiusa()) {
+                    path += "&errorMsg=Asta già chiusa";
+                } else if (!asta.getProprietario().equals(utente.getUsername())) {
+                    path += "&errorMsg=Non sei il proprietario dell'asta";
+                } else if (!asta.canBeClosed()) {
+                    path += "&errorMsg=Tempo rimanente maggiore di 0, impossibile chiudere l'asta";
+                } else {
+                    OffertaDAO offertaDAO = new OffertaDAO(connection);
+                    // Prendo l'offerta massima relativa all'asta
+                    Offerta offertaMax = offertaDAO.getMaxOffertaByIdAsta(idAsta);
+                    // Se è presente chiudo l'asta con l'offerente dell'offerta massima, altrimenti la chiudo senza offerente
+                    if (offertaMax == null) {
+                        if (astaDAO.chiudiAsta(idAsta)) {
+                            path += "&successMsg=Asta chiusa con successo";
+                        } else {
+                            path += "&errorMsg=Errore durante la chiusura dell'asta";
+                        }
+                    } else {
+                        if (astaDAO.chiudiAsta(idAsta, offertaMax.getOfferente())) {
+                            path += "&successMsg=Asta chiusa con successo";
+                        } else {
+                            path += "&errorMsg=Errore durante la chiusura dell'asta";
+                        }
                     }
-                    articoli = articoloDAO.getArticoliByIdAsta(a.getId());
-                    a.setArticoli(articoli);
                 }
-                ctx.setVariable("asteVinte", asteVinte);
             }
-            // Vai alla pagina di acquisto
-            templateEngine.process(path, ctx, response.getWriter());
+            // Reindirizzo alla pagina di dettaglio dell'asta con il messaggio di successo o errore nella request
+            response.sendRedirect(path);
         } catch (SQLException e) {
             response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Errore interno del server");
         }
     }
 
     @Override
-    public void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
-        doGet(request, response);
-    }
-
-    @Override
     public void destroy() {
-        try{
+        try {
             ConnectionHandler.closeConnection(connection);
-        }catch(SQLException e){
+        } catch(SQLException e){
             e.printStackTrace();
         }
     }

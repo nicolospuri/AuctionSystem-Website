@@ -1,4 +1,4 @@
-package it.polimi.progettotiw2025ria.beans;
+package it.polimi.progettotiw2025html.beans;
 
 import java.time.LocalDateTime;
 

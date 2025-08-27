@@ -4,7 +4,6 @@ import it.polimi.progettotiw2025ria.beans.Utente;
 import it.polimi.progettotiw2025ria.dao.ArticoloDAO;
 import it.polimi.progettotiw2025ria.dao.AstaDAO;
 import it.polimi.progettotiw2025ria.utils.ConnectionHandler;
-import jakarta.servlet.ServletContext;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.UnavailableException;
 import jakarta.servlet.annotation.WebServlet;
@@ -160,54 +159,63 @@ public class CreaAsta extends HttpServlet {
             // Prezzo iniziale = somma prezzi articoli
             double prezzoIniziale = articoloDAO.getSumOfPrice(articoliIds);
 
-            // Creazione asta
-            int idAsta = astaDAO.insertNewAsta(
-                    username,
-                    prezzoIniziale,
-                    (float) rialzoMinimo,          // firma del DAO accetta float
-                    Timestamp.valueOf(scadenza)
-            );
+            connection.setAutoCommit(false);
+            try {
+                // Creazione asta
+                int idAsta = astaDAO.insertNewAsta(
+                        username,
+                        prezzoIniziale,
+                        (float) rialzoMinimo,          // firma del DAO accetta float
+                        Timestamp.valueOf(scadenza)
+                );
 
-            // Collego gli articoli all'asta
-            articoloDAO.updateIdAstaInArticles(articoliIds, idAsta);
+                // Aggiornamento articoli con id_asta
+                articoloDAO.updateIdAstaInArticles(articoliIds, idAsta);
 
-            boolean lastActionFound = false;
-            Cookie[] cookies = request.getCookies();
+                connection.commit();
 
-            // Cerco i cookie "lastAction"
-            if (cookies != null) {
-                for (Cookie c : cookies) {
-                    if (c.getName().equals("lastActionCreaAsta" + username)) {
-                        c.setValue("true");
-                        c.setMaxAge(60*60*24*30);
-                        lastActionFound = true;
-                        response.addCookie(c);
-                        break;
+                boolean lastActionFound = false;
+                Cookie[] cookies = request.getCookies();
+
+                // Cerco i cookie "lastAction"
+                if (cookies != null) {
+                    for (Cookie c : cookies) {
+                        if (c.getName().equals("lastActionCreaAsta" + username)) {
+                            c.setValue("true");
+                            c.setMaxAge(60*60*24*30);
+                            lastActionFound = true;
+                            response.addCookie(c);
+                            break;
+                        }
                     }
                 }
+
+                // Se i cookie non esistono, li creo
+                if(!lastActionFound) {
+                    Cookie lastAction = new Cookie("lastActionCreaAsta" + username, "true");
+                    lastAction.setMaxAge(60*60*24*30);
+                    response.addCookie(lastAction);
+                }
+
+                // Risposta JSON
+                JSONObject json = new JSONObject()
+                        .put("success", true)
+                        .put("idAsta", idAsta)
+                        .put("proprietario", username)
+                        .put("prezzoIniziale", prezzoIniziale)
+                        .put("rialzoMinimo", rialzoMinimo)
+                        .put("scadenza", scadenza.toString())
+                        .put("articoli", new JSONArray(articoliIds));
+
+                response.setStatus(HttpServletResponse.SC_OK);
+                response.getWriter().write(json.toString());
+            } catch (SQLException e) {
+                connection.rollback();
+                throw new ServletException(e);
+            } finally {
+                connection.setAutoCommit(true);
             }
-
-            // Se i cookie non esistono, li creo
-            if(!lastActionFound) {
-                Cookie lastAction = new Cookie("lastActionCreaAsta" + username, "true");
-                lastAction.setMaxAge(60*60*24*30);
-                response.addCookie(lastAction);
-            }
-
-            // Risposta JSON
-            JSONObject json = new JSONObject()
-                    .put("success", true)
-                    .put("idAsta", idAsta)
-                    .put("proprietario", username)
-                    .put("prezzoIniziale", prezzoIniziale)
-                    .put("rialzoMinimo", rialzoMinimo)
-                    .put("scadenza", scadenza.toString())
-                    .put("articoli", new JSONArray(articoliIds));
-
-            response.setStatus(HttpServletResponse.SC_OK);
-            response.getWriter().write(json.toString());
-
-        } catch (SQLException e) {
+        } catch (SQLException | ServletException e) {
             e.printStackTrace();
             response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
             response.getWriter().write(new JSONObject()

@@ -1,14 +1,14 @@
-package it.polimi.progettotiw2025ria.controllers;
+package it.polimi.progettotiw2025html.controllers;
 
-import it.polimi.progettotiw2025ria.beans.Articolo;
-import it.polimi.progettotiw2025ria.beans.Asta;
-import it.polimi.progettotiw2025ria.beans.Offerta;
-import it.polimi.progettotiw2025ria.beans.Utente;
-import it.polimi.progettotiw2025ria.dao.ArticoloDAO;
-import it.polimi.progettotiw2025ria.dao.AstaDAO;
-import it.polimi.progettotiw2025ria.dao.OffertaDAO;
-import it.polimi.progettotiw2025ria.dao.UtenteDAO;
-import it.polimi.progettotiw2025ria.utils.ConnectionHandler;
+import it.polimi.progettotiw2025html.beans.Articolo;
+import it.polimi.progettotiw2025html.beans.Asta;
+import it.polimi.progettotiw2025html.beans.Offerta;
+import it.polimi.progettotiw2025html.beans.Utente;
+import it.polimi.progettotiw2025html.dao.ArticoloDAO;
+import it.polimi.progettotiw2025html.dao.AstaDAO;
+import it.polimi.progettotiw2025html.dao.OffertaDAO;
+import it.polimi.progettotiw2025html.dao.UtenteDAO;
+import it.polimi.progettotiw2025html.utils.ConnectionHandler;
 import jakarta.servlet.ServletContext;
 import jakarta.servlet.UnavailableException;
 import jakarta.servlet.annotation.WebServlet;

@@ -1,4 +1,4 @@
-package it.polimi.progettotiw2025ria.dao;
+package it.polimi.progettotiw2025html.dao;
 
 import java.sql.*;
 import java.util.ArrayList;
@@ -6,7 +6,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import it.polimi.progettotiw2025ria.beans.*;
+import it.polimi.progettotiw2025html.beans.*;
 
 public class ArticoloDAO {
     private final Connection connection;

@@ -1,4 +1,4 @@
-package it.polimi.progettotiw2025ria.controllers;
+package it.polimi.progettotiw2025html.controllers;
 
 import jakarta.servlet.ServletContext;
 import jakarta.servlet.UnavailableException;

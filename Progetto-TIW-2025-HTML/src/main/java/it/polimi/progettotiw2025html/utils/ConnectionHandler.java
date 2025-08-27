@@ -1,4 +1,4 @@
-package it.polimi.progettotiw2025ria.utils;
+package it.polimi.progettotiw2025html.utils;
 
 import jakarta.servlet.UnavailableException;
 import java.sql.Connection;
