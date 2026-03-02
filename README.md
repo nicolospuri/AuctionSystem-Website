@@ -1,39 +1,39 @@
-# Aste Online – Web Application (HTML & RIA)
+# Online Auctions – Web Application (HTML & RIA)
 
-Progetto di applicazione web per la gestione di aste online, sviluppato in doppia versione:
-- **HTML puro (Multi-page)**
+Web application project for managing online auctions, developed in two versions:
+- **Pure HTML (Multi-page)**
 - **JavaScript RIA (Single Page Application)**
 
 ---
 
-## 📌 Descrizione del Progetto
+## 📌 Project Description
 
-L’applicazione consente agli utenti registrati di:
+The application allows registered users to:
 
-- Vendere articoli tramite aste online
-- Partecipare alle aste come acquirenti
-- Effettuare offerte in tempo reale
-- Gestire articoli, aste e transazioni
+- Sell items through online auctions
+- Participate in auctions as buyers
+- Place bids in real time
+- Manage items, auctions, and transactions
 
-Il sistema è sviluppato secondo un’architettura **client-server**, con backend in Java
-e database relazionale.
+The system is developed using a **client-server** architecture, with a Java backend
+and a relational database.
 
-Sono state realizzate due versioni:
+Two versions have been developed:
 
-### ✅ Versione HTML Pura
-- Navigazione multi-pagina
-- Ricaricamento completo delle pagine
-- Interazione tramite form HTML
+### ✅ Pure HTML Version
+- Multi-page navigation
+- Full page reloading
+- Interaction via HTML forms
 
-### ✅ Versione JavaScript (RIA)
-- Applicazione a pagina singola (SPA)
-- Comunicazione asincrona (AJAX)
-- Aggiornamento dinamico dei contenuti
-- Persistenza lato client delle preferenze utente
+### ✅ JavaScript Version (RIA)
+- Single Page Application (SPA)
+- Asynchronous communication (AJAX)
+- Dynamic content updating
+- Client-side persistence of user preferences
 
 ---
 
-## ⚙️ Tecnologie Utilizzate
+## ⚙️ Technologies Used
 
 ### Frontend
 - HTML
@@ -44,20 +44,20 @@ Sono state realizzate due versioni:
 - JDBC
 
 ### Database
-- SQL (MySQL / MariaDB o equivalente)
+- SQL (MySQL / MariaDB or equivalent)
 
-### Progettazione
-- UML (diagrammi di classi e sequenza)
+### Design
+- UML (class and sequence diagrams)
 
 ### Server
 - Apache Tomcat
 
 ---
 
-## 🛠️ Architettura
+## 🛠️ Architecture
 
-Il progetto segue il pattern **MVC (Model-View-Controller)**:
+The project follows the **MVC pattern (Model-View-Controller)**:
 
 - **Model** → DAO + Database
 - **View** → HTML / JavaScript
-- **Controller** → Servlet Java
+- **Controller** → Java Servlet
