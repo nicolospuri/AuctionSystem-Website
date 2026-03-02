@@ -4,9 +4,6 @@ Progetto di applicazione web per la gestione di aste online, sviluppato in doppi
 - **HTML puro (Multi-page)**
 - **JavaScript RIA (Single Page Application)**
 
-Realizzato come progetto universitario presso il  
-[Politecnico di Milano](chatgpt://generic-entity?number=0).
-
 ---
 
 ## 📌 Descrizione del Progetto
@@ -53,7 +50,7 @@ Sono state realizzate due versioni:
 - UML (diagrammi di classi e sequenza)
 
 ### Server
-- [Apache Tomcat](chatgpt://generic-entity?number=1)
+- Apache Tomcat
 
 ---
 
